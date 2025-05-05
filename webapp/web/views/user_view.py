@@ -64,3 +64,7 @@ def load_test():
 @module.route("/users-management", methods=["get", "post"])
 def users_management():
     return render_template("users/users-management.html")
+
+@module.route("/roles-management", methods=["get", "post"])
+def rolesss_management():
+    return render_template("users/roles-management.html")
