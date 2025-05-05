@@ -1,0 +1,32 @@
+{% extends "/base/default_page.html" %}
+{% import "/components/forms/form_renderer.html" as form_renderer %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-screen bg-base-200">
+  <div class="card border border-base-content/10 shadow-lg min-w-96 max-w-md w-full mx-auto">
+    <form method="post">
+      <div class="card-body">
+        {% if error_msg %}
+        <div role="alert" class="alert alert-error mb-4">
+          <span>{{ error_msg }}</span>
+        </div>
+        {% endif %}
+        <h2 class="card-title text-center text-primary">
+          Register
+        </h2>
+        <div class="form-control w-full">
+          {{ form.csrf_token }}
+          {{ form_renderer.render_text_input(form.username, label="Username", placeholder="Enter your username") }}
+          {{ form_renderer.render_text_input(form.password, label="Password", placeholder="Enter your password", type="password") }}
+          {{ form_renderer.render_text_input(form.confirm_password, label="Confirm Password", placeholder="Re-enter your password", type="password") }}
+        </div>
+        <div class="card-actions justify-end mt-4">
+          <button class="btn btn-primary w-full">
+            Register
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock content %}

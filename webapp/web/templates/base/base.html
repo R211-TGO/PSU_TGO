@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>
+    {% block title %}
+    PSU-TGO
+    {% endblock %}
+  </title>
+  <link rel="stylesheet" href="{{ 'css/app.css' | static_url }}">
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script src="{{ 'node_modules/htmx.org/dist/htmx.min.js' | static_url }}"></script>
+  <script src="{{ 'node_modules/cally/dist/cally.js' | static_url }}"></script>
+  <script src="{{ 'js/date-picker.js' | static_url }}"></script>
+  {% block head %}
+  {% endblock head %}
+</head>
+
+<body>
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar Toggle -->
+    <input id="sidebar-toggle" type="checkbox" class="hidden peer" />
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="w-64 bg-base-200 shadow-md h-full z-10 peer-checked:hidden">
+      {% include "base/sidebar.html" %}
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+      <!-- Navbar -->
+      <div class="z-1 w-full bg-base-100">
+        {% include "base/navbar.html" %}
+      </div>
+      
+      <!-- Scrollable Body -->
+      <div class="p-2 flex-grow bg-base-200 z-0 overflow-y-auto">
+        {% block body %}
+        {% endblock body %}
+      </div>
+    </div>
+  </div>
+    <!-- Modal -->
+    <div id="modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div id="modal-content" class="modal-box w-full max-w-none bg-white">
+        <!-- เนื้อหาจะถูกโหลดที่นี่ -->
+      </div>
+    </div>
+    <!-- Feather Replace Script -->
+    <script>
+      feather.replace();
+    </script>
+  
+  {% block js %}
+  {% endblock js %}
+</body>
+
+</html>

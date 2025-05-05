@@ -1,0 +1,103 @@
+{% extends "/base/default_page.html" %}
+{% import "/components/forms/form_renderer.html" as form_renderer %}
+
+{% block content %}
+<div class="min-h-screen bg-base-200 p-0">
+  <div class="max-w-full mx-auto grid grid-cols-3 gap-10 h-full">
+    <!-- Column 0: Profile Overview Section -->
+    <div class="col-span-1 card bg-base-100 shadow-md p-6 flex flex-col items-center h-86">
+      <h2 class="text-lg font-bold text-base-content mb-4">Profile Overview</h2>
+      <div class="w-32 h-32 rounded-full bg-primary text-primary-content flex items-center justify-center mb-4">
+        <i data-feather="user" class="w-10 h-10 stroke-1"></i>
+      </div>
+      <h2 class="text-lg font-bold text-base-content mt-2">John Doe</h2>
+      <p class="text-sm text-base-content/70">admin</p>
+      <button class="btn btn-outline btn-primary mt-4 w-full">Change Photo</button>
+    </div>
+
+    <!-- Column 1: Profile Details Section -->
+    <div class="col-span-2 card bg-base-100 shadow-md p-6 h-full ">
+      <h2 class="text-lg font-bold text-base-content mb-4">Personal Information</h2>
+      <div class="space-y-6">
+        <!-- Full Name -->
+        <div class="flex items-center space-x-4">
+          <i data-feather="user" class="w-6 h-6 stroke-gray-500"></i>
+          <div>
+            <h3 class="text-sm font-bold text-base-content">Full Name</h3>
+            <p class="text-base text-base-content">John Doe</p>
+          </div>
+        </div>
+        <!-- Email -->
+        <div class="flex items-center space-x-4">
+          <i data-feather="mail" class="w-6 h-6 stroke-gray-500"></i>
+          <div>
+            <h3 class="text-sm font-bold text-base-content">Email</h3>
+            <p class="text-base text-base-content">john.doe@gmail.com</p>
+          </div>
+        </div>
+        <!-- Department -->
+        <div class="flex items-center space-x-4">
+          <i data-feather="home" class="w-6 h-6 stroke-gray-500"></i>
+          <div>
+            <h3 class="text-sm font-bold text-base-content">Department</h3>
+            <p class="text-base text-base-content">IT Department</p>
+          </div>
+        </div>
+        <!-- Role -->
+        <div class="flex items-center space-x-4">
+          <i data-feather="shield" class="w-6 h-6 stroke-gray-500"></i>
+          <div>
+            <h3 class="text-sm font-bold text-base-content">Role</h3>
+            <p class="text-base text-base-content">admin</p>
+          </div>
+        </div>
+        <!-- Member Since -->
+        <div class="flex items-center space-x-4">
+          <i data-feather="calendar" class="w-6 h-6 stroke-gray-500"></i>
+          <div>
+            <h3 class="text-sm font-bold text-base-content">Member Since</h3>
+            <p class="text-base text-base-content">January 15, 2024</p>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary mt-4 w-32" 
+        hx-get="/users/load-edit-profile" 
+        hx-target="#modal-content" 
+        hx-swap="innerHTML" 
+        hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
+          Edit Profile
+      </button>
+    </div>
+
+    <!-- Row 2: Account Settings Section -->
+    <div class="col-span-2 col-start-2 card bg-base-100 shadow-md p-6 h-full">
+      <h2 class="text-lg font-bold text-base-content mb-4">Account Settings</h2>
+      <div class="space-y-4">
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="text-base font-bold text-base-content">Email Notifications</h3>
+            <p class="text-sm text-base-content/70">Manage your email notification preferences</p>
+          </div>
+          <button class="btn btn-outline btn-primary">Configure</button>
+        </div>
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="text-base font-bold text-base-content">Change Password</h3>
+            <p class="text-sm text-base-content/70">Update your password regularly to keep your account secure</p>
+          </div>
+          <button class="btn btn-outline btn-primary">Update</button>
+        </div>
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="text-base font-bold text-base-content">Sign Out</h3>
+            <p class="text-sm text-base-content/70">Sign out your profile</p>
+          </div>
+          <button class="btn btn-outline btn-error">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %}
