@@ -6,6 +6,7 @@ import datetime
 class User(me.Document, UserMixin):
     username = me.StringField(required=True, unique=True)
     password = me.StringField(required=True)
+    roles = me.StringField(required=True)
 
     status = me.StringField(
         required=True, default="active", choices=["active", "disactive"]
