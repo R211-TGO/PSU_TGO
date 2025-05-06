@@ -138,3 +138,36 @@
   @apply text-sm;
   color: #6B7280;
 }
+
+.bg-slider {
+  background-size: cover;
+  background-position: center;
+  transition: opacity 1s ease-in-out;
+}
+
+@keyframes spin-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+
+@keyframes spin-slow-reverse {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg); /* หมุนย้อนกลับ */
+  }
+}
+
+.animate-spin-slow-reverse {
+  animation: spin-slow-reverse 16s linear infinite;
+}
