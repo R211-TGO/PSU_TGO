@@ -145,6 +145,23 @@
   transition: opacity 1s ease-in-out;
 }
 
+/* Sidebar Transition */
+.sidebar {
+  width: 16rem; /* ความกว้าง Sidebar คงที่ */
+  transition: transform 0.5s ease, opacity 0.5s ease; /* เพิ่ม Transition */
+}
+
+.peer-checked ~ #sidebar {
+  transform: translateX(-100%); /* เลื่อน Sidebar ออกไปทางซ้าย */
+  opacity: 0; /* ทำให้ Sidebar จางหายไป */
+}
+
+/* Main Content Transition */
+.peer-checked ~ .flex-1 {
+  margin-left: 0; /* ลดระยะห่างเมื่อ Sidebar ถูกซ่อน */
+}
+
+
 @keyframes spin-slow {
   0% {
     transform: rotate(0deg);
