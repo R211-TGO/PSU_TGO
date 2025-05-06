@@ -135,24 +135,27 @@
     ];
     let current = 0;
     const bg = document.getElementById("bg-slider");
-
+  
     const updateBackground = () => {
+      // อัปเดต backgroundImage ก่อนเปลี่ยน current
       bg.style.opacity = 0;
       setTimeout(() => {
+        current = (current + 1) % images.length; // เปลี่ยน current ก่อน
         bg.style.backgroundImage = `url('${images[current]}')`;
         bg.style.opacity = 1;
-
+  
+        // อัปเดต Slide Indicators
         images.forEach((_, idx) => {
           const el = document.getElementById(`indicator-${idx}`);
           if (el) el.className = idx === current ? "w-4 h-2 bg-white rounded-full" : "w-2 h-2 bg-white/50 rounded-full";
         });
-
-        current = (current + 1) % images.length;
-      }, 500);
+      }, 500); // ระยะเวลาตรงกับ transition
     };
-
+  
+    // ตั้งค่าเริ่มต้น
     bg.style.backgroundImage = `url('${images[current]}')`;
     setInterval(updateBackground, 5000);
+  </script>updateBackground, 5000);
   </script>
   <script>
     feather.replace();
