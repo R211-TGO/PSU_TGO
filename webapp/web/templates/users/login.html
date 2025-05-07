@@ -94,19 +94,45 @@
         </div>
 
         <div class="w-full max-w-3xl p-15 rounded-lg shadow-lg">
-          <form>
+          <form action="{{ url_for('users.login') }}" method="POST">
+            {{ form.csrf_token }} <!-- ป้องกัน CSRF -->
+        
             <div class="mb-4">
               <label class="label text-sm">Username</label>
-              <input type="text" placeholder="Enter your username" class="input input-bordered w-full" />
+              <input
+                type="text"
+                name="username"
+                placeholder="Enter your username"
+                class="input input-bordered w-full"
+                value="{{ form.username.data }}"
+              />
+              {% if form.username.errors %}
+              <p class="text-red-500 text-sm mt-1">{{ form.username.errors[0] }}</p>
+              {% endif %}
             </div>
+        
             <div class="mb-4">
               <label class="label text-sm">Password</label>
-              <input type="password" placeholder="Enter your password" class="input input-bordered w-full" />
+              <input
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                class="input input-bordered w-full"
+              />
+              {% if form.password.errors %}
+              <p class="text-red-500 text-sm mt-1">{{ form.password.errors[0] }}</p>
+              {% endif %}
             </div>
+        
+            {% if error_msg %}
+            <p class="text-red-500 text-sm mb-4">{{ error_msg }}</p>
+            {% endif %}
+        
             <div class="mb-4 flex items-center">
               <input type="checkbox" class="checkbox mr-2" />
               <span class="text-sm">Remember me</span>
             </div>
+        
             <button class="btn btn-primary w-full">Sign in</button>
           </form>
         </div>
@@ -121,58 +147,81 @@
       '/static/imagines/solarcell.mp4',
       '/static/imagines/charge_bettery.mp4',
     ];
-    let current = 0;
+    let current = 0; // เริ่มต้นที่ index 0
     const bgVideo = document.getElementById("bg-video");
     const bgImage = document.getElementById("bg-image");
-
+  
     const updateBackground = () => {
-  const overlay = document.getElementById("fade-overlay");
-
-  // Step 1: fade overlay in (bright)
-  overlay.style.opacity = 0.5;
-
-  setTimeout(() => {
-    // Step 2: change image/video source
-    current = (current + 1) % images.length;
-    const src = images[current];
-
-    bgVideo.classList.add("hidden");
-    bgImage.style.opacity = 0;
-
-    if (src.endsWith(".mp4")) {
-      bgVideo.src = src;
-      bgVideo.classList.remove("hidden");
-      bgVideo.load();
-      bgVideo.play();
-      bgImage.style.backgroundImage = "";
-    } else {
-      bgVideo.pause();
-      bgVideo.src = "";
-      bgImage.style.backgroundImage = `url('${src}')`;
-    }
-
-    // Step 3: Update indicators
-    images.forEach((_, idx) => {
-      const el = document.getElementById(`indicator-${idx}`);
-      if (el) {
-        el.className = idx === current
-          ? "w-4 h-2 bg-white rounded-full"
-          : "w-2 h-2 bg-white/50 rounded-full";
-      }
-    });
-
-    // Step 4: fade overlay out (back to normal)
-    setTimeout(() => {
-      overlay.style.opacity = 0;
-    }, 300); // Slight delay so new image is visible under brightness
-
-  }, 400); // Let the brightness come in before changing
-};
-
-    
-
+      const overlay = document.getElementById("fade-overlay");
+  
+      // Step 1: fade overlay in (bright)
+      overlay.style.opacity = 0.5;
+  
+      setTimeout(() => {
+        // Update current index for the next cycle
+        current = (current + 1) % images.length; // อัปเดต current ก่อนเปลี่ยนภาพ
+  
+        // Step 2: change image/video source
+        const src = images[current];
+  
+        bgVideo.classList.add("hidden");
+        bgImage.style.opacity = 0;
+  
+        if (src.endsWith(".mp4")) {
+          bgVideo.src = src;
+          bgVideo.classList.remove("hidden");
+          bgVideo.load();
+          bgVideo.play();
+          bgImage.style.backgroundImage = "";
+        } else {
+          bgVideo.pause();
+          bgVideo.src = "";
+          bgImage.style.backgroundImage = `url('${src}')`;
+        }
+  
+        // Step 3: Update indicators
+        images.forEach((_, idx) => {
+          const el = document.getElementById(`indicator-${idx}`);
+          if (el) {
+            el.className = idx === current
+              ? "w-4 h-2 bg-white rounded-full"
+              : "w-2 h-2 bg-white/50 rounded-full";
+          }
+        });
+  
+        // Step 4: fade overlay out (back to normal)
+        setTimeout(() => {
+          overlay.style.opacity = 0;
+        }, 300); // Slight delay so new image is visible under brightness
+      }, 400); // Let the brightness come in before changing
+    };
+  
+    // Set the initial background on page load
     window.onload = () => {
-      updateBackground();
+      const src = images[current];
+      if (src.endsWith(".mp4")) {
+        bgVideo.src = src;
+        bgVideo.classList.remove("hidden");
+        bgVideo.load();
+        bgVideo.play();
+        bgImage.style.backgroundImage = "";
+      } else {
+        bgVideo.pause();
+        bgVideo.src = "";
+        bgImage.style.backgroundImage = `url('${src}')`;
+      }
+  
+      // Update indicators for the initial state
+      images.forEach((_, idx) => {
+        const el = document.getElementById(`indicator-${idx}`);
+        if (el) {
+          el.className = idx === current
+            ? "w-4 h-2 bg-white rounded-full"
+            : "w-2 h-2 bg-white/50 rounded-full";
+        }
+      });
+  
+      // Start the background update cycle
       setInterval(updateBackground, 5000);
     };
   </script>

@@ -10,8 +10,8 @@
       <div class="w-32 h-32 rounded-full bg-primary text-primary-content flex items-center justify-center mb-4">
         <i data-feather="user" class="w-10 h-10 stroke-1"></i>
       </div>
-      <h2 class="text-lg font-bold text-base-content mt-2">John Doe</h2>
-      <p class="text-sm text-base-content/70">admin</p>
+      <h2 class="text-lg font-bold text-base-content mt-2">{{ user.username or "-" }}</h2>
+      <p class="text-sm text-base-content/70">{{ user.roles | join(', ') if user.roles else "-" }}</p>
       <button class="btn btn-outline btn-primary mt-4 w-full">Change Photo</button>
     </div>
 
@@ -19,12 +19,12 @@
     <div class="col-span-2 card bg-base-100 shadow-md p-6 h-full ">
       <h2 class="text-lg font-bold text-base-content mb-4">Personal Information</h2>
       <div class="space-y-6">
-        <!-- Full Name -->
+        <!-- Username -->
         <div class="flex items-center space-x-4">
           <i data-feather="user" class="w-6 h-6 stroke-gray-500"></i>
           <div>
-            <h3 class="text-sm font-bold text-base-content">Full Name</h3>
-            <p class="text-base text-base-content">John Doe</p>
+            <h3 class="text-sm font-bold text-base-content">Username</h3>
+            <p class="text-base text-base-content">{{ user.username or "-" }}</p>
           </div>
         </div>
         <!-- Email -->
@@ -32,7 +32,7 @@
           <i data-feather="mail" class="w-6 h-6 stroke-gray-500"></i>
           <div>
             <h3 class="text-sm font-bold text-base-content">Email</h3>
-            <p class="text-base text-base-content">john.doe@gmail.com</p>
+            <p class="text-base text-base-content">{{ user.email or "-" }}</p>
           </div>
         </div>
         <!-- Department -->
@@ -40,7 +40,7 @@
           <i data-feather="home" class="w-6 h-6 stroke-gray-500"></i>
           <div>
             <h3 class="text-sm font-bold text-base-content">Department</h3>
-            <p class="text-base text-base-content">IT Department</p>
+            <p class="text-base text-base-content">{{ user.department or "-" }}</p>
           </div>
         </div>
         <!-- Role -->
@@ -48,7 +48,7 @@
           <i data-feather="shield" class="w-6 h-6 stroke-gray-500"></i>
           <div>
             <h3 class="text-sm font-bold text-base-content">Role</h3>
-            <p class="text-base text-base-content">admin</p>
+            <p class="text-base text-base-content">{{ user.roles | join(', ') if user.roles else "-" }}</p>
           </div>
         </div>
         <!-- Member Since -->
@@ -56,7 +56,7 @@
           <i data-feather="calendar" class="w-6 h-6 stroke-gray-500"></i>
           <div>
             <h3 class="text-sm font-bold text-base-content">Member Since</h3>
-            <p class="text-base text-base-content">January 15, 2024</p>
+            <p class="text-base text-base-content">{{ user.created_date.strftime('%B %d, %Y') if user.created_date else "-" }}</p>
           </div>
         </div>
       </div>
@@ -98,6 +98,4 @@
     </div>
   </div>
 </div>
-
-
 {% endblock content %}

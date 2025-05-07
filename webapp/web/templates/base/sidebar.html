@@ -1,62 +1,52 @@
 <div class="flex flex-col h-full bg-base-100 shadow-md">
-    <!-- Logo Section -->
-    <div class="flex items-center gap-2 p-2">
-      <a href="/" class="flex items-center gap-2">
-        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-content font-bold">
-          P
-        </div>
-        <div>
-          <h1 class="text-lg font-bold text-base-content">PSU-TGO</h1>
-          <p class="text-sm text-base-content">PSU-TGO</p>
-        </div>
-      </a>
-    </div>
-    <div class="divider m-0"></div> <!-- เส้นแบ่งระหว่างโลโก้และเมนู -->
-  
-    <!-- Menu Section -->
-    <ul class="menu flex-grow w-full p-4 bg-base-100">
-      <li>
-        <a href="/users/users-management" class="flex items-center gap-2 hover:bg-primary hover:text-primary-content rounded-lg p-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5V4H2v16h5m10-10a3 3 0 11-6 0m6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          User Management
-        </a>
-      </li>
-      <li>
-        <a href="/users/roles-management" class="flex items-center gap-2 hover:bg-primary hover:text-primary-content rounded-lg p-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5V4H2v16h5m10-10a3 3 0 11-6 0m6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Role Management
-        </a>
-      </li>
-      <li>
-        <a href="/reports" class="flex items-center gap-2 hover:bg-primary hover:text-primary-content rounded-lg p-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m-6 0h6m-6 0a2 2 0 01-2-2v-6a2 2 0 012-2h2a2 2 0 012 2v6a2 2 0 01-2 2m-6 0h6" />
-          </svg>
-          Reports
-        </a>
-      </li>
-      <li>
-        <a href="/settings" class="flex items-center gap-2 hover:bg-primary hover:text-primary-content rounded-lg p-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01m6.938-4a7.938 7.938 0 01-1.414 4.243m-1.414 1.414A7.938 7.938 0 0112 20.938m-4.243-1.414A7.938 7.938 0 016.343 16.343m-1.414-1.414A7.938 7.938 0 014 12m1.414-4.243A7.938 7.938 0 016.343 6.343m1.414-1.414A7.938 7.938 0 0112 3.062m4.243 1.414A7.938 7.938 0 0117.657 6.343m1.414 1.414A7.938 7.938 0 0120 12z" />
-          </svg>
-          Settings
-        </a>
-      </li>
-    </ul>
-    <div class="divider m-0"></div> <!-- เส้นแบ่งระหว่างเมนูและปุ่มล็อกเอาท์ -->
-  
-    <!-- Logout Section -->
-    <div class="p-2">
-      <a href="/logout" class="flex items-center gap-2 hover:bg-primary hover:text-primary-content rounded-lg p-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10V5m0 10a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
-        </svg>
-        Log out
-      </a>
-    </div>
+  <!-- Logo Section -->
+  <div class="flex items-center gap-2 p-2">
+    <a href="/" class="flex items-center gap-4">
+      <div class="w-12 h-12 bg-primary rounded-lg flex items-center justify-center text-primary-content font-bold">
+        <span class="text-xl font-bold">P</span>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold text-base-content">PSU-TGO</h1>
+        <p class="text-sm text-base-content">PSU-TGO</p>
+      </div>
+    </a>
   </div>
+  <div class="divider m-0"></div> <!-- เส้นแบ่งระหว่างโลโก้และเมนู -->
+
+  <!-- Menu Section -->
+  <ul class="menu flex-grow w-full p-2 bg-base-100 space-y-4">
+    <li>
+      <a href="/users/users-management" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/users/users-management' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
+        <i data-feather="users"></i>
+        <span class="text-md">User Management</span>
+      </a>
+    </li>
+    <li>
+      <a href="/users/roles-management" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/users/roles-management' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
+        <i data-feather="shield"></i>
+        <span class="text-md">Role Management</span>
+      </a>
+    </li>
+    <li>
+      <a href="/reports" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/reports' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
+        <i data-feather="bar-chart-2"></i>
+        <span class="text-md">Reports</span>
+      </a>
+    </li>
+    <li>
+      <a href="/settings" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/settings' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
+        <i data-feather="settings"></i>
+        <span class="text-md">Settings</span>
+      </a>
+    </li>
+  </ul>
+  <div class="divider m-0"></div> <!-- เส้นแบ่งระหว่างเมนูและปุ่มล็อกเอาท์ -->
+
+  <!-- Logout Section -->
+  <div class="p-2">
+    <a href="/users/logout" class="flex items-center gap-3 rounded-lg p-3 font-bold hover:bg-primary/90 hover:text-primary-content/90">
+      <i data-feather="log-out"></i>
+      <span class="text-lg">Log out</span>
+    </a>
+  </div>
+</div>

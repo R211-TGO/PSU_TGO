@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, request
+from flask_login import login_required, logout_user, current_user
 from ..forms.user_form import LoginForm, RegisterForm
 from ...services.user_service import UserService
+from ...models.user_model import User
 
 module = Blueprint("users", __name__, url_prefix="/users")
 
@@ -30,6 +32,14 @@ def login():
     return redirect(request.args.get("next", url_for("index.index")))
 
 
+
+@module.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("users.login"))
+
+
 @module.route("/register", methods=["get", "post"])
 def register():
     form = RegisterForm()
@@ -47,24 +57,29 @@ def register():
 
 
 @module.route("/profile", methods=["get", "post"])
+@login_required
 def profile():
-    return render_template("/users/profile.html")
+    return render_template("/users/profile.html", user=current_user)
 
 
 @module.route("/load-edit-profile")
+@login_required
 def load_edit_profile():
     return render_template("users_form/form_edit_user.html")
 
 
 @module.route("/load-test")
+@login_required
 def load_test():
     return render_template("users_form/test.html")
 
 
 @module.route("/users-management", methods=["get", "post"])
+@login_required
 def users_management():
     return render_template("users/users-management.html")
 
 @module.route("/roles-management", methods=["get", "post"])
+@login_required
 def rolesss_management():
     return render_template("users/roles-management.html")
