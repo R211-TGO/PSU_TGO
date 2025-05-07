@@ -102,9 +102,22 @@
     --noise: 1; /* ระดับของ noise */
   }
   
+  .fade-bright {
+    transition: opacity 0.5s ease, background-color 0.5s ease;
+    background-color: rgba(255, 255, 255, 0.6);
+  }
   
+  .normal {
+    transition: opacity 0.5s ease, background-color 0.5s ease;
+    background-color: transparent;
+  }
   
-
+  #flash-overlay {
+    transition: opacity 0.3s ease-in-out;
+    background-color: white;
+    pointer-events: none;
+  }
+  
 .card-style {
   @apply border-2 border-base-300 bg-base-100 mt-2;
 }
@@ -139,11 +152,6 @@
   color: #6B7280;
 }
 
-.bg-slider {
-  background-size: cover;
-  background-position: center;
-  transition: opacity 1s ease-in-out;
-}
 
 /* Sidebar Transition */
 .sidebar {
@@ -172,7 +180,7 @@
 }
 
 .animate-spin-slow {
-  animation: spin-slow 8s linear infinite;
+  animation: spin-slow 4s linear infinite;
 }
 
 
@@ -186,5 +194,5 @@
 }
 
 .animate-spin-slow-reverse {
-  animation: spin-slow-reverse 16s linear infinite;
+  animation: spin-slow-reverse 20s linear infinite;
 }
