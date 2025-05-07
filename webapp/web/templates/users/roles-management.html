@@ -3,29 +3,6 @@
 {% block content %}
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
-  {% set roles = [
-    {
-      "title": "Administrator",
-      "desc": "Full system access with all permissions",
-      "permissions": ["roles manage", "system configure", "report view", "report create", "profile edit"]
-    },
-    {
-      "title": "Manager",
-      "desc": "Department management with limited administrative access",
-      "permissions": ["profile edit", "users view", "report view", "project manage"]
-    },
-    {
-      "title": "User",
-      "desc": "Standard user with basic system access",
-      "permissions": ["profile edit", "report view", "project view"]
-    },
-    {
-      "title": "Viewer",
-      "desc": "Read-only access to system data",
-      "permissions": ["report view", "project view"]
-    }
-  ] %}
-
   {% for role in roles %}
   <div class="card shadow-lg border border-base-300 bg-base-100 p-8">
     <div class="flex justify-between items-start">
@@ -33,17 +10,17 @@
         <div class="bg-primary text-primary-content p-3 rounded-full">
           <i data-feather="shield" class="w-6 h-6"></i>
         </div>
-        <h2 class="text-xl font-semibold">{{ role.title }}</h2>
+        <h2 class="text-xl font-semibold">{{ role.name }}</h2>
       </div>
       <button class="btn btn-ghost btn-sm" title="Edit">
         <i data-feather="edit-3" class="w-5 h-5"></i>
       </button>
     </div>
-    <p class="text-base mt-5">{{ role.desc }}</p>
+    <p class="text-base mt-5">{{ role.description or "-" }}</p>
     <div class="mt-2">
       <p class="font-medium text-sm mb-2">PERMISSIONS</p>
       <div class="flex flex-wrap gap-2">
-        {% for perm in role.permissions %}
+        {% for perm in role.permission %}
         <span class="badge bg-yellow-100 text-yellow-800 text-sm">{{ perm }}</span>
         {% endfor %}
       </div>
