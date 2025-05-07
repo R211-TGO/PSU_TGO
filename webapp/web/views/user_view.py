@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, logout_user, current_user
 from ..forms.user_form import LoginForm, RegisterForm
 from ...services.user_service import UserService
-from ...models.user_model import User
+from ...models import User, Role, Permission
 
 module = Blueprint("users", __name__, url_prefix="/users")
 
@@ -79,7 +79,8 @@ def load_test():
 def users_management():
     return render_template("users/users-management.html")
 
-@module.route("/roles-management", methods=["get", "post"])
+@module.route("/roles-management", methods=["GET", "POST"])
 @login_required
-def rolesss_management():
-    return render_template("users/roles-management.html")
+def roles_management():
+    roles = Role.objects()
+    return render_template("users/roles-management.html", roles=roles)
