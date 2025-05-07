@@ -5,34 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login</title>
 
-
   <link rel="stylesheet" href="{{ 'css/app.css' | static_url }}">
   <script src="https://unpkg.com/feather-icons"></script>
   <script src="{{ 'node_modules/cally/dist/cally.js' | static_url }}"></script>
   <script src="{{ 'js/date-picker.js' | static_url }}"></script>
-
 </head>
 <body class="font-sans h-screen m-0 overflow-hidden">
   <div class="flex h-screen w-full">
 
-    
     <!-- Left Section -->
     <div class="relative w-4/7 h-full overflow-hidden">
-      <div id="bg-slider" class="absolute inset-0 bg-slider z-0 opacity-100"></div>
+      <div id="fade-overlay" class="absolute top-0 left-0 w-full h-full z-30 pointer-events-none bg-white opacity-0 transition-opacity duration-800"></div>
+        <video id="bg-video" class="absolute top-0 left-0 w-full h-full object-cover hidden " autoplay muted loop></video>
+        <div id="bg-image" class="absolute top-0 left-0 w-full h-full bg-cover bg-center transition-opacity duration-500"></div>
       <div class="absolute inset-0 bg-black/20 z-10"></div>
-      
-      <!-- Rotating Circle + CO₂ -->
+
+      <!-- CO2 rotating -->
       <div class="absolute inset-0 z-20 flex flex-col justify-center items-center text-white p-10">
         <div class="relative w-64 h-64 flex items-center justify-center">
-          <!-- กลุ่มจุดในวง (หมุนตามเข็มนาฬิกา) -->
+          <!-- Inner circle -->
           <div class="absolute inset-0 animate-spin-slow">
-            <!-- เส้นวงกลม -->
             <div class="absolute inset-0 border border-white rounded-full"></div>
             <script>
               window.addEventListener('DOMContentLoaded', () => {
                 const container = document.querySelector('.animate-spin-slow');
-                
-                // จุดในวง (3 จุด)
                 [0, 120, 240].forEach(angle => {
                   const dot = document.createElement('div');
                   dot.className = 'absolute top-1/2 left-1/2 w-2.5 h-2.5 bg-white rounded-full';
@@ -42,15 +38,13 @@
               });
             </script>
           </div>
-          
-          <!-- กลุ่มจุดวงนอก (หมุนทวนเข็มนาฬิกา) -->
+
+          <!-- Outer circle -->
           <div class="absolute inset-0 animate-spin-slow-reverse">
             <script>
               window.addEventListener('DOMContentLoaded', () => {
                 const container = document.querySelector('.animate-spin-slow-reverse');
-                
-                // จุดวงนอก (2 จุด)
-                [60, 210].forEach(angle => {
+                [0, 120, 240].forEach(angle => {
                   const dot = document.createElement('div');
                   dot.className = 'absolute top-1/2 left-1/2 w-3 h-3 bg-white rounded-full';
                   dot.style.transform = `rotate(${angle}deg) translateX(160px)`;
@@ -59,24 +53,19 @@
               });
             </script>
           </div>
-        
-          <!-- CO₂: เลข 2 ใหญ่ขึ้น -->
+
           <span class="absolute text-7xl font-bold text-white z-10 flex items-center justify-center w-full h-full">
             CO<span class="text-7xl align-sub">₂</span>
           </span>
         </div>
-        
-        
-        
-        
-        
-        <!-- PSU-TGO ชิดซ้ายบน -->
+
+        <!-- PSU-TGO -->
         <div class="absolute top-10 left-15">
           <h1 class="mt-3 text-base break-words">PSU-TGO</h1>
-          <p class="text-sm text-base break-words opacity-100">PSU-TGO</p>
+          <p class="text-sm break-words opacity-100">PSU-TGO</p>
         </div>
-        
-        <!-- ข้อความ -->
+
+        <!-- Welcome Text -->
         <div class="absolute bottom-0 left-6 p-8 w-full max-w-md">
           <div class="mb-10">
             <h2 class="text-3xl font-bold">Welcome Back</h2>
@@ -125,38 +114,69 @@
     </div>
   </div>
 
-  <!-- Background Slider Script -->
   <script>
     const images = [
-      '/static/imagines/imagine1.jpg',
-      '/static/imagines/imagine2.jpg',
-      '/static/imagines/imagine3.jpg',
-      '/static/imagines/imagine4.jpg',
+      '/static/imagines/factory.mp4',
+      '/static/imagines/windmill.mp4',
+      '/static/imagines/solarcell.mp4',
+      '/static/imagines/charge_bettery.mp4',
     ];
     let current = 0;
-    const bg = document.getElementById("bg-slider");
-  
+    const bgVideo = document.getElementById("bg-video");
+    const bgImage = document.getElementById("bg-image");
+
     const updateBackground = () => {
-      // อัปเดต backgroundImage ก่อนเปลี่ยน current
-      bg.style.opacity = 0;
-      setTimeout(() => {
-        current = (current + 1) % images.length; // เปลี่ยน current ก่อน
-        bg.style.backgroundImage = `url('${images[current]}')`;
-        bg.style.opacity = 1;
-  
-        // อัปเดต Slide Indicators
-        images.forEach((_, idx) => {
-          const el = document.getElementById(`indicator-${idx}`);
-          if (el) el.className = idx === current ? "w-4 h-2 bg-white rounded-full" : "w-2 h-2 bg-white/50 rounded-full";
-        });
-      }, 500); // ระยะเวลาตรงกับ transition
+  const overlay = document.getElementById("fade-overlay");
+
+  // Step 1: fade overlay in (bright)
+  overlay.style.opacity = 0.5;
+
+  setTimeout(() => {
+    // Step 2: change image/video source
+    current = (current + 1) % images.length;
+    const src = images[current];
+
+    bgVideo.classList.add("hidden");
+    bgImage.style.opacity = 0;
+
+    if (src.endsWith(".mp4")) {
+      bgVideo.src = src;
+      bgVideo.classList.remove("hidden");
+      bgVideo.load();
+      bgVideo.play();
+      bgImage.style.backgroundImage = "";
+    } else {
+      bgVideo.pause();
+      bgVideo.src = "";
+      bgImage.style.backgroundImage = `url('${src}')`;
+    }
+
+    // Step 3: Update indicators
+    images.forEach((_, idx) => {
+      const el = document.getElementById(`indicator-${idx}`);
+      if (el) {
+        el.className = idx === current
+          ? "w-4 h-2 bg-white rounded-full"
+          : "w-2 h-2 bg-white/50 rounded-full";
+      }
+    });
+
+    // Step 4: fade overlay out (back to normal)
+    setTimeout(() => {
+      overlay.style.opacity = 0;
+    }, 300); // Slight delay so new image is visible under brightness
+
+  }, 400); // Let the brightness come in before changing
+};
+
+    
+
+    window.onload = () => {
+      updateBackground();
+      setInterval(updateBackground, 5000);
     };
-  
-    // ตั้งค่าเริ่มต้น
-    bg.style.backgroundImage = `url('${images[current]}')`;
-    setInterval(updateBackground, 5000);
-  </script>updateBackground, 5000);
   </script>
+
   <script>
     feather.replace();
   </script>
