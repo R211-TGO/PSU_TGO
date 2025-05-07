@@ -1,13 +1,16 @@
 import mongoengine as me
-from flask_login import UserMixin
+from flask_login import UserMixin, current_user
 import datetime
 
 
 class User(me.Document, UserMixin):
     username = me.StringField(required=True, unique=True)
     password = me.StringField(required=True)
-    roles = me.StringField(required=True)
-
+    roles = me.ListField(me.StringField(), default=["user"]) 
+    email = me.EmailField(required=False, unique=True, sparse=True, null=True, default=None)
+    department = me.StringField(
+        required=False, unique=False, null=True, default=""
+    )
     status = me.StringField(
         required=True, default="active", choices=["active", "disactive"]
     )
