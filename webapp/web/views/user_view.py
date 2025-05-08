@@ -32,7 +32,6 @@ def login():
     return redirect(request.args.get("next", url_for("index.index")))
 
 
-
 @module.route("/logout")
 @login_required
 def logout():
@@ -79,8 +78,14 @@ def load_test():
 def users_management():
     return render_template("users/users-management.html")
 
+
 @module.route("/roles-management", methods=["GET", "POST"])
 @login_required
 def roles_management():
     roles = Role.objects()
     return render_template("users/roles-management.html", roles=roles)
+
+
+@module.route("/load-edit-user-role")
+def load_edit_user_role():
+    return render_template("users_form/form-edit-user-role.html")
