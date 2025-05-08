@@ -1,0 +1,40 @@
+<h2 class="text-lg font-bold mb-4">
+  Edit Profile
+</h2>
+<form method="POST" action="{{ url_for('users.load_edit_profile') }}">
+<div class="mb-2">
+  <label class="block text-sm font-medium">
+      Full Name
+  </label>
+  <input type="text" name="username" class="input input-bordered w-full" value="{{ form.username.data }}">
+</div>
+<div class="mb-2">
+  <label class="block text-sm font-medium">
+      Email
+  </label>
+  <input type="email" name="email" class="input input-bordered w-full" value="{{ form.email.data }}">
+</div>
+<div class="mb-2">
+  <label class="block text-sm font-medium">
+      Department
+  </label>
+  <select name="department" class="select select-bordered w-full">
+      {% for department in departments %}
+      <option value="{{ department }}" {% if department == form.department.data %}selected{% endif %}>
+          {{ department }}
+      </option>
+      {% endfor %}
+  </select>
+</div>
+<div class="mt-4 flex justify-end space-x-2">
+  <!-- ปุ่ม Cancel -->
+  <button type="button" class="btn btn-outline"
+      hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
+          Cancel
+  </button>
+  <!-- ปุ่ม Update -->
+  <button type="submit" class="btn btn-primary">
+      Update
+  </button>
+</div>
+</form>

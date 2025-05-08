@@ -1,6 +1,6 @@
 from ..models.user_model import User
 from flask_login import login_user
-from ..web.forms.user_form import RegisterForm, EditUserForm
+from ..web.forms.user_form import RegisterForm, EditUserForm, EditprofileForm
 import datetime
 
 
@@ -47,6 +47,19 @@ class UserService:
         user.username = form.username.data
         user.department = form.department.data
         user.roles = form.roles.data.split(",")
+        user.save()
+        return {"success": True, "error_msg": ""}
+    
+    @staticmethod
+    def edit_profile(form: EditprofileForm):
+        user = User.objects(username=form.username.data).first()
+        print(user)
+        if not user:
+            return {"success": False, "error_msg": "ไม่พบผู้ใช้"}
+
+        user.username = form.username.data
+        user.department = form.department.data
+        user.email = form.email.data
         user.save()
         return {"success": True, "error_msg": ""}
 

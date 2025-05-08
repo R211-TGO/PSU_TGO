@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField
+from wtforms import StringField, PasswordField,EmailField
 from wtforms.validators import DataRequired
 
 
@@ -18,4 +18,11 @@ class EditUserForm(FlaskForm):
     username = StringField("Username", validators=[DataRequired()])
     department = StringField("Department")
     roles = StringField("Roles")
+    # Add any other fields you need for editing the user
+
+class EditprofileForm(FlaskForm):
+    username = StringField("Username", validators=[DataRequired()])
+    email = EmailField("Email", validators=[DataRequired()])
+    department = StringField("Department")
+
     # Add any other fields you need for editing the user

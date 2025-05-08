@@ -1,0 +1,42 @@
+<h2 class="text-lg font-bold mb-4">Add New Role</h2>
+<form method="POST" action="{{ url_for('users.add_role') }}">
+  <div class="mb-4">
+    <label class="block text-sm font-medium">Role Name</label>
+    <input type="text" name="name" class="input input-bordered w-full" placeholder="Enter role name" required>
+  </div>
+
+  <div class="mb-4">
+    <label class="block text-sm font-medium">Description</label>
+    <textarea name="description" class="textarea textarea-bordered w-full" placeholder="Enter role description"></textarea>
+  </div>
+
+  <div class="mb-4">
+    <label class="block text-sm font-medium">Permissions</label>
+    <div class="grid grid-cols-2 gap-4">
+      {% for permission in permissions %}
+      <div class="flex items-center space-x-2 relative">
+        <input type="checkbox" name="permissions" value="{{ permission.name }}" id="perm-{{ permission.name }}" class="checkbox checkbox-primary" title="{{ permission.description }}">
+        <label for="perm-{{ permission.name }}" class="text-sm">
+          {{ permission.name | capitalize }}
+        </label>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if error_msg %}
+    <div class="mt-2 text-red-500 text-sm">
+      {{ error_msg }}
+    </div>
+  {% endif %}
+
+  <div class="mt-4 flex justify-end space-x-2">
+    <button type="button" class="btn btn-outline"
+      onclick="document.getElementById('modal').classList.remove('modal-open')">
+      Cancel
+    </button>
+    <button type="submit" class="btn btn-primary">
+      Add Role
+    </button>
+  </div>
+</form>
