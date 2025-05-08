@@ -1,52 +1,38 @@
-<h2 class="text-lg font-bold mb-4">
-    Edit User
-</h2>
-<form>
-  <div class="mb-2">
-    <label class="block text-sm font-medium">
-        Full Name
-    </label>
-    <input type="text" class="input input-bordered w-full" value="John Doe">
-  </div>
-  <div class="mb-2">
-    <label class="block text-sm font-medium">
-        Email
-    </label>
-    <input type="email" class="input input-bordered w-full" value="admin@psu.ac.th">
-  </div>
-  <div class="mb-2">
-    <label class="block text-sm font-medium">
-        Department
-    </label>
-    <!-- <option i think we shold q ree all Department> -->
-    <select class="select select-bordered w-full">
-        <option value="IT Department" selected>IT Department</option>
-        <option value="HR Department">HR Department</option>
-        <option value="Finance Department">Finance Department</option>
-        <option value="Marketing Department">Marketing Department</option>
-    </select>
-</div>
-<div class="mb-2">
-    <label class="block text-sm font-medium">
-        Role
-    </label>
-    <!-- <option i think we shold q ree all Department> -->
-    <select class="select select-bordered w-full">
-        <option value="IT Department" selected>Admin</option>
-        <option value="HR Department">User</option>
-        <option value="Finance Department">Manager</option>
-        <option value="Marketing Department">Viewer</option>
-    </select>
-</div>
-  <div class="mt-4 flex justify-end space-x-2">
-    <!-- ปุ่ม Cancel -->
-    <button type="button" class="btn btn-outline"
-        hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
-            Cancel
-    </button>
-    <!-- ปุ่ม Update -->
-    <button type="submit" class="btn btn-primary">
-        Update
-    </button>
-  </div>
-</form>
+<form action="{{ url_for('users.load_edit_user_role', user_id=user.id) }}" method="POST">
+    <div class="mb-2">
+      <label class="block text-sm font-medium">Full Name</label>
+      <input type="text" name="username" class="input input-bordered w-full" value="{{ form.username.data }}" readonly>
+    </div>
+    <div class="mb-2">
+      <label class="block text-sm font-medium">Email</label>
+      <input type="email" name="email" class="input input-bordered w-full" value="{{ user.email }}" readonly>
+    </div>
+    <div class="mb-2">
+      <label class="block text-sm font-medium">Department</label>
+      <select name="department" class="select select-bordered w-full">
+          <option value="none" {% if not user.department or user.department not in departments %}selected{% endif %}>None</option>
+          {% for department in departments %}
+          <option value="{{ department }}" {% if form.department.data == department %}selected{% endif %}>
+              {{ department }}
+          </option>
+          {% endfor %}
+      </select>
+    </div>
+    <div class="mb-2">
+      <label class="block text-sm font-medium">Role</label>
+      <select name="roles" class="select select-bordered w-full">
+          {% for role in roles %}
+          <option value="{{ role }}" {% if role in form.roles.data.split(',') %}selected{% endif %}>
+              {{ role }}
+          </option>
+          {% endfor %}
+      </select>
+    </div>
+    <div class="mt-4 flex justify-end space-x-2">
+      <button type="button" class="btn btn-outline"
+              hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
+          Cancel
+      </button>
+      <button type="submit" class="btn btn-primary">Update</button>
+    </div>
+  </form>
