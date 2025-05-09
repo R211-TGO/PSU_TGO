@@ -50,18 +50,17 @@ class UserService:
         user.save()
         return {"success": True, "error_msg": ""}
     
+
     @staticmethod
     def edit_profile(form: EditprofileForm):
         user = User.objects(username=form.username.data).first()
-        print(user)
         if not user:
             return {"success": False, "error_msg": "ไม่พบผู้ใช้"}
 
         user.username = form.username.data
-        user.department = form.department.data
         user.email = form.email.data
+        user.department = form.department.data
         user.save()
         return {"success": True, "error_msg": ""}
-
 
 #     return render_template("users/roles-management.html")
