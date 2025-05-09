@@ -24,12 +24,12 @@
     <input id="sidebar-toggle" type="checkbox" class="hidden peer" />
 
     <!-- Sidebar -->
-    <div id="sidebar" class="sidebar fixed top-0 left-0 w-64 h-full bg-base-200 shadow-md z-20 peer-checked:translate-x-[-100%] peer-checked:opacity-0">
+    <div id="sidebar" class="sidebar fixed top-0 left-0 h-full bg-base-200 shadow-md z-20">
       {% include "base/sidebar.html" %}
     </div>
 
     <!-- Main Content -->
-    <div id="main-content" class="ml-64 transition-all duration-500 flex-1 flex flex-col peer-checked:ml-0">
+    <div id="main-content" class="ml-64 flex-1 flex flex-col peer-checked:ml-0">
       <!-- Navbar -->
       <div class="z-1 w-full bg-base-100">
         {% include "base/navbar.html" %}
