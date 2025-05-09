@@ -153,23 +153,23 @@
 }
 
 
-/* Sidebar Transition */
+/* ตั้งค่าเริ่มต้น */
 .sidebar {
-  width: 16rem; /* ความกว้าง Sidebar คงที่ */
-  transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out; /* ปรับให้การเลื่อนและจางหายสมูท */
+  width: 16rem;
+  transform: translateX(0);
+  opacity: 1;
+  transition: transform 0.40s ease-in-out, opacity 0.40s ease-in-out;
 }
 
-.peer-checked ~ #sidebar {
-  width: 0;
-  transform: translateX(-100%); /* เลื่อน Sidebar ออกไปทางซ้าย */
-  opacity: 0; /* ทำให้ Sidebar จางหายไป */
+/* เมื่อ input[type=checkbox] ถูกเช็ค */
+#sidebar-toggle:checked ~ .sidebar {
+  transform: translateX(-100%);
+  /* opacity: 0; ตรงนี้ทำให้จาง */
 }
 
-/* Main Content Transition */
-.peer-checked ~ .flex-1 {
-  margin-left: 0; /* ลดระยะห่างเมื่อ Sidebar ถูกซ่อน */
+#main-content {
+  transition: margin-left 0.40s ease-in-out;
 }
-
 
 @keyframes spin-slow {
   0% {
