@@ -16,13 +16,13 @@
   <!-- Menu Section -->
   <ul class="menu flex-grow w-full p-2 bg-base-100 space-y-4">
     <li>
-      <a href="/users/users-management" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/users/users-management' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
+      <a href="/users-management" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/users-management/' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
         <i data-feather="users"></i>
         <span class="text-md">User Management</span>
       </a>
     </li>
     <li>
-      <a href="/users/roles-management" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/users/roles-management' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
+      <a href="/role-management/" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/role-management/' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
         <i data-feather="shield"></i>
         <span class="text-md">Role Management</span>
       </a>

@@ -32,7 +32,7 @@
   <div class="card shadow-lg border border-dashed border-base-300 bg-base-100 p-8 flex items-center justify-center">
     <button 
       class="btn btn-primary btn-lg flex items-center gap-2"
-      hx-get="{{ url_for('users.load_add_role') }}" 
+      hx-get="{{ url_for('role_management.load_add_role') }}" 
       hx-target="#modal-content" 
       hx-swap="innerHTML"
       hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
