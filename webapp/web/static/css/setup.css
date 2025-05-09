@@ -156,10 +156,11 @@
 /* Sidebar Transition */
 .sidebar {
   width: 16rem; /* ความกว้าง Sidebar คงที่ */
-  transition: transform 0.5s ease, opacity 0.5s ease; /* เพิ่ม Transition */
+  transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out; /* ปรับให้การเลื่อนและจางหายสมูท */
 }
 
 .peer-checked ~ #sidebar {
+  width: 0;
   transform: translateX(-100%); /* เลื่อน Sidebar ออกไปทางซ้าย */
   opacity: 0; /* ทำให้ Sidebar จางหายไป */
 }
