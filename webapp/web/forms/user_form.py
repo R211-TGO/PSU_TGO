@@ -26,3 +26,7 @@ class EditprofileForm(FlaskForm):
     department = StringField("Department")
 
     # Add any other fields you need for editing the user
+
+# class EdituserpasswordForm(FlaskForm):
+#     password = PasswordField("Password", validators=[DataRequired()])
+#     confirm_password = PasswordField("Confirm Password", validators=[DataRequired()])
