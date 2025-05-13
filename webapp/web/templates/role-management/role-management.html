@@ -12,8 +12,12 @@
         </div>
         <h2 class="text-xl font-semibold">{{ role.name }}</h2>
       </div>
-      <button class="btn btn-ghost btn-sm" title="Edit">
-        <i data-feather="edit-3" class="w-5 h-5"></i>
+      <button class="btn btn-ghost" title="Edit"
+        hx-get="{{ url_for('role_management.load_edit_role', role_id=role.id) }}"
+        hx-target="#modal-content"
+        hx-swap="innerHTML"
+        onclick="document.getElementById('modal').classList.add('modal-open')">
+        <i data-feather="edit" class="w-5 h-5"></i>
       </button>
     </div>
     <p class="text-base mt-5">{{ role.description or "-" }}</p>

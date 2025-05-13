@@ -1,0 +1,36 @@
+<h2 class="text-lg font-bold mb-4">Edit Role</h2>
+<form hx-post="{{ url_for('role_management.edit_role', role_id=role.id) }}"
+      hx-target="#modal-content"
+      hx-swap="innerHTML">
+  <div class="mb-2">
+    <label class="block text-sm font-medium">Name (ชื่อ) </label>
+    <input type="text" name="name" value="{{ role.name }}" class="input input-bordered w-full" required>
+  </div>
+  <div class="mb-2">
+    <label class="block text-sm font-medium">Description (คำอธิบาย)</label>
+    <textarea name="description" class="textarea textarea-bordered w-full">{{ role.description }}</textarea>
+  </div>
+
+  <div class="mb-4">
+    <label class="block text-sm font-medium mb-1">Permissions (สิทธิ์)</label>
+    <div class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+      {% for perm in permissions %}
+        <label class="flex items-center space-x-2">
+          <input type="checkbox" name="permissions" value="{{ perm.id }}"
+          {% if perm.id in selected_permission_ids %}checked{% endif %}>
+          <span>{{ perm.name }}</span>
+        </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if error_msg %}
+  <p class="text-red-500 text-sm mb-2">{{ error_msg }}</p>
+  {% endif %}
+
+  <div class="flex justify-end space-x-2">
+    <button type="button" class="btn"
+            onclick="document.getElementById('modal').classList.remove('modal-open')">ยกเลิก</button>
+    <button type="submit" class="btn btn-primary">Update</button>
+  </div>
+</form>

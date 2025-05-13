@@ -33,7 +33,7 @@ def add_role():
     permissions = request.form.getlist("permissions")
 
     existing_role = Role.objects(name=name).first()
-    if existing_role:
+    if existing_role: 
         permissions_list = Permission.objects()
         return render_template(
             "/role-management/add-role.html",
@@ -54,3 +54,55 @@ def add_role():
 
     # สำเร็จ → redirect ไป roles-management
     return redirect(url_for("role_management.role_management"))
+
+
+@module.route("/load-edit-role/<role_id>", methods=["GET"])
+@login_required
+def load_edit_role(role_id):
+    role = Role.objects(id=role_id).first()
+    permissions = Permission.objects()
+
+    # เตรียมรายการ permission.id ที่ถูกเลือกไว้แล้ว
+    selected_permission_ids = [
+        p.id for p in permissions if p.name in role.permission
+    ]
+
+    return render_template(
+        "/role-management/edit-role.html",
+        role=role,
+        permissions=permissions,
+        selected_permission_ids=selected_permission_ids
+    )
+
+
+@module.route("/edit-role/<role_id>", methods=["POST"])
+@login_required
+def edit_role(role_id):
+    role = Role.objects(id=role_id).first()
+    role.name = request.form.get("name")
+    role.description = request.form.get("description")
+
+    try:
+        permission_ids = request.form.getlist("permissions")
+
+        # แปลง ID ให้เป็น Permission object
+        permissions = []
+        for pid in permission_ids:
+            print(pid)
+            permission = Permission.objects(id=pid).first()
+            if permission:
+                permissions.append(permission.name)
+
+        role.permission = permissions
+        role.save()
+
+    except Exception as e:
+        permissions = Permission.objects()
+        return render_template(
+            "/role-management/edit-role.html",
+            role=role,
+            permissions=permissions,
+            error_msg=f"Error updating role: {str(e)}"
+        )
+
+    return render_template("/role-management/success.html")
