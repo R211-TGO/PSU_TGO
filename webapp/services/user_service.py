@@ -59,10 +59,12 @@ class UserService:
 
         user.username = form.username.data
         user.email = form.email.data
+        user.campus = form.campus.data
         user.department = form.department.data
         user.save()
         return {"success": True, "error_msg": ""}
     
+
     @staticmethod
     def est_password(username: str, password: str):
         user = User.objects(username=username).first()
@@ -70,4 +72,13 @@ class UserService:
 
         return {"success": True, "error_msg": ""}
 
-#     return render_template("users/roles-management.html")
+
+    @staticmethod
+    def change_password(new_password: str):
+        user = User.objects(id=current_user.id).first()
+        if not user:
+            return {"success": False, "error_msg": "ไม่พบผู้ใช้"}
+
+        user.set_password(new_password)
+        user.save()
+        return {"success": True, "error_msg": ""}

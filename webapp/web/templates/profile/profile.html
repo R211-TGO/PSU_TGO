@@ -35,6 +35,14 @@
             <p class="text-base text-base-content">{{ user.email or "-" }}</p>
           </div>
         </div>
+        <!-- Campus -->
+        <div class="flex items-center space-x-4">
+          <i data-feather="home" class="w-6 h-6 stroke-gray-500"></i>
+          <div>
+            <h3 class="text-sm font-bold text-base-content">Campus</h3>
+            <p class="text-base text-base-content">{{ user.campus or "-" }}</p>
+          </div>
+        </div>
         <!-- Department -->
         <div class="flex items-center space-x-4">
           <i data-feather="home" class="w-6 h-6 stroke-gray-500"></i>
@@ -85,7 +93,14 @@
             <h3 class="text-base font-bold text-base-content">Change Password</h3>
             <p class="text-sm text-base-content/70">Update your password regularly to keep your account secure</p>
           </div>
-          <button class="btn btn-outline btn-primary">Update</button>
+
+          <button class="btn btn-outline btn-primary"
+            hx-get="{{ url_for('profile.load_check_password_form') }}"
+            hx-target="#modal-content"
+            hx-swap="innerHTML"
+            hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
+          Update
+        </button>
         </div>
         <div class="flex justify-between items-center">
           <div>

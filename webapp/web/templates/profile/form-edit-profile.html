@@ -16,6 +16,18 @@
 </div>
 <div class="mb-2">
   <label class="block text-sm font-medium">
+      Campus
+  </label>
+  <select name="campus" class="select select-bordered w-full">
+      {% for campus in campuses %}
+      <option value="{{ campus }}" {% if campus == form.campus.data %}selected{% endif %}>
+          {{ campus | capitalize }}
+      </option>
+      {% endfor %}
+  </select>
+</div>
+<div class="mb-2">
+  <label class="block text-sm font-medium">
       Department
   </label>
   <select name="department" class="select select-bordered w-full">
