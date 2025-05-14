@@ -6,6 +6,7 @@ from ...models import User, Role, Permission
 
 module = Blueprint("users_management", __name__, url_prefix="/users-management")
 
+
 @module.route("/", methods=["get", "post"])
 @login_required
 def users_management():
@@ -28,8 +29,8 @@ def load_edit_user_role():
         "Finance Department",
         "Marketing Department",
     ]
-    roles = ["admin", "user", "manager", "viewer"]
-
+    # roles = ["admin", "user", "manager", "viewer"]
+    roles = Role.objects()
     form = EditUserForm()
     users = User.objects()
     if request.method == "POST":
@@ -64,3 +65,25 @@ def load_edit_user_role():
         form=form,
     )
 
+
+@module.route("/load-users-table", methods=["GET", "POST"])
+@login_required
+def load_users_table():
+    page = int(request.args.get("page", 1))  # รับค่าหน้าปัจจุบันจาก query string
+    per_page = 10  # จำนวนผู้ใช้ต่อหน้า
+    total_users = User.objects.count()  # จำนวนผู้ใช้ทั้งหมด
+    total_pages = (total_users + per_page - 1) // per_page  # คำนวณจำนวนหน้าทั้งหมด
+
+    # ดึงข้อมูลผู้ใช้เฉพาะหน้าปัจจุบัน
+    users = User.objects.skip((page - 1) * per_page).limit(per_page)
+
+    # Debug: ตรวจสอบข้อมูล
+    print(f"Users: {users}")
+    print(f"Page: {page}, Total Pages: {total_pages}")
+
+    return render_template(
+        "/users-management/users-table.html",
+        users=users,  # ส่งผู้ใช้ในหน้าปัจจุบัน
+        page=page,
+        total_pages=total_pages,  # จำนวนหน้าทั้งหมด
+    )
