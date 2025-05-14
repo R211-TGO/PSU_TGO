@@ -4,19 +4,18 @@ import datetime
 
 def generate_default_email():
     """
-    Generate a default email with an incrementing number.
-    Example: user1@example.com, user2@example.com, etc.
+    Generate a unique default email with an incrementing number.
+    Ensures no duplicate email is created.
     """
-    last_user = User.objects.order_by("-created_date").first()
-    if last_user and last_user.email and last_user.email.startswith("user"):
-        # Extract the number from the last email and increment it
-        try:
-            last_number = int(last_user.email.split("@")[0][4:])  # Extract number after "user"
-            return f"user{last_number + 1}@example.com"
-        except ValueError:
-            pass
-    # Default to user1@example.com if no valid email exists
-    return "user1@example.com"
+    base = "user"
+    domain = "example.com"
+    counter = 1
+
+    while True:
+        email = f"{base}{counter}@{domain}"
+        if not User.objects(email=email).first():
+            return email
+        counter += 1
 
 class User(me.Document, UserMixin):
     username = me.StringField(required=True, unique=True)
