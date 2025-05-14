@@ -18,8 +18,9 @@
   {% endblock head %}
 </head>
 
-<body>
-  <div class="flex h-screen overflow-hidden">
+<body class="bg-base-200">
+  <div class="flex flex-col min-h-screen">
+
     <!-- Sidebar Toggle -->
     <input id="sidebar-toggle" type="checkbox" class="hidden peer" />
 
@@ -33,37 +34,35 @@
 
     <!-- Main Content -->
     <div id="main-content" class="flex-1 flex flex-col w-full">
+
       <!-- Navbar -->
-      <div class="w-full bg-base-100 z-1">
+      <div id="navbar" class="fixed top-0 left-0 w-full z-50 transition-colors duration-300 bg-transparent">
         {% include "base/navbar.html" %}
       </div>
-      
+
+
+      <!-- Hero Video Section -->
+      <section class="relative w-full h-screen overflow-hidden">
+        <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover z-0">
+          <source src="/static/imagines/dashboard-image.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+        <div class="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4 ">
+          <h1 class="text-4xl font-bold animate-fade-up">Understand Your Impact on the Planet</h1>
+          <p class="mt-4 text-lg animate-fade-up delay-100">ถ้าเปลี่ยนมาใช้ชีวิตอย่างใส่ใจ ยั่งยืนต่อสิ่งแวดล้อม เรื่องที่สอนคือ Basic Python</p>
+          <div class="mt-6 space-x-4 animate-fade-up delay-200">
+            <a href="#" class="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700">Calculate My Footprint ➜</a>
+            <a href="#" class="border border-white text-white px-6 py-2 rounded-full hover:bg-white hover:text-green-600">Learn More</a>
+          </div>
+        </div>
+      </section>
+
       <!-- Scrollable Body -->
-      <div class="p-2 flex-grow bg-base-200 z-0 overflow-y-auto">
+      <div class="relative z-10 -mt-20 px-4 lg:px-0 pb-10">
         {% block body %}
         <div class="px-3 lg:px-5 py-10 mx-auto">
           {% block content %}
-
-        <!-- Background Video -->
-          <video autoplay muted loop playsinline class="fixed inset-0 w-full h-full object-cover -z-10">
-            <source src="/static/imagines/dashboard-image.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-          </video>
-
-          <!-- Hero Section -->
-          <section class="py-24 px-8 text-center max-w-4xl mx-auto">
-            <div class="max-w-3xl mx-auto">
-              <h1 class="animate-fade-up text-4xl font-bold text-white">Understand Your Impact on the Planet</h1>
-              <p class="animate-fade-up delay-100 mt-4 text-lg text-white">
-                ถ้าเปลี่ยนมาใช้ชีวิตอย่างใส่ใจ ยั่งยืนต่อสิ่งแวดล้อม เรื่องที่สอนคือ Basic Python
-              </p>
-              <div class="animate-fade-up delay-200 mt-6 space-x-4">
-                <a href="#" class="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700">Calculate My Footprint ➜</a>
-                <a href="#" class="border border-white text-white px-6 py-2 rounded-full hover:bg-white hover:text-green-600">Learn More</a>
-              </div>
-            </div>  
-          </section>
-
+          
           <!-- Dashboard Section -->
           <section class="bg-white py-16 px-8 mt-8 rounded-3xl shadow-lg max-w-6xl mx-auto">
             <div class="text-center">
@@ -71,14 +70,12 @@
               <p class="mt-2 text-gray-700">
                 Track your process and see the impact of your daily choices on your overall carbon footprint.
               </p>
-              
               <div class="mt-6 flex justify-center space-x-4 border-b border-gray-200">
                 <button class="px-4 py-2 text-green-600 border-b-2 border-green-600 font-medium">Week</button>
                 <button class="px-4 py-2 text-gray-600 hover:text-green-600">Month</button>
                 <button class="px-4 py-2 text-gray-600 hover:text-green-600">Year</button>
               </div>
             </div>
-
             <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
               <div class="bg-gray-50 p-6 rounded-xl shadow">
                 <p class="text-gray-500">Total Emissions</p>
@@ -97,9 +94,10 @@
               </div>
             </div>
           </section>
-        {% endblock content %}
-      </div>
-      {% endblock body %}
+
+          {% endblock content %}
+        </div>
+        {% endblock body %}
       </div>
     </div>
   </div>
@@ -110,12 +108,12 @@
       <!-- เนื้อหาจะถูกโหลดที่นี่ -->
     </div>
   </div>
-  
+
   <!-- Feather Replace Script -->
   <script>
     feather.replace();
   </script>
-  
+
   <style>
     /* Sidebar Transition - สมูธการขยายและหด */
     .sidebar {
@@ -132,14 +130,14 @@
     #sidebar-toggle:checked ~ .sidebar {
       transform: translateX(0);
     }
-    
+
     /* Overlay */
     #sidebar-overlay {
       z-index: 20;
       transition: opacity 0.3s ease;
       pointer-events: none;
     }
-    
+
     #sidebar-toggle:checked ~ #sidebar-overlay {
       opacity: 0.5;
       pointer-events: auto;
@@ -162,11 +160,11 @@
   </style>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const sidebarToggle = document.getElementById('sidebar-toggle');
       const overlay = document.getElementById('sidebar-overlay');
-      
-      overlay.addEventListener('click', function() {
+
+      overlay.addEventListener('click', function () {
         sidebarToggle.checked = false;
       });
     });
@@ -174,6 +172,21 @@
 
   {% block js %}
   {% endblock js %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const navbar = document.getElementById('navbar');
+  
+      window.addEventListener('scroll', function () {
+        if (window.scrollY > 50) {
+          navbar.classList.remove('bg-transparent');
+          navbar.classList.add('bg-white', 'shadow-md');
+        } else {
+          navbar.classList.remove('bg-white', 'shadow-md');
+          navbar.classList.add('bg-transparent');
+        } 
+      });
+    });
+  </script>
 </body>
 
 </html>
