@@ -47,9 +47,9 @@ class UserService:
         user.username = form.username.data
         user.department = form.department.data
         user.roles = form.roles.data.split(",")
+        # print("5555", form.roles.name)
         user.save()
         return {"success": True, "error_msg": ""}
-    
 
     @staticmethod
     def edit_profile(form: EditprofileForm):
@@ -63,7 +63,6 @@ class UserService:
         user.department = form.department.data
         user.save()
         return {"success": True, "error_msg": ""}
-    
 
     @staticmethod
     def est_password(username: str, password: str):
@@ -71,7 +70,6 @@ class UserService:
         pass
 
         return {"success": True, "error_msg": ""}
-
 
     @staticmethod
     def change_password(new_password: str):
