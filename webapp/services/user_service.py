@@ -40,14 +40,12 @@ class UserService:
     @staticmethod
     def edit_user(form: EditUserForm):
         user = User.objects(username=form.username.data).first()
-        print(user)
         if not user:
             return {"success": False, "error_msg": "ไม่พบผู้ใช้"}
 
         user.username = form.username.data
         user.department = form.department.data
         user.roles = form.roles.data.split(",")
-        # print("5555", form.roles.name)
         user.save()
         return {"success": True, "error_msg": ""}
 

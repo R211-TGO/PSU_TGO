@@ -18,28 +18,24 @@ def users_management():
 @login_required
 def load_edit_user_role():
     user_id = request.args.get("user_id")
+    page = int(request.args.get("page", 1))
     user = User.objects.with_id(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    # ตัวอย่างข้อมูล Department และ Role
     departments = [
         "IT Department",
         "HR Department",
         "Finance Department",
         "Marketing Department",
     ]
-    # roles = ["admin", "user", "manager", "viewer"]
     roles = Role.objects()
     form = EditUserForm()
-    users = User.objects()
     if request.method == "POST":
-        # กรอกข้อมูลจากฟอร์ม
         form.username.data = user.username
         form.department.data = request.form.get("department")
         form.roles.data = request.form.get("roles")
 
-        # เรียกใช้ UserService เพื่อแก้ไขข้อมูล
         edit_result = UserService.edit_user(form)
         if not edit_result["success"]:
             return render_template(
@@ -50,9 +46,25 @@ def load_edit_user_role():
                 form=form,
                 error_msg=edit_result["error_msg"],
             )
-        return render_template("/users-management/users-management.html", users=users)
 
-    # แสดงฟอร์มพร้อมข้อมูลผู้ใช้งาน
+        # อัปเดตตารางผู้ใช้
+        users = User.objects.skip((page - 1) * 10).limit(10)
+
+        # ตรวจสอบว่าเป็นคำขอ HTMX หรือไม่
+        # ถ้าใช่ให้ส่งกลับ HTML ของตารางผู้ใช้
+
+        if request.headers.get("HX-Request"):
+            return render_template(
+                "/users-management/users-table.html",
+                users=users,
+                page=page,
+                total_pages=(User.objects.count() + 9) // 10,
+            )
+        # ถ้าไม่ใช่ให้เปลี่ยนเส้นทางไปยังหน้า users-management
+        # โดยไม่ต้องโหลดใหม่ทั้งหน้า
+        else:
+            return redirect(url_for("users_management.users_management"))
+
     form.username.data = user.username
     form.department.data = user.department
     form.roles.data = ",".join(user.roles)
@@ -63,6 +75,7 @@ def load_edit_user_role():
         departments=departments,
         roles=roles,
         form=form,
+        page=page,
     )
 
 
