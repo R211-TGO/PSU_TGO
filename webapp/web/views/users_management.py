@@ -58,7 +58,7 @@ def load_edit_user_role():
                 "/users-management/users-table.html",
                 users=users,
                 page=page,
-                total_pages=(User.objects.count() + 9) // 10,
+                total_pages=(User.objects.count() + 9) // 10,  # + 9 เพื่อปัดเศษขึ้น
             )
         # ถ้าไม่ใช่ให้เปลี่ยนเส้นทางไปยังหน้า users-management
         # โดยไม่ต้องโหลดใหม่ทั้งหน้า
