@@ -25,7 +25,6 @@ class FormAndFormula(me.Document):
     desc_formula = me.StringField(required=True)  # คำอธิบายสูตร
     # input_types = me.EmbeddedDocumentListField(InputType)  # รายการของอินพุต
     input_types = me.EmbeddedDocumentListField(InputType)  # รายการของอินพุต
-    main_unit = me.StringField(required=True)  # หน่วยหลัก เช่น "kgCO2e"
     variables = me.ListField(me.StringField(), required=True)  # ตัวแปรที่ใช้ในสูตร เช่น ["n", "p", "k"]
     formula = me.StringField(required=True)  # สูตรคำนวณ เช่น "n * 1.2 + p * 1.1 + k * 0.9"
     create_date = me.DateTimeField(default=datetime.datetime.now)  # วันที่สร้าง
@@ -53,21 +52,21 @@ class FormAndFormula(me.Document):
 
 
 
-from webapp.models.form_and_formula_model import FormAndFormula, InputType
+# from webapp.models.form_and_formula_model import FormAndFormula, InputType
 
-# สร้างฟอร์มใหม่
-form = FormAndFormula(
-    name="สูตรคำนวณคาร์บอนฟุตพริ้นท์ปุ๋ย",
-    desc_form="ฟอร์มคำนวณคาร์บอนฟุตพริ้นท์จาก NPK",
-    desc_formula="สูตรนี้จะรวมคาร์บอนฟุตพริ้นท์ของ N, P, และ K โดยใช้สัดส่วนที่กำหนด",
-    variables=["n", "p", "k"],
-    formula="n * 1.2 + p * 1.1 + k * 0.9"
-)
+# # สร้างฟอร์มใหม่
+# form = FormAndFormula(
+#     name="สูตรคำนวณคาร์บอนฟุตพริ้นท์ปุ๋ย",
+#     desc_form="ฟอร์มคำนวณคาร์บอนฟุตพริ้นท์จาก NPK",
+#     desc_formula="สูตรนี้จะรวมคาร์บอนฟุตพริ้นท์ของ N, P, และ K โดยใช้สัดส่วนที่กำหนด",
+#     variables=["n", "p", "k"],
+#     formula="n * 1.2 + p * 1.1 + k * 0.9"
+# )
 
-# เพิ่ม InputType ลงในฟอร์ม
-form.add_input_type(InputType.create_input(field="n", label="ไนโตรเจน (N)", input_type="number", unit="kg"))
-form.add_input_type(InputType.create_input(field="p", label="ฟอสฟอรัส (P)", input_type="number", unit="kg"))
-form.add_input_type(InputType.create_input(field="k", label="โพแทสเซียม (K)", input_type="number", unit="kg"))
+# # เพิ่ม InputType ลงในฟอร์ม
+# form.add_input_type(InputType.create_input(field="n", label="ไนโตรเจน (N)", input_type="number", unit="kg"))
+# form.add_input_type(InputType.create_input(field="p", label="ฟอสฟอรัส (P)", input_type="number", unit="kg"))
+# form.add_input_type(InputType.create_input(field="k", label="โพแทสเซียม (K)", input_type="number", unit="kg"))
 
-# บันทึกฟอร์มลงในฐานข้อมูล
-form.save_form()
+# # บันทึกฟอร์มลงในฐานข้อมูล
+# form.save_form()
