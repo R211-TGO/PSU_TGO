@@ -1,0 +1,36 @@
+<form method="POST" action="{{ url_for('emissions_scope.add_scope') }}">
+    <h3 class="text-xl font-semibold mb-4">เพิ่ม Scope</h3>
+  
+    <!-- แสดงข้อความแสดงข้อผิดพลาด -->
+    {% if error %}
+    <div class="alert alert-error shadow-lg mb-4">
+      <div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        <span>{{ error }}</span>
+      </div>
+    </div>
+    {% endif %}
+  
+    <div class="mb-4">
+      <label for="ghg_scope" class="block text-sm font-medium text-gray-700">GHG Scope</label>
+      <input type="number" id="ghg_scope" name="ghg_scope" class="input input-bordered w-full" required>
+    </div>
+    <div class="mb-4">
+      <label for="ghg_sup_scope" class="block text-sm font-medium text-gray-700">GHG Sup Scope</label>
+      <input type="number" id="ghg_sup_scope" name="ghg_sup_scope" class="input input-bordered w-full" required>
+    </div>
+    <div class="mb-4">
+      <label for="ghg_name" class="block text-sm font-medium text-gray-700">GHG Name</label>
+      <input type="text" id="ghg_name" name="ghg_name" class="input input-bordered w-full" required>
+    </div>
+    <div class="mb-4">
+      <label for="ghg_desc" class="block text-sm font-medium text-gray-700">GHG Description</label>
+      <textarea id="ghg_desc" name="ghg_desc" class="textarea textarea-bordered w-full" required></textarea>
+    </div>
+    <div class="flex justify-end gap-4">
+      <a href="{{ url_for('emissions_scope.emissions_scope') }}" class="btn btn-secondary">ยกเลิก</a>
+      <button type="submit" class="btn btn-primary">บันทึก</button>
+    </div>
+  </form>

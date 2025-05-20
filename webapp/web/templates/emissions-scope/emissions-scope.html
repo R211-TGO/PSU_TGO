@@ -1,32 +1,6 @@
 {% extends "/base/default_page.html" %}
 {% block content %}
 
-<!-- Mockup Data -->
-{% set mockup_data = {
-  "overall_progress": 30,
-  "total_sources": 10,
-  "in_progress": 6,
-  "not_started": 4,
-  "completed": 1,
-  "scopes": {
-    "Scope 1": [
-      {"id": "1.1", "title": "การเดินทางภายในและภายนอกสถาบันด้วยยานพาหนะขององค์กร", "progress": 35, "status": "In progress"},
-      {"id": "1.2", "title": "การรั่วไหลของก๊าซมีเทนจาก septic tank", "progress": 42, "status": "In progress"},
-      {"id": "1.3", "title": "ก๊าซมีเทนจากระบบบำบัดน้ำเสียของมหาวิทยาลัย", "progress": 51, "status": "In progress"},
-      {"id": "1.4", "title": "การเดินทางภายในและภายนอกสถาบันด้วยยานพาหนะขององค์กร", "progress": 75, "status": "In progress"},
-      {"id": "1.5", "title": "การเดินทางภายในและภายนอกสถาบันด้วยยานพาหนะขององค์กร", "progress": 0, "status": "Not started"}
-    ],
-    "Scope 2": [
-      {"id": "2.1", "title": "การใช้พลังงานไฟฟ้าภายในมหาวิทยาลัย", "progress": 60, "status": "In progress"},
-      {"id": "2.2", "title": "การใช้พลังงานไฟฟ้าจากแหล่งพลังงานหมุนเวียน", "progress": 80, "status": "Completed"}
-    ],
-    "Scope 3": [
-      {"id": "3.1", "title": "การเดินทางของบุคลากรและนักศึกษา", "progress": 20, "status": "Not started"},
-      {"id": "3.2", "title": "การจัดการขยะและของเสีย", "progress": 45, "status": "In progress"}
-    ]
-  }
-} %}
-
 <div class="p-4">
   <!-- Header Section -->
   <div class="card shadow-lg p-6 bg-white rounded-lg">
@@ -44,9 +18,18 @@
         </span>
       </div>
     </div>
+    <!-- ปุ่มเพิ่ม Scope -->
+    <div class="mt-4">
+      <button class="btn btn-outline btn-primary"
+        hx-get="{{ url_for('emissions_scope.add_scope') }}"
+        hx-target="#modal-content"
+        hx-swap="innerHTML"
+        hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
+        เพิ่ม Scope
+      </button>
+    </div>
   </div>
 
-  <!-- Scopes Section -->
   {% for scope_name, scope_items in mockup_data.scopes.items() %}
   <div class="mt-12">
     <h3 class="text-xl font-semibold mb-6 flex items-center gap-4">
@@ -71,25 +54,11 @@
             'Not started': 'badge-neutral',
             'Completed': 'badge-success'
           }[item.status] %}
-          <span class="badge {{ badge_class }}">{{ item.status }}</span>
+          <span class="badge {{ badge_class }} text-[10px] inline-flex items-center flex-shrink-0">{{ item.status }}</span>
         </div>
-        <!-- Progress Circle and Edit Icon in the Same Row -->
+        <!-- Edit Icon -->
         <div class="flex justify-between items-center mt-4">
-          <!-- Progress Circle -->
-          <div class="relative w-8 h-8">
-            <svg class="w-full h-full transform -rotate-90">
-              <circle cx="50%" cy="50%" r="40%" stroke="#e5e7eb" stroke-width="3" fill="none"></circle>
-              <circle cx="50%" cy="50%" r="40%" stroke="#3b82f6" stroke-width="3" fill="none"
-                stroke-dasharray="125.6"
-                stroke-dashoffset="{{ 125.6 - (item.progress / 100) * 125.6 }}">
-              </circle>
-            </svg>
-            <div class="absolute inset-0 flex items-center justify-center">
-              <span class="text-xs font-bold text-gray-700">{{ item.progress }}%</span>
-            </div>
-          </div>
-          <!-- Edit Icon -->
-          <a href="/edit/{{ item.id }}" class="text-blue-500 hover:text-blue-700">
+          <a href="#" class="text-blue-500 hover:text-blue-700" hx-get="{{ url_for('emissions_scope.edit_scope', ghg_scope=item.id) }}" hx-target="#modal-content" hx-swap="innerHTML">
             <i data-feather="edit"></i>
           </a>
         </div>
@@ -99,4 +68,5 @@
   </div>
   {% endfor %}
 </div>
+
 {% endblock content %}

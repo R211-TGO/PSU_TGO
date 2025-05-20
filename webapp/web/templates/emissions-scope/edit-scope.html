@@ -1,0 +1,16 @@
+<form method="POST" action="{{ url_for('emissions_scope.edit_scope', ghg_scope=scope.ghg_scope) }}" hx-post="{{ url_for('emissions_scope.edit_scope', ghg_scope=scope.ghg_scope) }}" hx-target="#modal-content" hx-swap="innerHTML">
+    <h3 class="text-xl font-semibold mb-4">แก้ไข Scope</h3>
+    <div class="mb-4">
+      <label for="ghg_name" class="block text-sm font-medium text-gray-700">GHG Name</label>
+      <input type="text" id="ghg_name" name="ghg_name" value="{{ scope.ghg_name }}" class="input input-bordered w-full" required>
+    </div>
+    <div class="mb-4">
+      <label for="ghg_desc" class="block text-sm font-medium text-gray-700">GHG Description</label>
+      <textarea id="ghg_desc" name="ghg_desc" class="textarea textarea-bordered w-full">{{ scope.ghg_desc }}</textarea>
+    </div>
+    <div class="flex justify-end gap-4">
+        <button type="button" class="btn"
+        onclick="document.getElementById('modal').classList.remove('modal-open')">cancel</button>
+      <button type="submit" class="btn btn-primary">บันทึก</button>
+    </div>
+  </form>
