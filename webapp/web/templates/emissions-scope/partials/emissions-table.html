@@ -1,0 +1,84 @@
+{% set years = ['2568(2025)', '2567(2024)', '2566(2023)', '2565(2022)'] %}
+{% set months = [
+    {'id': 1, 'name': 'ตุลาคม(2567)'},
+    {'id': 2, 'name': 'พฤศจิกายน(2567)'},
+    {'id': 3, 'name': 'ธันวาคม(2567)',},
+    {'id': 4, 'name': 'มกราคม(2568)',},
+    {'id': 5, 'name': 'กุมภาพันธ์(2568)',},
+    {'id': 6, 'name': 'มีนาคม(2568)', },
+    {'id': 7, 'name': 'เมษายน(2568)',},
+    {'id': 8, 'name': 'พฤษภาคม(2568)',},
+    {'id': 9, 'name': 'มิถุนายน(2568)', },
+    {'id': 10, 'name': 'กรกฎาคม(2568)',},
+    {'id': 11, 'name': 'สิงหาคม(2568)',},
+    {'id': 12, 'name': 'กันยายน(2568)',}
+] %}
+
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <!-- ส่วนหัว -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h2 class="text-lg font-medium mb-4 md:mb-0">ข้อมูลการใช้เชื้อเพลิง</h2>
+                <div class="relative w-full md:w-64">
+                    <select class="w-full bg-white border border-gray-300 rounded-md py-2 px-4 appearance-none">
+                        {% for year in years %}
+                        <option value="{{ year }}">ปีงบประมาณ: {{ year }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                        <i class="fas fa-chevron-down text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- ตารางข้อมูล -->
+            <div class="bg-white rounded-lg border border-base-300 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto w-full">
+                    <table class="table w-full">
+                        <!-- หัวตาราง -->
+                        <thead>
+                            <tr class="bg-base-200 text-base-content uppercase text-xs">
+                                <th class="px-4 py-3 font-medium">ACTION</th>
+                                <th class="px-4 py-3 font-medium">ข้อมูลประจำเดือน</th>
+                                {% for head in head_table %}
+                                <th class="px-4 py-3 font-medium">{{ head }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <!-- เนื้อหาตาราง -->
+                        <tbody>
+                            {% for month in months %}
+                            <tr class="hover:bg-base-100 border-t border-base-200">
+                                <!-- คอลัมน์ ACTION -->
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-500 hover:text-blue-700 transition-colors">
+                                        <i data-feather="edit" class="w-[18px] h-[18px]"></i>
+                                    </button>
+                                </td>
+                                <!-- คอลัมน์ข้อมูลประจำเดือน -->
+                                <td class="px-4 py-3">
+                                    <div class="text-sm text-gray-900">{{ month.name }}</div>
+                                </td>
+                                <!-- คอลัมน์ข้อมูล Material -->
+                                {% for head in head_table %}
+                                <td class="px-4 py-3">
+                                    <div class="text-sm text-gray-900">
+                                        {% for material in materials %}
+                                            {% if material.month == month.id and material.name == head %}
+                                                {% for quantity in material.quantity_type %}
+                                                    {{ quantity.amount }} {{ quantity.unit }}
+                                                {% endfor %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
