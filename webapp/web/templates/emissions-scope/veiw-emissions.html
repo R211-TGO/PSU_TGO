@@ -1,0 +1,16 @@
+{% extends "/base/default_page.html" %}
+{% import "/components/forms/form_renderer.html" as form_renderer %}
+
+{% block content %}
+
+
+            <!-- Table Container -->
+            <div id="emissions-table-container" 
+                 hx-get="{{ url_for('emissions.load_emissions_table',scope_id=scope_id,sub_scope_id=sub_scope_id) }}" 
+                 hx-trigger="load" 
+                 hx-target="#emissions-table-container" 
+                 hx-swap="innerHTML">
+                <!-- ตารางจะถูกโหลดที่นี่ -->
+            </div>
+
+{% endblock content %}

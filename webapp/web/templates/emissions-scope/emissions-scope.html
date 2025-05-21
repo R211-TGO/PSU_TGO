@@ -36,8 +36,10 @@
       <!-- วงกลมที่มีตัวเลข -->
       <span class="w-10 h-10 flex items-center justify-center bg-primary text-white rounded-full">
         {{ loop.index }}
+        {%set num = loop.index%}
       </span>
       {{ scope_name }}
+      
     </h3>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       {% for item in scope_items %}
@@ -58,7 +60,7 @@
         </div>
         <!-- Edit Icon -->
         <div class="flex justify-between items-center mt-4">
-          <a href="#" class="text-blue-500 hover:text-blue-700" hx-get="{{ url_for('emissions_scope.edit_scope', ghg_scope=item.id) }}" hx-target="#modal-content" hx-swap="innerHTML">
+          <a href="{{ url_for('emissions.veiw_emissions', scope_id=num,sub_scope_id=item.id) }}" class="text-blue-500 hover:text-blue-700">
             <i data-feather="edit"></i>
           </a>
         </div>
@@ -70,3 +72,7 @@
 </div>
 
 {% endblock content %}
+
+<a href="{{ url_for('emissions.veiw_emissions', item_id=item.id) }}" class="text-blue-500 hover:text-blue-700">
+  <i data-feather="edit"></i>
+</a>
