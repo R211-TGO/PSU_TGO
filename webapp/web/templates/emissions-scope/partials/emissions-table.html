@@ -13,68 +13,77 @@
     {'id': 11, 'name': 'สิงหาคม(2568)',},
     {'id': 12, 'name': 'กันยายน(2568)',}
 ] %}
-
-
-    <div class="container mx-auto px-4 py-6">
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <!-- ส่วนหัว -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-                <h2 class="text-lg font-medium mb-4 md:mb-0">ข้อมูลการใช้เชื้อเพลิง</h2>
-                <div class="relative w-full md:w-64">
-                    <select class="w-full bg-white border border-gray-300 rounded-md py-2 px-4 appearance-none">
-                        {% for year in years %}
-                        <option value="{{ year }}">ปีงบประมาณ: {{ year }}</option>
-                        {% endfor %}
-                    </select>
-                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <i class="fas fa-chevron-down text-gray-400"></i>
+<div class="min-h-screen bg-gray-100 p-4">
+    <div class="max-w-full mx-auto">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16.6667 7.5H3.33333C2.8731 7.5 2.5 7.8731 2.5 8.33333V15.8333C2.5 16.2936 2.8731 16.6667 3.33333 16.6667H16.6667C17.1269 16.6667 17.5 16.2936 17.5 15.8333V8.33333C17.5 7.8731 17.1269 7.5 16.6667 7.5Z" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M5.83333 7.5V4.16667C5.83333 3.72464 6.00893 3.30072 6.32149 2.98816C6.63405 2.67559 7.05797 2.5 7.5 2.5H12.5C12.942 2.5 13.366 2.67559 13.6785 2.98816C13.9911 3.30072 14.1667 3.72464 14.1667 4.16667V7.5" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
                     </div>
+                    <h1 class="text-xl font-semibold text-gray-900">ระบบติดตามการใช้เชื้อเพลิง</h1>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                    <div class="relative w-full md:w-64">
+                        <select class="w-full bg-white border border-gray-300 rounded-md py-2 px-4 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                            {% for year in years %}
+                            <option value="{{ year }}">ปีงบประมาณ: {{ year }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                    <button class="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors duration-200">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        <span>ดาวน์โหลดข้อมูล</span>
+                    </button>
                 </div>
             </div>
-    
-            <!-- ตารางข้อมูล -->
             <div class="overflow-x-auto border border-gray-200 rounded-md">
-                <div class="max-h-[500px] overflow-y-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <!-- หัวตาราง -->
-                        <thead class="bg-gray-50 sticky top-0">
+                <div class="max-h-[700px] overflow-y-auto">
+                    <table class="table-auto w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 sticky top-0 z-10">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                                    ACTION
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    ข้อมูลประจำเดือน
-                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">ACTION</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ข้อมูลประจำเดือน</th>
                                 {% for head in head_table %}
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {{ head }}
-                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ head }}</th>
                                 {% endfor %}
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             {% for month in months %}
-                            <tr class="hover:bg-gray-50">
-                                <!-- คอลัมน์ ACTION -->
+                            <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <button class="focus:outline-none">
-                                        <i class="fas fa-edit text-{{ 'green' if month.status == 'completed' else 'blue' }}-500 hover:scale-110 transition-transform"></i>
+                                    <button class="focus:outline-none transition-transform duration-150 hover:scale-110">
+                                        <svg class="w-4 h-4 text-{{ 'green' if month.status == 'completed' else 'blue' }}-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                        </svg>
                                     </button>
                                 </td>
-                                <!-- คอลัมน์ข้อมูลประจำเดือน -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">{{ month.name }}</div>
                                 </td>
-                                <!-- คอลัมน์ข้อมูล Material -->
                                 {% for head in head_table %}
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">
                                         {% for material in materials %}
-                                            {% if material.month == month.id and material.name == head %}
-                                                {% for quantity in material.quantity_type %}
-                                                    {{ quantity.amount }} {{ quantity.unit }}
-                                                {% endfor %}
-                                            {% endif %}
+                                        {% if material.month == month.id and material.name == head %}
+                                        {% for quantity in material.quantity_type %}
+                                        {{ quantity.amount }} {{ quantity.unit }}
+                                        {% endfor %}
+                                        {% endif %}
                                         {% endfor %}
                                     </div>
                                 </td>
@@ -87,3 +96,4 @@
             </div>
         </div>
     </div>
+</div>
