@@ -40,6 +40,22 @@
         <textarea id="ghg_desc" name="ghg_desc" class="textarea textarea-bordered w-full" required></textarea>
     </div>
 
+    <!-- Head Table -->
+    <div class="mb-4">
+        <label for="head_table" class="block text-sm font-medium text-gray-700">Head Table</label>
+        <div class="grid grid-cols-2 gap-4">
+            {% for material_name in material_names %}
+            <div class="flex items-center space-x-2">
+                <input type="checkbox" name="head_table" value="{{ material_name }}" id="head-{{ material_name }}" class="checkbox checkbox-primary">
+                <label for="head-{{ material_name }}" class="text-sm">{{ material_name }}</label>
+            </div>
+            {% endfor %}
+        </div>
+        {% if error %}
+        <p class="text-red-500 text-sm mt-2">{{ error }}</p>
+        {% endif %}
+    </div>
+
     <!-- ปุ่ม -->
     <div class="flex justify-end gap-4">
         <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal').classList.remove('modal-open')">ยกเลิก</button>

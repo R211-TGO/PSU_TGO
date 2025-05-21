@@ -24,6 +24,7 @@ class FormAndFormula(me.Document):
     )  # ชื่อฟอร์ม เช่น "สูตรคำนวณคาร์บอนฟุตพริ้นท์ปุ๋ย"
     desc_form = me.StringField(required=True)  # คำอธิบายฟอร์ม
     desc_formula = me.StringField(required=True)  # คำอธิบายสูตร
+    material_name = me.StringField(required=True)  # ชื่อวัสดุที่ใช้ในฟอร์ม
     # input_types = me.EmbeddedDocumentListField(InputType)  # รายการของอินพุต
     input_types = me.EmbeddedDocumentListField(InputType)  # รายการของอินพุต
     variables = me.ListField(
@@ -35,7 +36,6 @@ class FormAndFormula(me.Document):
     create_date = me.DateTimeField(default=datetime.datetime.now)  # วันที่สร้าง
     update_date = me.DateTimeField(default=datetime.datetime.now)  # วันที่อัปเดต
 
-    material_name = me.StringField(required=True)  # ชื่อวัสดุที่ใช้ในฟอร์ม
 
     def add_input_type(self, input_type):
         """
