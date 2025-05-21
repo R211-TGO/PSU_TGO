@@ -79,9 +79,13 @@
               <i data-feather="settings"></i>
             </a>
             <!-- Edit Icon -->
-              <a href="{{ url_for('emissions.veiw_emissions', scope_id=num,sub_scope_id=item.id) }}" class="text-blue-500 hover:text-blue-700">
-                <i data-feather="edit"></i>
-              </a>
+            <form action="{{ url_for('emissions.view_emissions') }}" method="POST" style="display: inline;">
+              <input type="hidden" name="scope_id" value="{{ num }}">
+              <input type="hidden" name="sub_scope_id" value="{{ item.id }}">
+              <button type="submit" class="text-blue-500 hover:text-blue-700">
+                  <i data-feather="edit"></i>
+              </button>
+          </form>
           </div>
         </div>
       </div>
