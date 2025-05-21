@@ -34,44 +34,80 @@ def emissions_scope():
         }
     )
 
+
 @module.route("/add", methods=["GET", "POST"])
 @login_required
 def add_scope():
     if request.method == "POST":
-        # รับข้อมูลจากฟอร์ม
+        action = request.form.get("action")  # ตรวจสอบการกระทำ (fetch_sub_scope หรือ save)
         ghg_scope = request.form.get("ghg_scope")
         ghg_sup_scope = request.form.get("ghg_sup_scope")
         ghg_name = request.form.get("ghg_name")
         ghg_desc = request.form.get("ghg_desc")
 
-        # ตรวจสอบว่าทุกช่องถูกกรอก
-        if not ghg_scope or not ghg_sup_scope or not ghg_name or not ghg_desc:
+        # หากผู้ใช้กดปุ่ม "บันทึก"
+        if action == "save":
+            # ตรวจสอบว่าทุกช่องถูกกรอก
+            if not ghg_scope or not ghg_sup_scope or not ghg_name or not ghg_desc:
+                scopes = Scope.objects.distinct("ghg_scope")
+                latest_sub_scope = None
+                return render_template(
+                    "/emissions-scope/add-scope.html",
+                    error="กรุณากรอกข้อมูลให้ครบทุกช่อง",
+                    scopes=scopes,
+                    latest_sub_scope=latest_sub_scope
+                )
+
+            # ตรวจสอบว่ามี Scope ซ้ำหรือไม่
+            existing_scope = Scope.objects(
+                ghg_scope=int(ghg_scope),
+                ghg_sup_scope=int(ghg_sup_scope)
+            ).first()
+            if existing_scope:
+                scopes = Scope.objects.distinct("ghg_scope")
+                latest_sub_scope = None
+                return render_template(
+                    "/emissions-scope/add-scope.html",
+                    error="Scope และ Sub-Scope นี้มีอยู่แล้ว",
+                    scopes=scopes,
+                    latest_sub_scope=latest_sub_scope
+                )
+
+            # สร้าง Scope ใหม่
+            scope = Scope(
+                ghg_scope=int(ghg_scope),
+                ghg_sup_scope=int(ghg_sup_scope),
+                ghg_name=ghg_name,
+                ghg_desc=ghg_desc
+            )
+            scope.save()
+
+            # เรนเดอร์ HTML ของ add-scope-success.html
             return render_template(
-                "/emissions-scope/add-scope.html",
-                error="กรุณากรอกข้อมูลให้ครบทุกช่อง"
+                "/emissions-scope/add-scope-success.html",
+                success="Scope added successfully!"
             )
 
-        # ตรวจสอบว่ามี Scope ซ้ำหรือไม่
-        existing_scope = Scope.objects(
-            ghg_scope=int(ghg_scope),
-            ghg_sup_scope=int(ghg_sup_scope)
-        ).first()
-        if existing_scope:
-            return render_template(
-                "/emissions-scope/add-scope.html",
-                error="Scope และ Sub-Scope นี้มีอยู่แล้ว"
-            )
+    # กรณี GET: ดึง Scope หลักทั้งหมด
+    scopes = Scope.objects.distinct("ghg_scope")
+    latest_sub_scope = None
+    return render_template(
+        "/emissions-scope/add-scope.html",
+        scopes=scopes,
+        latest_sub_scope=latest_sub_scope
+    )
 
-        # สร้าง Scope ใหม่
-        scope = Scope(
-            ghg_scope=int(ghg_scope),
-            ghg_sup_scope=int(ghg_sup_scope),
-            ghg_name=ghg_name,
-            ghg_desc=ghg_desc
-        )
-        scope.save()
-        return render_template("/emissions-scope/add-scope-success.html")
-    return render_template("/emissions-scope/add-scope.html")
+
+@module.route("/get-latest-sub-scope", methods=["POST"])
+@login_required
+def get_latest_sub_scope():
+    ghg_scope = request.json.get("ghg_scope")  # รับข้อมูลจาก JSON
+    if not ghg_scope or not ghg_scope.isdigit():
+        return jsonify({"latest_sub_scope": 1})  # ถ้า Scope หลักว่างหรือไม่ใช่ตัวเลข ให้เริ่มที่ 1
+    ghg_scope = int(ghg_scope)
+    latest_sub_scope = Scope.objects(ghg_scope=ghg_scope).order_by("-ghg_sup_scope").first()
+    latest_sub_scope = latest_sub_scope.ghg_sup_scope + 1 if latest_sub_scope else 1
+    return jsonify({"latest_sub_scope": latest_sub_scope})
 
 @module.route("/edit/<int:ghg_scope>", methods=["GET", "POST"])
 @login_required

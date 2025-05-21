@@ -47,7 +47,7 @@
         <div class="flex justify-between items-center">
           <h4 class="font-semibold text-base flex items-center gap-2">
             <span class="w-8 h-8 flex items-center justify-center bg-blue-100 text-gray-800 rounded-full">
-              {{ item.id }}
+              {{ scope_name[-1] }}.{{ loop.index }}
             </span>
             {{ item.title }}
           </h4>
@@ -60,9 +60,29 @@
         </div>
         <!-- Edit Icon -->
         <div class="flex justify-between items-center mt-4">
-          <a href="{{ url_for('emissions.veiw_emissions', scope_id=num,sub_scope_id=item.id) }}" class="text-blue-500 hover:text-blue-700">
-            <i data-feather="edit"></i>
-          </a>
+          <!-- Progress Circle (อยู่ทางซ้าย) -->
+          <div class="relative w-12 h-12">
+            <svg class="w-full h-full transform -rotate-90">
+              <circle cx="50%" cy="50%" r="18" stroke="#e5e7eb" stroke-width="4" fill="none"></circle>
+              <circle cx="50%" cy="50%" r="18" stroke="#3b82f6" stroke-width="4" fill="none"
+                stroke-dasharray="113" stroke-dashoffset="{{ 113 - (item.progress / 100) * 113 }}"></circle>
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center text-sm font-semibold text-gray-700">
+              {{ item.progress }}%
+            </div>
+          </div>
+        
+          <!-- Icons (อยู่ทางขวา) -->
+          <div class="flex items-center gap-4">
+            <!-- Gear Icon -->
+            <a href="#" class="text-blue-500 hover:text-blue-700">
+              <i data-feather="settings"></i>
+            </a>
+            <!-- Edit Icon -->
+            <a href="#" class="text-blue-500 hover:text-blue-700" hx-get="{{ url_for('emissions.veiw_emissions', scope_id=num,sub_scope_id=item.id) }}" hx-target="#modal-content" hx-swap="innerHTML">
+              <i data-feather="edit"></i>
+            </a>
+          </div>
         </div>
       </div>
       {% endfor %}
@@ -72,7 +92,3 @@
 </div>
 
 {% endblock content %}
-
-<a href="{{ url_for('emissions.veiw_emissions', item_id=item.id) }}" class="text-blue-500 hover:text-blue-700">
-  <i data-feather="edit"></i>
-</a>
