@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, jsonify
 from flask_login import login_required, current_user
-from ...models.scope_model import Scope
+from ...models import FormAndFormula, Scope
 
 module = Blueprint("emissions_scope", __name__, url_prefix="/emissions-scope")
 
@@ -44,18 +44,21 @@ def add_scope():
         ghg_sup_scope = request.form.get("ghg_sup_scope")
         ghg_name = request.form.get("ghg_name")
         ghg_desc = request.form.get("ghg_desc")
+        head_table = request.form.getlist("head_table")  # รับค่าของ Head Table
 
         # หากผู้ใช้กดปุ่ม "บันทึก"
         if action == "save":
             # ตรวจสอบว่าทุกช่องถูกกรอก
-            if not ghg_scope or not ghg_sup_scope or not ghg_name or not ghg_desc:
+            if not ghg_scope or not ghg_sup_scope or not ghg_name or not ghg_desc or not head_table:
                 scopes = Scope.objects.distinct("ghg_scope")
                 latest_sub_scope = None
+                material_names = FormAndFormula.objects.distinct("material_name")
                 return render_template(
                     "/emissions-scope/add-scope.html",
                     error="กรุณากรอกข้อมูลให้ครบทุกช่อง",
                     scopes=scopes,
-                    latest_sub_scope=latest_sub_scope
+                    latest_sub_scope=latest_sub_scope,
+                    material_names=material_names
                 )
 
             # ตรวจสอบว่ามี Scope ซ้ำหรือไม่
@@ -66,11 +69,13 @@ def add_scope():
             if existing_scope:
                 scopes = Scope.objects.distinct("ghg_scope")
                 latest_sub_scope = None
+                material_names = FormAndFormula.objects.distinct("material_name")
                 return render_template(
                     "/emissions-scope/add-scope.html",
                     error="Scope และ Sub-Scope นี้มีอยู่แล้ว",
                     scopes=scopes,
-                    latest_sub_scope=latest_sub_scope
+                    latest_sub_scope=latest_sub_scope,
+                    material_names=material_names
                 )
 
             # สร้าง Scope ใหม่
@@ -78,7 +83,8 @@ def add_scope():
                 ghg_scope=int(ghg_scope),
                 ghg_sup_scope=int(ghg_sup_scope),
                 ghg_name=ghg_name,
-                ghg_desc=ghg_desc
+                ghg_desc=ghg_desc,
+                head_table=head_table  # บันทึกค่า Head Table
             )
             scope.save()
 
@@ -88,13 +94,15 @@ def add_scope():
                 success="Scope added successfully!"
             )
 
-    # กรณี GET: ดึง Scope หลักทั้งหมด
+    # กรณี GET: ดึง Scope หลักทั้งหมดและ material_name
     scopes = Scope.objects.distinct("ghg_scope")
     latest_sub_scope = None
+    material_names = FormAndFormula.objects.distinct("material_name")
     return render_template(
         "/emissions-scope/add-scope.html",
         scopes=scopes,
-        latest_sub_scope=latest_sub_scope
+        latest_sub_scope=latest_sub_scope,
+        material_names=material_names
     )
 
 

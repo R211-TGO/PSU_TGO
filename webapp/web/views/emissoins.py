@@ -60,7 +60,7 @@ def load_emissions_table():
         return "Invalid scope or sub-scope ID", 400
 
     # ดึง Scope ที่ตรงกับ scope_id
-    scope = Scope.objects(ghg_scope=int(scope_id)).first()  # ดึง Scope ที่ตรงกับ scope_id
+    scope = Scope.objects(ghg_scope=int(scope_id),ghg_sup_scope=int(sub_scope_id)).first()  # ดึง Scope ที่ตรงกับ scope_id
     if not scope:
         return "Scope not found", 404
 
