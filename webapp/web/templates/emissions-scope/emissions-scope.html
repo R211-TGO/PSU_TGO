@@ -79,9 +79,9 @@
               <i data-feather="settings"></i>
             </a>
             <!-- Edit Icon -->
-            <a href="#" class="text-blue-500 hover:text-blue-700" hx-get="{{ url_for('emissions.veiw_emissions', scope_id=num,sub_scope_id=item.id) }}" hx-target="#modal-content" hx-swap="innerHTML">
-              <i data-feather="edit"></i>
-            </a>
+              <a href="{{ url_for('emissions.veiw_emissions', scope_id=num,sub_scope_id=item.id) }}" class="text-blue-500 hover:text-blue-700">
+                <i data-feather="edit"></i>
+              </a>
           </div>
         </div>
       </div>
