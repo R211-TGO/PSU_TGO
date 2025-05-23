@@ -25,39 +25,53 @@ def view_emissions():
 @module.route("/load-emissions-table", methods=["GET"])
 @login_required
 def load_emissions_table():
-    # รับค่า scope_id และ sub_scope_id จาก query string
     scope_id = request.args.get("scope_id")
     sub_scope_id = request.args.get("sub_scope_id")
-    print("scope_id:", scope_id)
-    print("sub_scope_id:", sub_scope_id)
+    page = int(request.args.get("page", 1))
+    items_per_page = 4
 
-    # ตรวจสอบว่าค่า scope_id และ sub_scope_id ไม่เป็น None
     if not scope_id or not sub_scope_id:
-        return "Invalid scope or sub-scope ID", 400
+        return jsonify({"error": "Invalid scope or sub-scope ID"}), 400
 
-    # ดึง Scope ที่ตรงกับ scope_id
     scope = Scope.objects(
         ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
-    ).first()  # ดึง Scope ที่ตรงกับ scope_id
+    ).first()
     if not scope:
-        return "Scope not found", 404
+        return jsonify({"error": "Scope not found"}), 404
 
-    print("Scope:", scope.ghg_name)
+    head_table = scope.head_table
+    total_headers = len(head_table)
+    total_pages = (total_headers + items_per_page - 1) // items_per_page
 
-    head_table = scope.head_table  # ดึง head_table ของ scope
-    print("head_table:", scope.head_table)
+    start_index = (page - 1) * items_per_page
+    end_index = start_index + items_per_page
+    current_headers = head_table[start_index:end_index]
+
     materials = Material.objects(scope=int(scope_id), sub_scope=int(sub_scope_id))
-    print("Materials:", materials)
 
-    s = Scope.objects(ghg_scope=1)
-    print("Scope:", s)
+    # Debugging: ตรวจสอบค่าที่ส่งกลับ
+    print(
+        f"Scope ID: {scope_id}, Sub Scope ID: {sub_scope_id}, Page: {page}, Total Pages: {total_pages}"
+    )
 
+    # ตรวจสอบว่าเป็นคำขอ HTMX หรือไม่
+    if request.headers.get("HX-Request"):
+        return render_template(
+            "emissions-scope/partials/emissions-table.html",
+            scope=scope,
+            scope_id=scope_id,
+            sub_scope_id=sub_scope_id,
+            materials=materials,
+            head_table=current_headers,
+            total_pages=total_pages,
+            page=page,
+            user=current_user,
+        )
+
+    # ถ้าไม่ใช่ HTMX ให้โหลดหน้าเต็ม
     return render_template(
-        "emissions-scope/partials/emissions-table.html",
-        scope=scope,
+        "emissions-scope/view-emissions.html",
         scope_id=scope_id,
         sub_scope_id=sub_scope_id,
-        materials=materials,
-        head_table=head_table,
         user=current_user,
     )
