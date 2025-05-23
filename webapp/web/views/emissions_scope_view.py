@@ -97,7 +97,11 @@ def add_scope():
     # กรณี GET: ดึง Scope หลักทั้งหมดและ material_name
     scopes = Scope.objects.distinct("ghg_scope")
     latest_sub_scope = None
-    material_names = FormAndFormula.objects.distinct("material_name")
+    material_names = FormAndFormula.objects()
+    material_names = [x.material_name for x in material_names] # ดึงชื่อวัสดุทั้งหมด
+    # print("Material names:", material_names)  # ตรวจสอบข้อมูลที่ดึงมา
+    # material_names = FormAndFormula.objects(material_name="maintenance")  # ดึงเฉพาะ material_name = "maintenance"
+    # print("Material names:", material_names)
     return render_template(
         "/emissions-scope/add-scope.html",
         scopes=scopes,
