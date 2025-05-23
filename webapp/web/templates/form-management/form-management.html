@@ -1,3 +1,55 @@
 {% extends "/base/default_page.html" %}
 {% block content %}
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+    {% for form in forms %}
+    <div class="card shadow-lg border border-base-300 bg-base-100 p-8">
+      <div class="flex justify-between items-start">
+        <div class="flex items-center gap-4">
+          <div class="bg-primary text-primary-content p-3 rounded-full">
+            <i data-feather="file-text" class="w-6 h-6"></i>
+          </div>
+          <h2 class="text-xl font-semibold">{{ form.name }}</h2>
+        </div>
+        <button class="btn btn-ghost" title="Edit"
+          hx-get="{{ url_for('form_management.load_add_form_and_formula', form_id=form.id) }}"
+          hx-target="#modal-content"
+          hx-swap="innerHTML"
+          onclick="document.getElementById('modal').classList.add('modal-open')">
+          <i data-feather="edit" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <p class="text-base mt-5">{{ form.desc_form or "-" }}</p>
+      <div class="mt-2">
+        <p class="font-medium text-sm mb-2">MATERIAL NAME</p>
+        <span class="badge bg-blue-100 text-blue-800 text-sm">{{ form.material_name }}</span>
+      </div>
+      <div class="mt-2">
+        <p class="font-medium text-sm mb-2">VARIABLES</p>
+        <div class="flex flex-wrap gap-2">
+          {% for var in form.variables %}
+          <span class="badge bg-yellow-100 text-yellow-800 text-sm">{{ var }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="mt-2">
+        <p class="font-medium text-sm mb-2">FORMULA</p>
+        <p class="text-sm bg-gray-100 p-2 rounded">{{ form.formula or "No formula provided" }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  
+    <!-- Add New Form Card -->
+    <div class="card shadow-lg border border-dashed border-base-300 bg-base-100 p-8 flex items-center justify-center">
+        <button 
+        class="btn btn-primary btn-lg flex items-center gap-2"
+        hx-get="{{ url_for('form_management.load_add_form_and_formula') }}" 
+        hx-target="#modal-content" 
+        hx-swap="innerHTML"
+        hx-on="htmx:afterRequest: initializeForm(); document.getElementById('modal').classList.add('modal-open')">
+        <i data-feather="plus-circle" class="w-6 h-6"></i>
+        <span>Add New Form</span>
+      </button>
+    </div>
+  </div>
 {% endblock content %}

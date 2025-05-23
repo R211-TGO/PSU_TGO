@@ -143,9 +143,14 @@
   padding: 1rem;
   border-radius: 0.5rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  width: 90%;
-  max-width: 500px;
+  width: auto; /* ขนาดอัตโนมัติตามเนื้อหา */
+  min-width: 500px; /* กำหนดขนาดเล็กสุด */
+  max-width: 100%; /* กำหนดขนาดใหญ่สุด */
+  max-height: 90%; /* จำกัดความสูงสูงสุด */
+  overflow-y: auto; /* เพิ่ม Scroll หากเนื้อหายาวเกิน */
 }
+
+
 .text-sm {
   @apply text-sm;
   color: #6B7280;
