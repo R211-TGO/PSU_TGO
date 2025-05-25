@@ -1,22 +1,2 @@
-<div id="modal" class="modal">
-    <div class="modal-box">
-        <h3 class="font-bold text-lg">กรอกข้อมูลสำหรับ {{ head }}</h3>
-        <form method="POST" action="{{ url_for('emissions.save_material') }}">
-            <input type="hidden" name="month_id" value="{{ month_id }}">
-            <input type="hidden" name="head" value="{{ head }}">
-            {{ form.hidden_tag() }}
-            {{ form.name.label }} {{ form.name }}
-            {{ form.scope.label }} {{ form.scope }}
-            {{ form.form_and_formula.label }} {{ form.form_and_formula }}
-            {{ form.quantity_type.label }} {{ form.quantity_type }}
-            {{ form.year.label }} {{ form.year }}
-            {{ form.month.label }} {{ form.month }}
-            {{ form.day.label }} {{ form.day }}
-            {{ form.sub_scope.label }} {{ form.sub_scope }}
-            <div class="modal-action">
-                <button type="submit" class="btn btn-primary">บันทึก</button>
-                <button type="button" class="btn" hx-on="click: document.getElementById('modal').classList.remove('modal-open')">ยกเลิก</button>
-            </div>
-        </form>
-    </div>
-</div>
+
+
