@@ -48,21 +48,33 @@
                                     {% for head in head_table %}
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">
-                                            
                                             {% set ns = namespace(has_data=false) %}
                                             {% for material in materials %}
                                                 {% if material.month == month.id and material.name == head %}
                                                     {% for quantity in material.quantity_type %}
-                                                        {{ quantity.amount }} {{ quantity.unit }}
+                                                        <span 
+                                                            class="cursor-pointer text-blue-500 hover:underline"
+                                                            hx-get="{{ url_for('emissions.load_material_form', month_id=month.id, head=head) }}"
+                                                            hx-target="#modal-content"
+                                                            hx-swap="innerHTML"
+                                                            hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
+                                                            {{ quantity.amount }} {{ quantity.unit }}
+                                                           
+                                                        </span>
                                                         {% set ns.has_data = true %}
                                                     {% endfor %}
                                                 {% endif %}
                                             {% endfor %}
                                             {% if not ns.has_data %}
-                                                ระบุข้อมูล
+                                                <span 
+                                                    class="cursor-pointer text-blue-500 hover:underline"
+                                                    hx-get="{{ url_for('emissions.load_material_form', month_id=month.id, head=head) }}"
+                                                    hx-target="#modal-content"
+                                                    hx-swap="innerHTML"
+                                                    hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
+                                                    ระบุข้อมูล
+                                                </span>
                                             {% endif %}
-                                            
-                                            
                                         </div>
                                     </td>
                                     {% endfor %}

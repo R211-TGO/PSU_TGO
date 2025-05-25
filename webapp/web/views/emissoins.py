@@ -3,6 +3,7 @@ from flask_login import login_required, logout_user, current_user
 from ..forms.user_form import LoginForm, RegisterForm, EditUserForm, EditprofileForm
 from ...services.user_service import UserService
 from ...models import User, Role, Permission, Scope, Material
+from ..forms.material_form import MaterialForm
 
 module = Blueprint("emissions", __name__, url_prefix="/emissions")
 
@@ -74,4 +75,25 @@ def load_emissions_table():
         scope_id=scope_id,
         sub_scope_id=sub_scope_id,
         user=current_user,
+    )
+
+
+@module.route("/load-material-form", methods=["GET"])
+@login_required
+def load_material_form():
+    month_id = request.args.get("month_id")
+    head = request.args.get("head")
+
+    # ตรวจสอบข้อมูลที่จำเป็น
+    if not month_id or not head:
+        return jsonify({"error": "Invalid month or head"}), 400
+
+    # สร้างฟอร์มใหม่
+    form = MaterialForm()  # สมมติว่าคุณมี MaterialForm อยู่แล้ว
+    print(head)
+    return render_template(
+        "emissions-scope/partials/material-form.html",
+        form=form,
+        month_id=month_id,
+        head=head,
     )
