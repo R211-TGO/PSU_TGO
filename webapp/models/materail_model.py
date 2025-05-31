@@ -11,7 +11,7 @@ class QuantityType(me.EmbeddedDocument):
 
 class Material(me.Document):
     name = me.StringField(required=True)
-    scope = me.StringField(required=True)
+    scope = me.IntField(required=True)
     form_and_formula = me.StringField(required=True)
     quantity_type = me.EmbeddedDocumentListField(QuantityType)
     year = me.IntField(required=True)
@@ -22,7 +22,7 @@ class Material(me.Document):
     )  # ใช้ DynamicField เพื่อรองรับค่า null หรือค่าประเภทอื่น
     create_date = me.DateTimeField(default=datetime.datetime.now)
     update_date = me.DateTimeField(default=datetime.datetime.now)
-    sub_scope = me.StringField(required=True)
+    sub_scope = me.IntField(required=True)
 
     meta = {
         "collection": "materials",

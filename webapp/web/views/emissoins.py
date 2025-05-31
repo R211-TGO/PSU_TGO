@@ -145,8 +145,8 @@ def save_material():
         material = Material(
             month=int(month_id),
             name=head,
-            scope=str(scope_id),
-            sub_scope=str(sub_scope_id),
+            scope=int(scope_id),
+            sub_scope=int(sub_scope_id),
             year=2025,  # กำหนดค่าตามจริง
             day=1,  # กำหนดค่าตามจริง
             form_and_formula="",
