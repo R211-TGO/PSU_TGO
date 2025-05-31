@@ -6,7 +6,7 @@
         <input type="hidden" name="head" value="{{ head }}">
     </div>
     <div class="mb-4">
-        <label class="block text-sm font-medium mb-1">เดือน: {{ month_id }}</label>
+        <label class="block text-sm font-medium mb-1">เดือน: {{ month_id }}{{year}}</label>
         <input type="hidden" name="month_id" value="{{ month_id }}">
     </div>
     <div class="mb-4">
@@ -16,6 +16,7 @@
     <input type="hidden" name="scope_id" value="{{ request.args.get('scope_id') }}">
     <input type="hidden" name="sub_scope_id" value="{{ request.args.get('sub_scope_id') }}">
     <input type="hidden" name="page" value="{{ request.args.get('page', 1) }}">
+    <input type="hidden" name="year" value="{{ request.args.get('year', '') }}">
     <div class="mt-4 flex justify-end space-x-2">
         <button type="button" class="btn btn-outline"
                 hx-on="click: document.getElementById('modal').classList.remove('modal-open')">

@@ -1,6 +1,6 @@
 {% extends "/base/default_page.html" %}
 {% import "/components/forms/form_renderer.html" as form_renderer %}
-{% set years = ['2568(2025)', '2567(2024)', '2566(2023)', '2565(2022)'] %}
+
 
 {% block content %}
 
@@ -30,17 +30,22 @@
             <div class="flex flex-col sm:flex-row justify-between items-center gap-3 w-full mb-6">
                 <!-- ย้ายการเลือกปีไปด้านขวาสุด -->
                 <div class="relative w-full md:w-80 md:ml-auto">
-                    <select class="select select-lg select-bordered w-full">
-                        {% for year in years %}
-                        <option value="{{ year }}">ปีงบประมาณ: {{ year }}</option>
-                        {% endfor %}
-                    </select>
+                    <select class="select select-lg select-bordered w-full"
+                    hx-get="{{ url_for('emissions.load_emissions_table', scope_id=scope_id, sub_scope_id=sub_scope_id) }}"
+                    hx-target="#emissions-table-container"
+                    hx-swap="innerHTML"
+                    hx-trigger="change from:select"
+                    name="year">
+                {% for year in years %}
+                <option value="{{ year }}" {% if loop.first %}selected{% endif %}>ปีงบประมาณ: {{ year }}</option>
+                {% endfor %}
+            </select>
                 </div>
             </div>
         
             <!-- Table Container -->
             <div id="emissions-table-container" 
-                 hx-get="{{ url_for('emissions.load_emissions_table',scope_id=scope_id,sub_scope_id=sub_scope_id) }}" 
+                 hx-get="{{ url_for('emissions.load_emissions_table', scope_id=scope_id, sub_scope_id=sub_scope_id) }}&year={{ request.args.get('year', '') }}" 
                  hx-trigger="load" 
                  hx-target="#emissions-table-container" 
                  hx-swap="innerHTML">
