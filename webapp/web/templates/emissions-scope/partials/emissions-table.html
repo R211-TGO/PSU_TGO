@@ -1,20 +1,21 @@
 {% set months = [
-    {'id': 1, 'name': 'ตุลาคม(2567)'},
-    {'id': 2, 'name': 'พฤศจิกายน(2567)'},
-    {'id': 3, 'name': 'ธันวาคม(2567)',},
-    {'id': 4, 'name': 'มกราคม(2568)',},
-    {'id': 5, 'name': 'กุมภาพันธ์(2568)',},
-    {'id': 6, 'name': 'มีนาคม(2568)', },
-    {'id': 7, 'name': 'เมษายน(2568)',},
-    {'id': 8, 'name': 'พฤษภาคม(2568)',},
-    {'id': 9, 'name': 'มิถุนายน(2568)', },
-    {'id': 10, 'name': 'กรกฎาคม(2568)',},
-    {'id': 11, 'name': 'สิงหาคม(2568)',},
-    {'id': 12, 'name': 'กันยายน(2568)',}
+    {'id': 1, 'name': 'มกราคม',},
+    {'id': 2, 'name': 'กุมภาพันธ์',},
+    {'id': 3, 'name': 'มีนาคม', },
+    {'id': 4, 'name': 'เมษายน',},
+    {'id': 5, 'name': 'พฤษภาคม',},
+    {'id': 6, 'name': 'มิถุนายน', },
+    {'id': 7, 'name': 'กรกฎาคม',},
+    {'id': 8, 'name': 'สิงหาคม',},
+    {'id': 9, 'name': 'กันยายน',},
+    {'id': 10, 'name': 'ตุลาคม'},
+    {'id': 11, 'name': 'พฤศจิกายน'},
+    {'id': 12, 'name': 'ธันวาคม',},
 ] %}
 
 
-        <!-- การ์ดตาราง -->
+        <!-- การ์ดตาราง -->  
+
 
             <div id="table-container">
                 <div class="overflow-x-auto border border-gray-200 rounded-md">
@@ -22,10 +23,12 @@
                         <table class="table w-full table-striped">
                             <thead class="bg-gray-50 sticky top-0 z-10">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">ACTION</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ข้อมูลประจำเดือน</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24 ">ACTION</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider ">ข้อมูลประจำเดือน</th>
                                     {% for head in head_table %}
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ head }}</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        {{ head }} 
+                                    </th>
                                     {% endfor %}
                                 </tr>
                             </thead>
@@ -43,7 +46,7 @@
                                           </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ month.name }}</div>
+                                        <div class="text-sm text-gray-900 w-full text-center flex justify-center">{{ month.name }} ({{year}})</div>
                                     </td>
                                     {% for head in head_table %}
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -52,28 +55,26 @@
                                             {% for material in materials %}
                                                 {% if material.month == month.id and material.name == head %}
                                                     {% for quantity in material.quantity_type %}
-                                                        <span 
-                                                            class="cursor-pointer text-blue-500 hover:underline"
-                                                            hx-get="{{ url_for('emissions.load_material_form', month_id=month.id, head=head) }}"
-                                                            hx-target="#modal-content"
-                                                            hx-swap="innerHTML"
-                                                            hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
-                                                            {{ quantity.amount }} {{ quantity.unit }}
+                                                    <div class="w-full text-center"
+                                                        hx-get="{{ url_for('emissions.load_material_form', month_id=month.id, head=head, scope_id=scope_id, sub_scope_id=sub_scope_id, page=page,year=year) }}"
+                                                        hx-target="#modal-content"
+                                                        hx-swap="innerHTML"
+                                                        hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
+                                                        {{ quantity.amount }} 
+                                                    </div>
                                                            
-                                                        </span>
                                                         {% set ns.has_data = true %}
                                                     {% endfor %}
                                                 {% endif %}
                                             {% endfor %}
                                             {% if not ns.has_data %}
-                                                <span 
-                                                    class="cursor-pointer text-blue-500 hover:underline"
-                                                    hx-get="{{ url_for('emissions.load_material_form', month_id=month.id, head=head, scope_id=scope_id, sub_scope_id=sub_scope_id, page=page) }}"
-                                                    hx-target="#modal-content"
-                                                    hx-swap="innerHTML"
-                                                    hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
-                                                    ระบุข้อมูล
-                                                </span>
+                                            <div class=" w-full text-center"
+                                                hx-get="{{ url_for('emissions.load_material_form', month_id=month.id, head=head, scope_id=scope_id, sub_scope_id=sub_scope_id, page=page,year=year) }}"
+                                                hx-target="#modal-content"
+                                                hx-swap="innerHTML"
+                                                hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
+                                               ระบุ-ข้อมูล
+                                            </div>
                                             {% endif %}
                                         </div>
                                     </td>
@@ -90,7 +91,7 @@
                     <!-- ปุ่ม Previous -->
                     <button 
                         class="btn btn-circle bg-base-200 hover:bg-base-300 text-base-content shadow-md transition duration-200 {% if page <= 1 %}btn-disabled opacity-50{% endif %}" 
-                        {% if page > 1 %}hx-get="{{ url_for('emissions.load_emissions_table', scope_id=scope_id, sub_scope_id=sub_scope_id, page=page - 1) }}" hx-target="#table-container" hx-swap="innerHTML"{% endif %}>
+                        {% if page > 1 %}hx-get="{{ url_for('emissions.load_emissions_table', scope_id=scope_id, sub_scope_id=sub_scope_id, page=page - 1,year=year) }}" hx-target="#table-container" hx-swap="innerHTML"{% endif %}>
                         <i data-feather="arrow-left" class="w-5 h-5"></i>
                     </button>
 
@@ -102,7 +103,7 @@
                     <!-- ปุ่ม Next -->
                     <button 
                         class="btn btn-circle bg-base-200 hover:bg-base-300 text-base-content shadow-md transition duration-200 {% if page >= total_pages %}btn-disabled opacity-50{% endif %}" 
-                        {% if page < total_pages %}hx-get="{{ url_for('emissions.load_emissions_table', scope_id=scope_id, sub_scope_id=sub_scope_id, page=page + 1) }}" hx-target="#table-container" hx-swap="innerHTML"{% endif %}>
+                        {% if page < total_pages %}hx-get="{{ url_for('emissions.load_emissions_table', scope_id=scope_id, sub_scope_id=sub_scope_id, page=page + 1,year=year) }}" hx-target="#table-container" hx-swap="innerHTML"{% endif %}>
                         <i data-feather="arrow-right" class="w-5 h-5"></i>
                     </button>
 
