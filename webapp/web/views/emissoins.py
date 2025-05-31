@@ -19,12 +19,21 @@ def view_emissions():
 
     years = sorted(Material.objects().distinct("year"))[::-1]  # เรียงลำดับปีจากมากไปน้อย
 
+    scope = Scope.objects(
+        ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
+    ).first()
+    if scope:
+        ghg_name = scope.ghg_name
+    else:
+        ghg_name = "Unknown Scope"
+
     return render_template(
         "emissions-scope/view-emissions.html",
         scope_id=scope_id,
         sub_scope_id=sub_scope_id,
         user=current_user,
         years=years,
+        ghg_name=ghg_name,
     )
 
 
@@ -95,6 +104,8 @@ def load_material_form():
     month_id = request.args.get("month_id")
     head = request.args.get("head")
     year = request.args.get("year")
+    month = request.args.get("month")
+    amount = request.args.get("amount")
 
     # ตรวจสอบข้อมูลที่จำเป็น
     if not month_id or not head:
@@ -110,6 +121,9 @@ def load_material_form():
         month_id=month_id,
         head=head,
         year=year,
+        month=month,  # ส่งค่าเดือนด้วย
+        user=current_user,  # ส่งข้อมูลผู้ใช้ปัจจุบัน
+        amount=amount,  # ส่งค่า amount ด้วย
     )
 
 
