@@ -1,2 +1,29 @@
-
-
+<form hx-post="{{ url_for('emissions.save_material') }}"
+      hx-target="#table-container"
+      hx-swap="innerHTML">
+    <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">หัวข้อ: {{ head }}</label>
+        <input type="hidden" name="head" value="{{ head }}">
+    </div>
+    <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">เดือน: {{ month_id }}</label>
+        <input type="hidden" name="month_id" value="{{ month_id }}">
+    </div>
+    <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">จำนวน</label>
+        <input type="number" step="any" name="amount" class="input input-bordered w-full" required>
+    </div>
+    <input type="hidden" name="scope_id" value="{{ request.args.get('scope_id') }}">
+    <input type="hidden" name="sub_scope_id" value="{{ request.args.get('sub_scope_id') }}">
+    <input type="hidden" name="page" value="{{ request.args.get('page', 1) }}">
+    <div class="mt-4 flex justify-end space-x-2">
+        <button type="button" class="btn btn-outline"
+                hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
+            Cancel
+        </button>
+        <button type="submit" class="btn btn-primary"
+                hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
+            Update
+        </button>
+    </div>
+</form>
