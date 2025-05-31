@@ -87,6 +87,7 @@ def load_material_form():
 
     # ตรวจสอบข้อมูลที่จำเป็น
     if not month_id or not head:
+        print("Missing month_id or head in request")
         return jsonify({"error": "Invalid month or head"}), 400
 
     # สร้างฟอร์มใหม่
@@ -109,22 +110,29 @@ def save_material():
     scope_id = request.form.get("scope_id")
     sub_scope_id = request.form.get("sub_scope_id")
     page = int(request.form.get("page", 1))
-
+    print(
+        f"Received data: month_id={month_id}, head={head}, amount={amount}, scope_id={scope_id}, sub_scope_id={sub_scope_id}, page={page}"
+    )
     # ตรวจสอบข้อมูล
     if not month_id or not head or not amount or not scope_id or not sub_scope_id:
+        print("Missing data in request")
         return jsonify({"error": "Missing data"}), 400
 
     try:
         scope_id = int(scope_id)
         sub_scope_id = int(sub_scope_id)
         amount = float(amount)
+        print(
+            f"Received data: month_id={month_id}, head={head}, amount={amount}, scope_id={scope_id}, sub_scope_id={sub_scope_id}, page={page}"
+        )
     except ValueError:
         return jsonify({"error": "Invalid data format"}), 400
 
     # หา material เดิม
     material = Material.objects(
-        month=int(month_id), name=head, scope=str(scope_id), sub_scope=str(sub_scope_id)
+        month=int(month_id), name=head, scope=int(scope_id), sub_scope=int(sub_scope_id)
     ).first()
+    print(f"Found material: {material}")
 
     if material:
         # อัปเดต amount ใน quantity_type ตัวแรก
