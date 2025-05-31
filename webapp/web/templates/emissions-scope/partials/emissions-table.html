@@ -56,7 +56,7 @@
                                                 {% if material.month == month.id and material.name == head %}
                                                     {% for quantity in material.quantity_type %}
                                                     <div class="w-full text-center"
-                                                        hx-get="{{ url_for('emissions.load_material_form', month_id=month.id, head=head, scope_id=scope_id, sub_scope_id=sub_scope_id, page=page,year=year) }}"
+                                                        hx-get="{{ url_for('emissions.load_material_form', month_id=month.id, head=head, scope_id=scope_id, sub_scope_id=sub_scope_id, page=page,year=year,month=month.name,amount=quantity.amount) }}"
                                                         hx-target="#modal-content"
                                                         hx-swap="innerHTML"
                                                         hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
@@ -69,7 +69,7 @@
                                             {% endfor %}
                                             {% if not ns.has_data %}
                                             <div class=" w-full text-center"
-                                                hx-get="{{ url_for('emissions.load_material_form', month_id=month.id, head=head, scope_id=scope_id, sub_scope_id=sub_scope_id, page=page,year=year) }}"
+                                                hx-get="{{ url_for('emissions.load_material_form', month_id=month.id, head=head, scope_id=scope_id, sub_scope_id=sub_scope_id, page=page,year=year,month=month.name,amount=none) }}"
                                                 hx-target="#modal-content"
                                                 hx-swap="innerHTML"
                                                 hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
