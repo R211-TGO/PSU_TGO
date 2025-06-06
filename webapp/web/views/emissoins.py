@@ -45,9 +45,9 @@ def load_emissions_table():
     page = int(request.args.get("page", 1))
     year = (
         request.args.get("year") or sorted(Material.objects().distinct("year"))[-1]
-    )  # ใช้ปีล่าสุดเป็นค่าเริ่มต้น
+    )  # ใช้ปีล่าสุดถ้าไม่ระบุ
     items_per_page = 4
-
+    print(f"Received year: {year}")
     if not scope_id or not sub_scope_id:
         return jsonify({"error": "Invalid scope or sub-scope ID"}), 400
 
