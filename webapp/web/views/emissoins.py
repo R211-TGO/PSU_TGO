@@ -16,9 +16,14 @@ def view_emissions():
     # รับค่า scope_id และ sub_scope_id จาก POST request
     scope_id = request.form.get("scope_id")
     sub_scope_id = request.form.get("sub_scope_id")
-
-    years = sorted(Material.objects().distinct("year"))[::-1]  # เรียงลำดับปีจากมากไปน้อย
-
+    # ดึงปีจาก Material
+    years = sorted(Material.objects().distinct("year"))
+    # ถ้ามีปีใน database ใช้ปีแรก, ถ้าไม่มีให้ใช้ปีปัจจุบัน
+    start_year = years[0] if years else datetime.datetime.now().year
+    # ปีปัจจุบัน
+    current_year = datetime.datetime.now().year
+    years = list(range(start_year, current_year + 1))
+    # year_list = list(range(start_year, current_year + 1))
     scope = Scope.objects(
         ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
     ).first()
@@ -43,9 +48,7 @@ def load_emissions_table():
     scope_id = request.args.get("scope_id")
     sub_scope_id = request.args.get("sub_scope_id")
     page = int(request.args.get("page", 1))
-    year = (
-        request.args.get("year") or sorted(Material.objects().distinct("year"))[-1]
-    )  # ใช้ปีล่าสุดถ้าไม่ระบุ
+    year = request.args.get("year") or datetime.datetime.now().year  # ใช้ปีล่าสุดถ้าไม่ระบุ
     items_per_page = 4
     print(f"Received year: {year}")
     if not scope_id or not sub_scope_id:
@@ -95,6 +98,7 @@ def load_emissions_table():
         scope_id=scope_id,
         sub_scope_id=sub_scope_id,
         user=current_user,
+        year=year,
     )
 
 
@@ -124,6 +128,37 @@ def load_material_form():
         month=month,  # ส่งค่าเดือนด้วย
         user=current_user,  # ส่งข้อมูลผู้ใช้ปัจจุบัน
         amount=amount,  # ส่งค่า amount ด้วย
+    )
+
+
+@module.route("/load-materials-form", methods=["GET"])
+def load_materials_form():
+    """
+    ฟังก์ชันนี้ใช้สำหรับโหลดฟอร์มของ materials ทั้งหมดในเดือนนั้น
+    """
+    month_id = request.args.get("month_id")
+    year = request.args.get("year")
+    sub_scope_id = request.args.get("sub_scope_id")
+    scope_id = request.args.get("scope_id")
+    print(f"Received month_id: {month_id}, year: {year}")
+    form = MaterialForm()  # สร้างฟอร์มใหม่
+    materials = Material.objects(month=int(month_id), year=year)
+    scope = Scope.objects(
+        ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
+    ).first()
+    if not scope:
+        return jsonify({"error": "Scope not found"}), 404
+
+    head_table = scope.head_table
+    print(head_table)
+    return render_template(
+        "emissions-scope/partials/materials-form.html",
+        form=form,
+        user=current_user,
+        month_id=month_id,
+        materials=materials,
+        year=year,
+        head_table=head_table,
     )
 
 
@@ -172,26 +207,7 @@ def save_material():
         unit = form_and_formula.input_types[0].unit
         field = form_and_formula.input_types[0].field
         label = form_and_formula.input_types[0].label
-    # else:
-    #     formula = "default_formula"
 
-    # unit = FormAndFormula.objects(material_name=head).first()
-    # if unit:
-    #     unit = unit.unit
-    # else:
-    #     unit = "หน่วย"
-    # field = FormAndFormula.objects(material_name=head).first()
-    # if field:
-    #     field = field.field
-    # else:
-    #     field = "default_field"
-    # label = FormAndFormula.objects(material_name=head).first()
-    # if label:
-    #     label = label.label
-    # else:
-    #     label = "default_label"
-
-    # ถ้ามี material เดิม ให้แก้ไข
     if material:
         # อัปเดต amount ใน quantity_type ตัวแรก
         if material.quantity_type and len(material.quantity_type) > 0:
@@ -247,7 +263,111 @@ def save_material():
     if request.headers.get("HX-Request"):
         return render_template(
             "emissions-scope/partials/emissions-table.html",
-            scope=scope,
+            scope_id=scope_id,
+            sub_scope_id=sub_scope_id,
+            materials=materials,
+            head_table=current_headers,
+            total_pages=total_pages,
+            page=page,
+            user=current_user,
+            year=year,
+        )
+    else:
+        return redirect(
+            url_for(
+                "emissions.view_emissions",
+                scope_id=scope_id,
+                sub_scope_id=sub_scope_id,
+                year=year,
+            )
+        )
+
+
+@module.route("/save-materials", methods=["POST"])
+@login_required
+def save_materials():
+    scope_id = request.form.get("scope_id")
+    sub_scope_id = request.form.get("sub_scope_id")
+    month_id = request.form.get("month_id")
+    year = request.form.get("year")
+    page = int(request.form.get("page", 1))
+
+    # ดึงข้อมูล materials จากฟอร์ม
+    materials = []
+    for key in request.form.keys():
+        if key.startswith("amount_"):
+            parts = key.split("_")
+            head = parts[1]
+            quantity_type = parts[2] if len(parts) > 2 else "empty"
+            amount = request.form.get(key)
+            materials.append({"head": head, "type": quantity_type, "amount": amount})
+
+    if not scope_id or not sub_scope_id or not month_id or not year or not materials:
+        return jsonify({"error": "Missing data"}), 400
+
+    # บันทึกข้อมูล materials
+    for material_data in materials:
+        head = material_data["head"]
+        quantity_type = material_data["type"]
+        amount = material_data["amount"]
+
+        material = Material.objects(
+            month=int(month_id),
+            name=head,
+            scope=int(scope_id),
+            sub_scope=int(sub_scope_id),
+            year=year,
+        ).first()
+
+        if material:
+            # อัปเดตข้อมูล
+            for qt in material.quantity_type:
+                if qt.field == quantity_type:
+                    qt.amount = float(amount)
+            material.save()
+        else:
+            # กำหนดค่าดีฟอลต์สำหรับฟิลด์ที่จำเป็น
+            default_label = "Default Label"
+            default_unit = "Default Unit"
+            default_day = 1
+            default_formula = "Default Formula"
+
+            # สร้าง material ใหม่
+            new_material = Material(
+                month=int(month_id),
+                name=head,
+                scope=int(scope_id),
+                sub_scope=int(sub_scope_id),
+                year=year,
+                day=default_day,  # กำหนดค่าดีฟอลต์สำหรับ day
+                form_and_formula=default_formula,  # กำหนดค่าดีฟอลต์สำหรับ form_and_formula
+                quantity_type=[
+                    QuantityType(
+                        field=quantity_type,
+                        label=default_label,  # กำหนดค่าดีฟอลต์สำหรับ label
+                        amount=float(amount),
+                        unit=default_unit,  # กำหนดค่าดีฟอลต์สำหรับ unit
+                    )
+                ],
+            )
+            new_material.save()
+
+    # อัปเดตตาราง emissions
+    materials = Material.objects(
+        scope=str(scope_id), sub_scope=str(sub_scope_id), year=int(year)
+    )
+    scope = Scope.objects(ghg_scope=scope_id, ghg_sup_scope=sub_scope_id).first()
+    head_table = scope.head_table
+    items_per_page = 4
+    total_headers = len(head_table)
+    total_pages = (total_headers + items_per_page - 1) // items_per_page
+    start_index = (page - 1) * items_per_page
+    end_index = start_index + items_per_page
+    current_headers = head_table[start_index:end_index]
+
+    if request.headers.get("HX-Request"):
+        return render_template(
+            "emissions-scope/partials/emissions-table.html",
             scope_id=scope_id,
             sub_scope_id=sub_scope_id,
             materials=materials,
