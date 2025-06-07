@@ -1,0 +1,70 @@
+<form hx-post="{{ url_for('emissions.save_materials') }}"
+      hx-target="#table-container"
+      hx-swap="innerHTML">
+      
+    <!-- ส่วนหัวข้อ -->
+    <div class="mb-4">
+        <h2 class="text-lg text-gray-900">แก้ไขข้อมูลประจำเดือน {{ month }} ({{ year }})</h2>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6 grid grid-cols-2 gap-4">
+
+        <!-- ลูปหัวข้อ -->
+        {% for head in head_table %}
+        <div class="mb-4">
+            <label class="text-gray-700">{{ head }} (ลิตร):</label>
+            {% set ns = namespace(has_data=false) %}
+            
+            <!-- ลูปข้อมูลใน materials -->
+            {% for material in materials %}
+                {% if material.name == head %}
+                    {% set ns.has_data = true %}
+                    <!-- ลูปข้อมูลใน quantity_type -->
+                    {% for quantity in material.quantity_type %}
+                    <input
+                      type="number"
+                      step="any"
+                      name="amount_{{ head }}_{{ quantity.type }}"
+                      class="input input-bordered w-full"
+                      placeholder="ระบุ-ลิตร"
+                      value="{{ quantity.amount if quantity.amount is not none else '' }}"
+                      required
+                    >
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            
+            <!-- ช่องกรอกว่างๆ หากไม่มีข้อมูล -->
+            {% if not ns.has_data %}
+            <input
+              type="number"
+              step="any"
+              name="amount_{{ head }}_empty"
+              class="input input-bordered w-full"
+              placeholder="ระบุ-ลิตร"
+              value=""
+              required
+            >
+            {% endif %}
+        </div>
+        {% endfor %}
+        
+        <!-- Hidden Inputs -->
+        <input type="hidden" name="scope_id" value="{{ request.args.get('scope_id') }}">
+        <input type="hidden" name="sub_scope_id" value="{{ request.args.get('sub_scope_id') }}">
+        <input type="hidden" name="page" value="{{ request.args.get('page', 1) }}">
+        <input type="hidden" name="year" value="{{ request.args.get('year', '') }}">
+        <input type="hidden" name="month_id" value="{{ month_id }}">
+    </div>
+
+    <!-- ปุ่ม -->
+    <div class="mt-4 flex justify-end space-x-2">
+        <button type="button" class="btn btn-outline"
+                hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
+            Cancel
+        </button>
+        <button type="submit" class="btn btn-primary"
+                hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
+            Save Changes
+        </button>
+    </div>
+</form>
