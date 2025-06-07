@@ -1,16 +1,135 @@
-<form method="POST" action="{{ url_for('emissions_scope.edit_scope', ghg_scope=scope.ghg_scope) }}" hx-post="{{ url_for('emissions_scope.edit_scope', ghg_scope=scope.ghg_scope) }}" hx-target="#modal-content" hx-swap="innerHTML">
-    <h3 class="text-xl font-semibold mb-4">แก้ไข Scope</h3>
-    <div class="mb-4">
-      <label for="ghg_name" class="block text-sm font-medium text-gray-700">GHG Name</label>
-      <input type="text" id="ghg_name" name="ghg_name" value="{{ scope.ghg_name }}" class="input input-bordered w-full" required>
-    </div>
-    <div class="mb-4">
-      <label for="ghg_desc" class="block text-sm font-medium text-gray-700">GHG Description</label>
-      <textarea id="ghg_desc" name="ghg_desc" class="textarea textarea-bordered w-full">{{ scope.ghg_desc }}</textarea>
-    </div>
-    <div class="flex justify-end gap-4">
-        <button type="button" class="btn"
-        onclick="document.getElementById('modal').classList.remove('modal-open')">cancel</button>
-      <button type="submit" class="btn btn-primary">บันทึก</button>
-    </div>
+<div class="p-6">
+  <form method="POST" 
+        action="{{ url_for('emissions_scope.edit_scope', ghg_scope=scope.ghg_scope, ghg_sup_scope=scope.ghg_sup_scope) }}" 
+        hx-post="{{ url_for('emissions_scope.edit_scope', ghg_scope=scope.ghg_scope, ghg_sup_scope=scope.ghg_sup_scope) }}" 
+        hx-target="#modal-content" 
+        hx-swap="innerHTML">
+      
+      <h3 class="text-xl font-semibold mb-4">แก้ไข Scope {{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}</h3>
+    
+      <!-- แสดงข้อความข้อผิดพลาด -->
+      {% if error %}
+      <div class="alert alert-error shadow-lg mb-4">
+          <div class="flex items-center">
+              <i data-feather="alert-circle" class="w-5 h-5 mr-2"></i>
+              <span>{{ error }}</span>
+          </div>
+      </div>
+      {% endif %}
+
+      <!-- แสดงข้อมูล Scope ที่ไม่สามารถแก้ไขได้ -->
+      <div class="grid grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+          <div>
+              <label class="block text-sm font-medium text-gray-500">GHG Scope</label>
+              <div class="text-lg font-semibold">{{ scope.ghg_scope }}</div>
+          </div>
+          <div>
+              <label class="block text-sm font-medium text-gray-500">GHG Sub-Scope</label>
+              <div class="text-lg font-semibold">{{ scope.ghg_sup_scope }}</div>
+          </div>
+      </div>
+
+      <!-- GHG Name -->
+      <div class="mb-4">
+          <label for="ghg_name" class="block text-sm font-medium text-gray-700 mb-2">
+              GHG Name <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="ghg_name" name="ghg_name" 
+                 value="{{ scope.ghg_name }}" 
+                 class="input input-bordered w-full" 
+                 placeholder="ระบุชื่อแหล่งปล่อยก๊าซเรือนกระจก" 
+                 required>
+      </div>
+
+      <!-- GHG Description -->
+      <div class="mb-4">
+          <label for="ghg_desc" class="block text-sm font-medium text-gray-700 mb-2">
+              GHG Description <span class="text-red-500">*</span>
+          </label>
+          <textarea id="ghg_desc" name="ghg_desc" 
+                    class="textarea textarea-bordered w-full" 
+                    rows="3"
+                    placeholder="อธิบายรายละเอียดเกี่ยวกับแหล่งปล่อยก๊าซเรือนกระจก" 
+                    required>{{ scope.ghg_desc }}</textarea>
+      </div>
+
+      <!-- Head Table -->
+      <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+              Head Table (Material Names)
+          </label>
+          <div class="text-xs text-gray-500 mb-3">เลือกวัสดุที่เกี่ยวข้องกับ Scope นี้</div>
+          
+          {% if material_names %}
+              <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {% for material_name in material_names %}
+                      <div class="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded">
+                          <input type="checkbox" 
+                                 name="head_table" 
+                                 value="{{ material_name }}" 
+                                 id="head-{{ loop.index }}" 
+                                 class="checkbox checkbox-primary checkbox-sm"
+                                 {% if scope.head_table and material_name in scope.head_table %}checked{% endif %}>
+                          <label for="head-{{ loop.index }}" class="text-sm cursor-pointer flex-1">
+                              {{ material_name }}
+                          </label>
+                      </div>
+                      {% endfor %}
+                  </div>
+              </div>
+              
+              <!-- Select All / Deselect All buttons -->
+              <div class="mt-2 flex gap-2">
+                  <button type="button" class="btn btn-xs btn-outline" onclick="selectAllMaterials()">
+                      เลือกทั้งหมด
+                  </button>
+                  <button type="button" class="btn btn-xs btn-outline" onclick="deselectAllMaterials()">
+                      ยกเลิกทั้งหมด
+                  </button>
+              </div>
+          {% else %}
+              <div class="text-center py-4 text-gray-500">
+                  <i data-feather="inbox" class="w-8 h-8 mx-auto mb-2 text-gray-300"></i>
+                  <p class="text-sm">ไม่มี Material Names ในระบบ</p>
+              </div>
+          {% endif %}
+      </div>
+
+      <!-- ปุ่ม -->
+      <div class="flex justify-end gap-3 pt-4 border-t">
+          <button type="button" class="btn btn-outline" 
+                  onclick="document.getElementById('modal').classList.remove('modal-open')">
+              <i data-feather="x" class="w-4 h-4 mr-2"></i>
+              ยกเลิก
+          </button>
+          <button type="submit" name="action" value="save" class="btn btn-primary">
+              <i data-feather="save" class="w-4 h-4 mr-2"></i>
+              บันทึกการแก้ไข
+          </button>
+      </div>
   </form>
+</div>
+
+<script>
+  // ฟังก์ชันเลือกวัสดุทั้งหมด
+  function selectAllMaterials() {
+      const checkboxes = document.querySelectorAll('input[name="head_table"]');
+      checkboxes.forEach(checkbox => {
+          checkbox.checked = true;
+      });
+  }
+
+  // ฟังก์ชันยกเลิกการเลือกวัสดุทั้งหมด
+  function deselectAllMaterials() {
+      const checkboxes = document.querySelectorAll('input[name="head_table"]');
+      checkboxes.forEach(checkbox => {
+          checkbox.checked = false;
+      });
+  }
+
+  // เรียกใช้ Feather icons
+  if (typeof feather !== 'undefined') {
+      feather.replace();
+  }
+</script>
