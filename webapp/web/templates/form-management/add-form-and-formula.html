@@ -63,21 +63,47 @@
           </button>
         </div>
 
-        <!-- Formula -->
-        <div class="mt-6">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Formula</label>
-          <input 
-            type="text" 
-            name="formula" 
-            id="formula" 
-            class="input input-bordered w-full" 
-            placeholder="e.g. diesel * 2.68" 
-            readonly 
-            required>
-          <div class="flex gap-2 flex-wrap mb-2" id="formula-buttons">
-            <!-- ปุ่มสำหรับตัวแปรและการดำเนินการทางคณิตศาสตร์จะถูกเพิ่มที่นี่ -->
-          </div>
-        </div>
+<!-- Formula Section -->
+<div class="mt-6">
+  <label class="block text-sm font-medium text-gray-700 mb-1">Formula</label>
+  <input 
+    type="text" 
+    name="formula" 
+    id="formula" 
+    class="input input-bordered w-full mb-4" 
+    placeholder="e.g. diesel * 2.68" 
+    readonly 
+    required>
+
+  <!-- Formula Buttons Card -->
+  <div class="card bg-white shadow-md p-4">
+    <h4 class="text-lg font-semibold text-gray-700 mb-3">Formula Builder</h4>
+
+    <!-- Variables Section -->
+    <div class="mb-4">
+      <h5 class="text-md font-medium text-gray-600 mb-2">Variables</h5>
+      <div class="grid grid-cols-4 gap-2" id="variables-buttons">
+        <!-- ปุ่มตัวแปรจะถูกเพิ่มที่นี่ -->
+      </div>
+    </div>
+
+    <!-- Numbers Section -->
+    <div class="mb-4">
+      <h5 class="text-md font-medium text-gray-600 mb-2">Numbers</h5>
+      <div class="grid grid-cols-3 gap-2" id="numbers-buttons">
+        <!-- ปุ่มตัวเลขจะถูกเพิ่มที่นี่ -->
+      </div>
+    </div>
+
+    <!-- Operators Section -->
+    <div>
+      <h5 class="text-md font-medium text-gray-600 mb-2">Operators</h5>
+      <div class="grid grid-cols-4 gap-2" id="operators-buttons">
+        <!-- ปุ่มสัญลักษณ์ทางคณิตศาสตร์จะถูกเพิ่มที่นี่ -->
+      </div>
+    </div>
+  </div>
+</div>
         
         <div class="sm:col-span-2 mt-4">
           <label class="text-sm font-medium text-gray-600">Formula Description</label>
@@ -184,10 +210,14 @@ function removeField(button) {
 function updateFormulaButtons() {
     const container = document.getElementById("input-fields-container");
     const fields = container.querySelectorAll("[data-index]");
-    const formulaButtons = document.getElementById("formula-buttons");
+    const variablesButtons = document.getElementById("variables-buttons");
+    const numbersButtons = document.getElementById("numbers-buttons");
+    const operatorsButtons = document.getElementById("operators-buttons");
 
     // ล้างปุ่มเก่า
-    formulaButtons.innerHTML = "";
+    variablesButtons.innerHTML = "";
+    numbersButtons.innerHTML = "";
+    operatorsButtons.innerHTML = "";
 
     // เพิ่มปุ่มสำหรับตัวแปร
     fields.forEach((row) => {
@@ -198,19 +228,8 @@ function updateFormulaButtons() {
             button.className = "btn btn-sm btn-outline bg-pink-100 text-pink-800";
             button.textContent = field;
             button.onclick = () => addToFormula(field);
-            formulaButtons.appendChild(button);
+            variablesButtons.appendChild(button);
         }
-    });
-
-    // เพิ่มปุ่มสำหรับการดำเนินการทางคณิตศาสตร์
-    const operators = ["+", "-", "*", "/", "^"];
-    operators.forEach(op => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "btn btn-sm btn-outline";
-        button.textContent = op;
-        button.onclick = () => addToFormula(op);
-        formulaButtons.appendChild(button);
     });
 
     // เพิ่มปุ่มสำหรับตัวเลข
@@ -220,17 +239,18 @@ function updateFormulaButtons() {
         button.className = "btn btn-sm btn-outline";
         button.textContent = i;
         button.onclick = () => addToFormula(i);
-        formulaButtons.appendChild(button);
+        numbersButtons.appendChild(button);
     }
 
-    // เพิ่มปุ่มสำหรับวงเล็บ
-    ["(", ")"].forEach(bracket => {
+    // เพิ่มปุ่มสำหรับการดำเนินการทางคณิตศาสตร์
+    const operators = ["+", "-", "*", "/", "^", "(", ")"];
+    operators.forEach(op => {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "btn btn-sm btn-outline";
-        button.textContent = bracket;
-        button.onclick = () => addToFormula(bracket);
-        formulaButtons.appendChild(button);
+        button.textContent = op;
+        button.onclick = () => addToFormula(op);
+        operatorsButtons.appendChild(button);
     });
 
     // เพิ่มปุ่มลบ (Backspace)
@@ -239,7 +259,7 @@ function updateFormulaButtons() {
     backspaceButton.className = "btn btn-sm btn-error";
     backspaceButton.textContent = "⌫";
     backspaceButton.onclick = () => removeLastCharacter();
-    formulaButtons.appendChild(backspaceButton);
+    operatorsButtons.appendChild(backspaceButton);
 }
 
 function addToFormula(value) {

@@ -75,9 +75,14 @@
           <!-- Icons (อยู่ทางขวา) -->
           <div class="flex items-center gap-4">
             <!-- Gear Icon -->
-            <a href="#" class="text-blue-500 hover:text-blue-700">
-              <i data-feather="settings"></i>
-            </a>
+            <button class="text-blue-500 hover:text-blue-700 p-1 rounded"
+              hx-get="{{ url_for('emissions_scope.edit_scope', ghg_scope=scope_name.split(' ')[1], ghg_sup_scope=item.id) }}"
+              hx-target="#modal-content"
+              hx-swap="innerHTML"
+              hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')"
+              title="แก้ไข Scope">
+              <i data-feather="settings" class="w-5 h-5"></i>
+            </button>
             <!-- Edit Icon -->
             <form action="{{ url_for('emissions.view_emissions') }}" method="POST" style="display: inline;">
               <input type="hidden" name="scope_id" value="{{ num }}">
