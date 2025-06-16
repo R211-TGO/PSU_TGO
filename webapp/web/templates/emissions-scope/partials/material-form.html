@@ -1,24 +1,13 @@
-<form hx-post="{{ url_for('emissions.save_material') }}"
+<form hx-post="{{ url_for('emissions.save_materials') }}"
       hx-target="#table-container"
       hx-swap="innerHTML">
-      
-    <!-- ส่วนหัวข้อ -->
-    <div class="mb-4">
-        <h2 class="text-lg  text-gray-900">แก้ไขข้อมูลประจำเดือน {{ month }} ({{ year }})</h2>
-    </div>
-    <div class="bg-white rounded-lg shadow p-6">
-    <div class="mb-4">
-        <label class="text-gray-700">เดือน:</label>
-        <div class="block text-sm font-medium mb-1">{{ month }} ({{ year }})</div>
-    </div>
-
+    
     <div class="mb-4">
         <label class="text-gray-700">ประเภท:</label>
         <div class="block text-sm font-medium mb-1">{{ head }}</div>
         <input type="hidden" name="head" value="{{ head }}">
     </div>
 
-    <!-- ฟิลด์สำหรับกรอกข้อมูล -->
     <div class="mb-4">
         <label class="block text-sm font-medium mb-1">ข้อมูล:</label>
         <input
@@ -30,18 +19,15 @@
           value="{{ amount if amount is not none else '' }}"
           required
         >
-      </div>
-      
+    </div>
 
     <!-- Hidden Inputs -->
     <input type="hidden" name="scope_id" value="{{ request.args.get('scope_id') }}">
     <input type="hidden" name="sub_scope_id" value="{{ request.args.get('sub_scope_id') }}">
     <input type="hidden" name="page" value="{{ request.args.get('page', 1) }}">
     <input type="hidden" name="year" value="{{ request.args.get('year', '') }}">
-    <input type="hidden" name="head" value="{{ head }}">
     <input type="hidden" name="month_id" value="{{ month_id }}">
-</div>
-    <!-- ปุ่ม -->
+
     <div class="mt-4 flex justify-end space-x-2">
         <button type="button" class="btn btn-outline"
                 hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
@@ -52,6 +38,4 @@
             Save Changes
         </button>
     </div>
-
 </form>
-
