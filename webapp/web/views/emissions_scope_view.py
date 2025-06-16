@@ -20,7 +20,8 @@ def emissions_scope():
         if main_scope not in grouped_scopes:
             grouped_scopes[main_scope] = []
         grouped_scopes[main_scope].append({
-            "id": scope.ghg_sup_scope,
+            "id": scope.ghg_scope,
+            "sup_id": scope.ghg_sup_scope,
             "title": scope.ghg_name,
             "progress": 0,
             "status": "Not started"
