@@ -35,7 +35,7 @@
     <h3 class="text-xl font-semibold mb-6 flex items-center gap-4">
       <!-- วงกลมที่มีตัวเลข -->
       <span class="w-10 h-10 flex items-center justify-center bg-primary text-white rounded-full">
-        {{ loop.index }}
+        {{ scope_items[0]['id']  }}
         {%set num = loop.index%}
       </span>
       {{ scope_name }}
