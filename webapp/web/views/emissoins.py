@@ -120,7 +120,17 @@ def load_material_form():
     amount = request.args.get("amount")
     input_label = request.args.get("input_label")
     input_field = request.args.get("input_field")
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", amount)
+    sub_scope_id = request.args.get("sub_scope_id")
+    scope_id = request.args.get("scope_id")
+    print(
+        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",
+        amount,
+        sub_scope_id,
+        scope_id,
+        month_id,
+        year,
+        head,
+    )
 
     # ตรวจสอบข้อมูลที่จำเป็น
     if not month_id or not head:
@@ -141,6 +151,8 @@ def load_material_form():
         amount=amount,  # ส่งค่า amount ด้วย
         input_label=input_label,  # ส่งค่า input_label ด้วย
         input_field=input_field,  # ส่งค่า input_field ด้วย
+        sub_scope_id=sub_scope_id,  # ส่งค่า sub_scope_id ด้วย
+        scope_id=scope_id,  # ส่งค่า scope_id ด้วย
     )
 
 
@@ -151,6 +163,7 @@ def load_materials_form():
     year = request.args.get("year")
     scope_id = request.args.get("scope_id")
     sub_scope_id = request.args.get("sub_scope_id")
+    print("<<<<<<<<<<<<<<<<<<<<<<", scope_id, sub_scope_id, month_id, year)
 
     # ดึงข้อมูล materials
     materials = Material.objects(
@@ -282,16 +295,18 @@ def save_materials():
     print(f"Received form data: {request.form}")
 
     # ตรวจสอบว่า scope และ sub_scope มีอยู่ในฐานข้อมูล
-    scope = Scope.objects(ghg_scope=int(scope_id)).first()
-    sub_scope = Scope.objects(
+    scope = Scope.objects(
         ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
     ).first()
 
-    if not scope or not sub_scope:
+    if not scope:
         print(
             f"Invalid scope or sub-scope ID: scope_id={scope_id}, sub_scope_id={sub_scope_id}"
         )
         return jsonify({"error": "Invalid scope or sub-scope ID"}), 400
+
+    head_table = scope.head_table
+    print(f"Head table before saving materials: {head_table}")  # Debugging
 
     # Extract materials from form
     materials = []
@@ -337,7 +352,9 @@ def save_materials():
         save_material(scope_id, sub_scope_id, month_id, year, material_data)
 
     # Update emissions table
-    head_table = scope.head_table if scope else []
+    head_table = scope.head_table  # Re-fetch head_table after saving materials
+    print(f"Head table after saving materials: {head_table}")  # Debugging
+
     materials_form = []
     for head in head_table:
         form_and_formula = FormAndFormula.objects(material_name=head).first()
@@ -361,6 +378,9 @@ def save_materials():
     current_headers = head_table[start_index:end_index]
 
     if request.headers.get("HX-Request"):
+        print(
+            f"Rendering emissions table with scope_id: {scope_id}, sub_scope_id: {sub_scope_id}, year: {year}, page: {page}"
+        )
         return render_template(
             "emissions-scope/partials/emissions-table.html",
             scope=scope,
