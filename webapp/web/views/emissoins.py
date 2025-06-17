@@ -68,22 +68,26 @@ def load_emissions_table():
     total_headers = len(head_table)
     total_pages = (total_headers + items_per_page - 1) // items_per_page
 
+    # คำนวณ index สำหรับการแบ่งหน้า
     start_index = (page - 1) * items_per_page
     end_index = start_index + items_per_page
     current_headers = head_table[start_index:end_index]
+
+    # สร้าง materials_form ใหม่ตาม current_headers
+    materials_form = []
+    for head in current_headers:
+        form_and_formula_item = FormAndFormula.objects(material_name=head).first()
+        if form_and_formula_item:
+            materials_form.append(form_and_formula_item.input_types)
 
     # กรองข้อมูล Material ตามปี
     materials = Material.objects(
         scope=int(scope_id), sub_scope=int(sub_scope_id), year=int(year)  # กรองตามปี
     )
 
-    materials_form = []
-    for head in head_table:
-        form_and_formula_item = FormAndFormula.objects(material_name=head).first()
-        if form_and_formula_item:
-            materials_form.append(form_and_formula_item.input_types)
-
     print(f"Materials found: {len(materials)}")
+    print(f"Current headers: {current_headers}")
+    print(f"Materials form: {materials_form}")
 
     if request.headers.get("HX-Request"):
         return render_template(
@@ -92,12 +96,12 @@ def load_emissions_table():
             scope_id=scope_id,
             sub_scope_id=sub_scope_id,
             materials=materials,
-            head_table=current_headers,
+            head_table=current_headers,  # ส่งเฉพาะ headers ของหน้าปัจจุบัน
             total_pages=total_pages,
             page=page,
             user=current_user,
             year=year,
-            materials_form=materials_form,
+            materials_form=materials_form,  # ส่ง materials_form ที่ตรงกับ current_headers
         )
 
     return render_template(
@@ -287,7 +291,7 @@ def save_materials():
     sub_scope_id = request.form.get("sub_scope_id")
     month_id = request.form.get("month_id")
     year = request.form.get("year")
-    page = int(request.form.get("page", 1))
+    page = int(request.form.get("page", 1))  # รับค่าหน้าปัจจุบัน
     input_label = request.form.get("input_label")
     input_field = request.form.get("input_field")
 
@@ -355,8 +359,16 @@ def save_materials():
     head_table = scope.head_table  # Re-fetch head_table after saving materials
     print(f"Head table after saving materials: {head_table}")  # Debugging
 
+    items_per_page = 4
+    total_headers = len(head_table)
+    total_pages = (total_headers + items_per_page - 1) // items_per_page
+    start_index = (page - 1) * items_per_page
+    end_index = start_index + items_per_page
+    current_headers = head_table[start_index:end_index]
+
+    # สร้าง materials_form ใหม่ตาม current_headers
     materials_form = []
-    for head in head_table:
+    for head in current_headers:
         form_and_formula = FormAndFormula.objects(material_name=head).first()
         if form_and_formula:
             materials_form.append(form_and_formula.input_types)
@@ -365,17 +377,10 @@ def save_materials():
     materials = Material.objects(
         scope=int(scope_id),
         sub_scope=int(sub_scope_id),
-        year=int(year),  # เพิ่มการกรองปี
-        department=current_user.department,  # อ้างอิง department จากผู้ใช้ปัจจุบัน
-        campus=current_user.campus,  # อ้างอิง campus จากผู้ใช้ปัจจุบัน
+        year=int(year),
+        department=current_user.department,
+        campus=current_user.campus,
     )
-
-    items_per_page = 4
-    total_headers = len(head_table)
-    total_pages = (total_headers + items_per_page - 1) // items_per_page
-    start_index = (page - 1) * items_per_page
-    end_index = start_index + items_per_page
-    current_headers = head_table[start_index:end_index]
 
     if request.headers.get("HX-Request"):
         print(
@@ -389,7 +394,7 @@ def save_materials():
             materials=materials,
             head_table=current_headers,
             total_pages=total_pages,
-            page=page,
+            page=page,  # ส่งหน้าปัจจุบันกลับไปยังเทมเพลต
             user=current_user,
             year=year,
             materials_form=materials_form,
