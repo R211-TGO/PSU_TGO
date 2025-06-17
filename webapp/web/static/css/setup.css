@@ -156,6 +156,11 @@
   color: #6B7280;
 }
 
+.text-font {
+  font-weight: bold;
+  color: #454E5D;
+}
+
 
 /* ตั้งค่าเริ่มต้น */
 .sidebar {

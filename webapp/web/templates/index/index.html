@@ -28,19 +28,116 @@
     <div id="sidebar-overlay" class="fixed inset-0 bg-black opacity-0 pointer-events-none z-10 transition-opacity duration-300"></div>
 
     <!-- Sidebar -->
-    <div id="sidebar" class="sidebar fixed top-0 left-0 h-full bg-base-200 shadow-md z-20">
-      {% include "base/sidebar.html" %}
+    <div id="sidebar" class="sidebar fixed top-0 left-0 h-full bg-base-100 shadow-md z-20 flex flex-col transition-transform duration-300">
+      <!-- Logo Section -->
+      <div class="flex items-center gap-2 p-2">
+        <a href="/" class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-primary rounded-lg flex items-center justify-center text-primary-content font-bold">
+            <span class="text-xl font-bold">P</span>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-base-content">PSU-TGO</h1>
+            <p class="text-sm text-base-content">PSU-TGO</p>
+          </div>
+        </a>
+      </div>
+      <div class="divider m-0"></div>
+
+      <!-- Menu Section -->
+      <ul class="menu flex-grow w-full p-2 bg-base-100 space-y-4">
+        <li>
+          <a href="/users-management" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/users-management/' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
+            <i data-feather="users"></i>
+            <span class="text-md">User Management</span>
+          </a>
+        </li>
+        <li>
+          <a href="/role-management" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/role-management/' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
+            <i data-feather="shield"></i>
+            <span class="text-md">Role Management</span>
+          </a>
+        </li>
+        <li>
+          <a href="/form-management" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/form-management/' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
+            <i data-feather="file-text"></i>
+            <span class="text-md">Form Management</span>
+          </a>
+        </li>
+        <li>
+          <a href="/emissions-scope" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/emissions-scope' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
+            <i data-feather="bar-chart-2"></i>
+            <span class="text-md">Emissions scope</span>
+          </a>
+        </li>
+        <li>
+          <a href="/settings" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/settings' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
+            <i data-feather="settings"></i>
+            <span class="text-md">Settings</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="divider m-0"></div>
+
+      <!-- Logout -->
+      <div class="p-2">
+        <a href="/users/logout" class="flex items-center gap-3 rounded-lg p-3 font-bold hover:bg-primary/90 hover:text-primary-content/90">
+          <i data-feather="log-out"></i>
+          <span class="text-lg">Log out</span>
+        </a>
+      </div>
     </div>
 
-    <!-- Main Content -->
-    <div id="main-content" class="flex-1 flex flex-col w-full">
-
-      <!-- Navbar -->
-      <div id="navbar" class="fixed top-0 left-0 w-full z-50 transition-colors duration-300 bg-transparent">
-        {% include "base/navbar.html" %}
+    <!-- Navbar -->
+    <nav class="navbar bg-base-100 p-3 shadow-md flex justify-between items-center transition-all duration-300" id="navbar">
+      <!-- Sidebar Toggle Button -->
+      <div class="flex-none">
+        <label for="sidebar-toggle" class="btn btn-ghost btn-square">
+          <i data-feather="menu" class="h-6 w-6"></i>
+        </label>
       </div>
+      <!-- Page Title -->
+      <div class="flex-1 flex flex-col pl-4">
+        <span class="text-lg font-bold text-base-content">
+          {% if request.path == '/users/users-management' %}
+            User Management
+          {% elif request.path == '/users/roles-management' %}
+            Role Management
+          {% elif request.path == '/reports' %}
+            Reports
+          {% elif request.path == '/settings' %}
+            Settings
+          {% else %}
+            PSU-TGO
+          {% endif %}
+        </span>
+        <span class="text-sm">
+          {% if request.path == '/users/users-management' %}
+            Manage user accounts and permissions
+          {% elif request.path == '/users/roles-management' %}
+            Manage roles and permissions
+          {% elif request.path == '/reports' %}
+            View and analyze reports
+          {% elif request.path == '/settings' %}
+            Configure system settings
+          {% else %}
+            Welcome to PSU-TGO
+          {% endif %}
+        </span>
+      </div>
+      <!-- User Profile -->
+      <div class="flex items-center gap-2">
+        <a href="/profile/" class="flex items-center gap-2">
+          <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-content font-bold">
+            <span class="text-lg font-bold">{{ current_user.username[0]|upper }}</span>
+          </div>
+          <span class="ml-2 text-base font-medium text-base-content">{{ current_user.username }}</span>
+        </a>
+      </div>
+    </nav>
 
-
+    <!-- Main Content -->
+    <div id="main-content" class="flex-1 transition-all duration-300">
       <!-- Hero Video Section -->
       <section class="relative w-full h-screen overflow-hidden">
         <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover z-0">
@@ -131,6 +228,30 @@
       transform: translateX(0);
     }
 
+    /* Navbar - เลื่อนไปขวาเมื่อ sidebar เปิด */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 15;
+      transition: margin-left 0.4s ease-in-out;
+    }
+
+    #sidebar-toggle:checked ~ .navbar {
+      margin-left: 16rem;
+    }
+
+    /* Main Content - เลื่อนไปขวาเมื่อ sidebar เปิด */
+    #main-content {
+      transition: margin-left 0.4s ease-in-out;
+      margin-top: 5rem; /* เพิ่ม margin-top เพื่อไม่ให้ navbar บังเนื้อหา */
+    }
+
+    #sidebar-toggle:checked ~ #main-content {
+      margin-left: 16rem;
+    }
+
     /* Overlay */
     #sidebar-overlay {
       z-index: 20;
@@ -143,13 +264,20 @@
       pointer-events: auto;
     }
 
-    /* Main Content - Transition สมูธขยับ */
-    #main-content {
-      transition: margin-left 0.4s ease-in-out;
-    }
-
-    #sidebar-toggle:checked ~ #main-content {
-      margin-left: 16rem;
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      #sidebar-toggle:checked ~ .navbar {
+        margin-left: 0;
+      }
+      
+      #sidebar-toggle:checked ~ #main-content {
+        margin-left: 0;
+      }
+      
+      #sidebar-toggle:checked ~ #sidebar-overlay {
+        opacity: 0.5;
+        pointer-events: auto;
+      }
     }
 
     /* ปิดไซด์บาร์เมื่อคลิกที่ overlay */
@@ -163,19 +291,14 @@
     document.addEventListener('DOMContentLoaded', function () {
       const sidebarToggle = document.getElementById('sidebar-toggle');
       const overlay = document.getElementById('sidebar-overlay');
+      const navbar = document.getElementById('navbar');
 
+      // ปิด sidebar เมื่อคลิก overlay
       overlay.addEventListener('click', function () {
         sidebarToggle.checked = false;
       });
-    });
-  </script>
 
-  {% block js %}
-  {% endblock js %}
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const navbar = document.getElementById('navbar');
-  
+      // Navbar scroll effect
       window.addEventListener('scroll', function () {
         if (window.scrollY > 50) {
           navbar.classList.remove('bg-transparent');
@@ -187,6 +310,9 @@
       });
     });
   </script>
+
+  {% block js %}
+  {% endblock js %}
 </body>
 
 </html>
