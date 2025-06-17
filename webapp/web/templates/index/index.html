@@ -88,74 +88,227 @@
       </div>
     </div>
 
-    <!-- Navbar -->
-    <nav class="navbar bg-base-100 p-3 shadow-md flex justify-between items-center transition-all duration-300" id="navbar">
+    <!-- Navbar - โปร่งใส -->
+    <nav class="navbar bg-black/20 backdrop-blur-sm p-3 flex justify-between items-center transition-all duration-300" id="navbar">
       <!-- Sidebar Toggle Button -->
       <div class="flex-none">
-        <label for="sidebar-toggle" class="btn btn-ghost btn-square">
+        <label for="sidebar-toggle" class="btn btn-ghost btn-square text-white hover:bg-white/20">
           <i data-feather="menu" class="h-6 w-6"></i>
         </label>
       </div>
       <!-- Page Title -->
       <div class="flex-1 flex flex-col pl-4">
-        <span class="text-lg font-bold text-base-content">
-          {% if request.path == '/users/users-management' %}
-            User Management
-          {% elif request.path == '/users/roles-management' %}
-            Role Management
-          {% elif request.path == '/reports' %}
-            Reports
-          {% elif request.path == '/settings' %}
-            Settings
-          {% else %}
-            PSU-TGO
-          {% endif %}
-        </span>
-        <span class="text-sm">
-          {% if request.path == '/users/users-management' %}
-            Manage user accounts and permissions
-          {% elif request.path == '/users/roles-management' %}
-            Manage roles and permissions
-          {% elif request.path == '/reports' %}
-            View and analyze reports
-          {% elif request.path == '/settings' %}
-            Configure system settings
-          {% else %}
-            Welcome to PSU-TGO
-          {% endif %}
-        </span>
+        <span class="text-lg font-bold text-white">PSU-TGO</span>
+        <span class="text-sm text-white/80">Welcome to PSU-TGO</span>
       </div>
       <!-- User Profile -->
       <div class="flex items-center gap-2">
-        <a href="/profile/" class="flex items-center gap-2">
-          <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-content font-bold">
-            <span class="text-lg font-bold">{{ current_user.username[0]|upper }}</span>
+        <a href="/profile/" class="flex items-center gap-2 text-white hover:text-white/80">
+          <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold border border-white/30">
+            <span class="text-lg font-bold">{{ current_user.username[0]|upper if current_user else 'U' }}</span>
           </div>
-          <span class="ml-2 text-base font-medium text-base-content">{{ current_user.username }}</span>
+          <span class="ml-2 text-base font-medium">{{ current_user.username if current_user else 'Username' }}</span>
         </a>
       </div>
     </nav>
 
     <!-- Main Content -->
     <div id="main-content">
-      <!-- Hero Video Section - อยู่ที่เดิม ไม่เลื่อน -->
+      <!-- Hero Video Section -->
       <section class="hero-video-section relative w-full h-screen overflow-hidden">
         <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover z-0">
           <source src="/static/imagines/dashboard-image.mp4" type="video/mp4">
           Your browser does not support the video tag.
         </video>
         <div class="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
-          <h1 class="text-4xl font-bold animate-fade-up">Understand Your Impact on the Planet</h1>
-          <p class="mt-4 text-lg animate-fade-up delay-100">ถ้าเปลี่ยนมาใช้ชีวิตอย่างใส่ใจ ยั่งยืนต่อสิ่งแวดล้อม เรื่องที่สอนคือ Basic Python</p>
+          <h1 class="text-4xl md:text-6xl font-bold animate-fade-up">Understand Your Impact on the Planet</h1>
+          <p class="mt-4 text-lg md:text-xl animate-fade-up delay-100 max-w-4xl">ถ้าเปลี่ยนมาใช้ชีวิตอย่างใส่ใจ ยั่งยืนต่อสิ่งแวดล้อม เรื่องที่สอนคือ Basic Python</p>
           <div class="mt-6 space-x-4 animate-fade-up delay-200">
-            <a href="#" class="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700">Calculate My Footprint ➜</a>
-            <a href="#" class="border border-white text-white px-6 py-2 rounded-full hover:bg-white hover:text-green-600">Learn More</a>
+            <a href="#" class="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors">Calculate My Footprint ➜</a>
+            <a href="#" class="border border-white text-white px-6 py-3 rounded-full hover:bg-white hover:text-green-600 transition-colors">Learn More</a>
           </div>
         </div>
       </section>
 
-      <!-- Content Area - เลื่อนตาม sidebar -->
-      <div class="content-area relative z-10 -mt-20 px-4 lg:px-0 pb-10">
+      <!-- Content Area - ไม่ยืดหดตาม sidebar -->
+      <div class="content-area relative z-10 bg-gradient-to-b from-transparent to-white">
+        
+        <!-- About Section -->
+        <section class="py-20 px-4 lg:px-8 max-w-6xl mx-auto">
+          <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">About PSU-TGO</h2>
+            <p class="text-xl text-gray-600">Prince of Songkla University Greenhouse Gas Organization</p>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+              <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                <i data-feather="leaf" class="w-8 h-8 text-green-600"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-800 mb-4">Environmental Impact</h3>
+              <p class="text-gray-600">Monitor and reduce greenhouse gas emissions across the university campus with comprehensive tracking and analysis.</p>
+            </div>
+            
+            <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+              <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                <i data-feather="bar-chart" class="w-8 h-8 text-blue-600"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-800 mb-4">Data Analytics</h3>
+              <p class="text-gray-600">Advanced analytics and reporting tools to help visualize carbon footprint data and identify improvement opportunities.</p>
+            </div>
+            
+            <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+              <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6">
+                <i data-feather="users" class="w-8 h-8 text-purple-600"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-800 mb-4">Community Engagement</h3>
+              <p class="text-gray-600">Engage students, faculty, and staff in sustainability initiatives and environmental awareness programs.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="py-20 bg-gray-50">
+          <div class="px-4 lg:px-8 max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+              <h2 class="text-4xl font-bold text-gray-800 mb-4">Key Features</h2>
+              <p class="text-xl text-gray-600">Comprehensive tools for environmental management</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Emissions Tracking</h3>
+                <div class="space-y-4">
+                  <div class="flex items-start gap-4">
+                    <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <i data-feather="check" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-semibold text-gray-800">Scope 1, 2, 3 Emissions</h4>
+                      <p class="text-gray-600">Track direct and indirect emissions across all university operations.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-start gap-4">
+                    <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <i data-feather="check" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-semibold text-gray-800">Real-time Monitoring</h4>
+                      <p class="text-gray-600">Live data collection and analysis for immediate insights.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-start gap-4">
+                    <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <i data-feather="check" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-semibold text-gray-800">Automated Reporting</h4>
+                      <p class="text-gray-600">Generate comprehensive reports with just a few clicks.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="bg-white p-8 rounded-xl shadow-lg">
+                <div class="w-full h-64 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
+                  <i data-feather="trending-down" class="w-24 h-24 text-white"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Statistics Section -->
+        <section class="py-20">
+          <div class="px-4 lg:px-8 max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+              <h2 class="text-4xl font-bold text-gray-800 mb-4">Our Impact</h2>
+              <p class="text-xl text-gray-600">Making a difference through data-driven decisions</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+              <div class="text-center">
+                <div class="text-4xl font-bold text-green-600 mb-2">25%</div>
+                <div class="text-gray-600">CO2 Reduction</div>
+              </div>
+              
+              <div class="text-center">
+                <div class="text-4xl font-bold text-blue-600 mb-2">150+</div>
+                <div class="text-gray-600">Data Points</div>
+              </div>
+              
+              <div class="text-center">
+                <div class="text-4xl font-bold text-purple-600 mb-2">500+</div>
+                <div class="text-gray-600">Active Users</div>
+              </div>
+              
+              <div class="text-center">
+                <div class="text-4xl font-bold text-orange-600 mb-2">99.9%</div>
+                <div class="text-gray-600">Uptime</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="py-20 bg-gray-800 text-white">
+          <div class="px-4 lg:px-8 max-w-6xl mx-auto text-center">
+            <h2 class="text-4xl font-bold mb-4">Get Started Today</h2>
+            <p class="text-xl text-gray-300 mb-8">Join us in creating a more sustainable future for our university and community.</p>
+            
+            <div class="space-x-4">
+              <a href="#" class="bg-green-600 text-white px-8 py-3 rounded-full hover:bg-green-700 transition-colors inline-block">Start Tracking</a>
+              <a href="#" class="border border-white text-white px-8 py-3 rounded-full hover:bg-white hover:text-gray-800 transition-colors inline-block">Learn More</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Additional Content for Scrolling -->
+        <section class="py-20 bg-white">
+          <div class="px-4 lg:px-8 max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+              <div>
+                <h3 class="text-3xl font-bold text-gray-800 mb-6">Sustainable Campus Initiative</h3>
+                <p class="text-gray-600 mb-6">Our comprehensive approach to campus sustainability includes energy management, waste reduction, transportation planning, and green building practices.</p>
+                <ul class="space-y-3">
+                  <li class="flex items-center gap-3">
+                    <i data-feather="check-circle" class="w-5 h-5 text-green-500"></i>
+                    <span>Carbon neutral campus by 2030</span>
+                  </li>
+                  <li class="flex items-center gap-3">
+                    <i data-feather="check-circle" class="w-5 h-5 text-green-500"></i>
+                    <span>100% renewable energy sources</span>
+                  </li>
+                  <li class="flex items-center gap-3">
+                    <i data-feather="check-circle" class="w-5 h-5 text-green-500"></i>
+                    <span>Zero waste to landfill program</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div class="bg-gradient-to-br from-green-400 to-blue-500 p-8 rounded-xl text-white">
+                <h4 class="text-2xl font-bold mb-4">Environmental Dashboard</h4>
+                <div class="space-y-4">
+                  <div class="flex justify-between items-center">
+                    <span>Energy Efficiency</span>
+                    <span class="font-bold">87%</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span>Waste Reduction</span>
+                    <span class="font-bold">72%</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span>Water Conservation</span>
+                    <span class="font-bold">64%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {% block body %}
         <div class="px-3 lg:px-5 py-10 mx-auto">
           {% block content %}
@@ -175,7 +328,7 @@
   </div>
 
   <style>
-    /* Sidebar Transition - สมูธการขยายและหด */
+    /* Sidebar Transition */
     .sidebar {
       position: fixed;
       top: 0;
@@ -191,14 +344,14 @@
       transform: translateX(0);
     }
     
-    /* Navbar - หดขยายตาม sidebar */
+    /* Navbar - เฉพาะตัวนี้หดขยายตาม sidebar */
     .navbar {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       z-index: 15;
-      transition: margin-left 0.4s ease-in-out, width 0.4s ease-in-out;
+      transition: margin-left 0.4s ease-in-out, width 0.4s ease-in-out, background-color 0.3s ease;
     }
     
     #sidebar-toggle:checked ~ .navbar {
@@ -206,31 +359,53 @@
       width: calc(100% - 16rem);
     }
     
-    /* Main Content */
-    #main-content {
-      margin-top: 5rem;
+    /* Navbar Scroll Effect */
+    .navbar.scrolled {
+      background-color: rgba(255, 255, 255, 0.95) !important;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
     
-    /* Hero Video Section - ไม่เลื่อนตาม sidebar */
+    .navbar.scrolled * {
+      color: #374151 !important;
+    }
+    
+    .navbar.scrolled .btn-ghost:hover {
+      background-color: rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .navbar.scrolled .w-10 {
+      background-color: #3b82f6 !important;
+      border-color: #3b82f6 !important;
+    }
+    
+    /* Main Content - ไม่หดขยาย */
+    #main-content {
+      margin-top: 0;
+      position: relative;
+      width: 100%;
+    }
+    
+    /* Hero Video Section - ไม่หดขยาย */
     .hero-video-section {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
+      position: relative;
+      width: 100%;
       height: 100vh;
       z-index: 1;
     }
     
-    /* Content Area - เลื่อนไปขวาเมื่อ sidebar เปิด */
+    /* Content Area - ไม่หดขยาย ลบ transition ออก */
     .content-area {
       position: relative;
       z-index: 10;
-      transition: margin-left 0.4s ease-in-out;
+      width: 100%;
+      /* ลบ transition และ margin-left ออก */
     }
     
-    #sidebar-toggle:checked ~ #main-content .content-area {
+    /* ลบ Content Area margin-left ออกทั้งหมด */
+    /* #sidebar-toggle:checked ~ #main-content .content-area {
       margin-left: 16rem;
-    }
+    } */
     
     /* Overlay */
     #sidebar-overlay {
@@ -251,14 +426,10 @@
         width: 100%;
       }
       
-      #sidebar-toggle:checked ~ #main-content .content-area {
+      /* ลบ responsive content area ออก */
+      /* #sidebar-toggle:checked ~ #main-content .content-area {
         margin-left: 0;
-      }
-      
-      #sidebar-toggle:checked ~ #sidebar-overlay {
-        opacity: 0.5;
-        pointer-events: auto;
-      }
+      } */
     }
     
     /* Animation Classes */
@@ -282,7 +453,7 @@
         transform: translateY(0);
       }
     }
-    </style>
+  </style>
 
   <script>
     // Feather Replace Script
@@ -301,12 +472,10 @@
       // Navbar scroll effect
       window.addEventListener('scroll', function () {
         if (window.scrollY > 50) {
-          navbar.classList.remove('bg-transparent');
-          navbar.classList.add('bg-white', 'shadow-md');
+          navbar.classList.add('scrolled');
         } else {
-          navbar.classList.remove('bg-white', 'shadow-md');
-          navbar.classList.add('bg-transparent');
-        } 
+          navbar.classList.remove('scrolled');
+        }
       });
     });
   </script>
