@@ -1,96 +1,103 @@
 {% set months = [
-    {'id': 1, 'name': 'มกราคม',},
-    {'id': 2, 'name': 'กุมภาพันธ์',},
-    {'id': 3, 'name': 'มีนาคม', },
-    {'id': 4, 'name': 'เมษายน',},
-    {'id': 5, 'name': 'พฤษภาคม',},
-    {'id': 6, 'name': 'มิถุนายน', },
-    {'id': 7, 'name': 'กรกฎาคม',},
-    {'id': 8, 'name': 'สิงหาคม',},
-    {'id': 9, 'name': 'กันยายน',},
+    {'id': 1, 'name': 'มกราคม'},
+    {'id': 2, 'name': 'กุมภาพันธ์'},
+    {'id': 3, 'name': 'มีนาคม'},
+    {'id': 4, 'name': 'เมษายน'},
+    {'id': 5, 'name': 'พฤษภาคม'},
+    {'id': 6, 'name': 'มิถุนายน'},
+    {'id': 7, 'name': 'กรกฎาคม'},
+    {'id': 8, 'name': 'สิงหาคม'},
+    {'id': 9, 'name': 'กันยายน'},
     {'id': 10, 'name': 'ตุลาคม'},
     {'id': 11, 'name': 'พฤศจิกายน'},
-    {'id': 12, 'name': 'ธันวาคม',},
+    {'id': 12, 'name': 'ธันวาคม'}
 ] %}
 
-
-        <!-- การ์ดตาราง -->  
-
-
-            <div id="table-container">
-    <div class="overflow-x-auto border border-gray-200 rounded-md">
-        <div class="max-h-[700px] overflow-y-auto">
-            <table class="table w-full table-striped">
-                <thead class="bg-gray-50 sticky top-0 z-10">
+<!-- Container for the table and pagination -->
+<div id="table-container">
+    <div class="border border-gray-200 rounded-md">
+        
+            <table class="table w-full table-striped" style="border-collapse: separate; border-spacing: 0;">
+                <!-- Complex Table Header -->
+                <thead class="bg-gray-50 sticky top-0 z-10 text-center">
+                    <!-- First Header Row: Main Categories -->
                     <tr>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">ACTION</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ข้อมูลประจำเดือน</th>
+                        <th rowspan="2" class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider align-middle border-b-2 border-r border-gray-200">ACTION</th>
+                        <th rowspan="2" class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider align-middle border-b-2 border-r border-gray-200">ข้อมูลประจำเดือน</th>
                         
+                        <!-- Loop through main headers (e.g., 'สูตร N-P-K (1)') -->
                         {% for head in head_table %}
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th colspan="{{ materials_form[loop.index0] | length }}" class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-r border-gray-200">
                             {{ head }}
-                            
                         </th>
                         {% endfor %}
                     </tr>
+                    <!-- Second Header Row: Sub-categories -->
+                    <tr>
+                        <!-- Loop through each main header's sub-fields -->
+                        {% for head in head_table %}
+                            {% for input in materials_form[loop.index0] %}
+                            <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-r border-gray-200">
+                                {{ input.label }} ({{ input.unit }})
+                            </th>
+                            {% endfor %}
+                        {% endfor %}
+                    </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+
+                <!-- Table Body -->
+                <tbody class="bg-white">
                     {% for month in months %}
                     <tr class="hover:bg-gray-50 transition-colors duration-150">
                         <!-- Action Column -->
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex gap-2 px-4">
+                        <td class="px-6 py-4 whitespace-nowrap border-b border-r border-gray-200">
+                            <div class="flex justify-center gap-2">
                                 <button class="text-blue-500 hover:text-blue-700 transition-colors"
-                                        hx-get="{{ url_for('emissions.load_materials_form', month_id=month.id, year=year,scope_id=scope_id,sub_scope_id=sub_scope_id,) }}"
+                                        hx-get="{{ url_for('emissions.load_materials_form', month_id=month.id, year=year,scope_id=scope_id,sub_scope_id=sub_scope_id) }}"
                                         hx-target="#modal-content"
                                         hx-swap="innerHTML"
                                         hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
-                                      
                                     <i data-feather="edit" class="w-[18px] h-[18px]"></i>
                                 </button>
                             </div>
                         </td>
 
                         <!-- Month Column -->
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900 w-full text-center flex justify-center">
-                                {{ month.name }} ({{ year }})
+                        <td class="px-6 py-4 whitespace-nowrap border-b border-r border-gray-200">
+                            <div class="text-sm text-gray-900 text-center">
+                                {{ loop.index }}. {{ month.name }} ({{ year }})
                             </div>
                         </td>
 
                         <!-- Data Columns -->
                         {% for head in head_table %}
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">
-                                {% set ns = namespace(has_data=false) %}
-                                {% for input in materials_form[loop.index0] %}
-                                    {% set matched_quantity = materials | selectattr('month', 'equalto', month.id) 
-                                                                         | selectattr('name', 'equalto', head) 
-                                                                         | map(attribute='quantity_type') 
-                                                                         | sum(start=[]) 
-                                                                         | selectattr('field', 'equalto', input.field) 
-                                                                         | list %}
-                                    <div class="w-full text-center"
+                            {% for input in materials_form[loop.index0] %}
+                                <td class="px-6 py-4 whitespace-nowrap text-center border-b border-r border-gray-200">
+                                    {% set matched_quantity = materials | selectattr('month', 'equalto', month.id)
+                                                                          | selectattr('name', 'equalto', head)
+                                                                          | map(attribute='quantity_type')
+                                                                          | sum(start=[])
+                                                                          | selectattr('field', 'equalto', input.field)
+                                                                          | list %}
+                                    <div class="text-sm text-gray-900 cursor-pointer hover:text-blue-500"
                                          hx-get="{{ url_for('emissions.load_material_form', month_id=month.id, head=head, scope_id=scope_id, sub_scope_id=sub_scope_id, page=page, year=year, month=month.name, amount=(matched_quantity[0].amount if matched_quantity else None),input_label=input.label,input_field=input.field) }}"
                                          hx-target="#modal-content"
                                          hx-swap="innerHTML"
                                          hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
-                                        {{ matched_quantity[0].amount if matched_quantity else input.label }} ({{ input.unit }} )
-                                       
+                                        {% if matched_quantity %}
+                                            {{ matched_quantity[0].amount }}
+                                        {% else %}
+                                            <span class="text-gray-400">ระบุ - {{ input.unit }}</span>
+                                        {% endif %}
                                     </div>
-                                    {% if matched_quantity %}
-                                        {% set ns.has_data = true %}
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        </td>
+                                </td>
+                            {% endfor %}
                         {% endfor %}
-                        
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
+        
     </div>
 
     <!-- Pagination -->

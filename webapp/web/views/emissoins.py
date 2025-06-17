@@ -128,6 +128,7 @@ def load_material_form():
     amount = request.args.get("amount")
     input_label = request.args.get("input_label")
     input_field = request.args.get("input_field")
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", amount)
 
     # ตรวจสอบข้อมูลที่จำเป็น
     if not month_id or not head:
