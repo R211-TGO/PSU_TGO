@@ -27,6 +27,9 @@
     <input type="hidden" name="page" value="{{ request.args.get('page', 1) }}">
     <input type="hidden" name="year" value="{{ request.args.get('year', '') }}">
     <input type="hidden" name="month_id" value="{{ month_id }}">
+    <input type="hidden" name="input_label" value="{{ input_label }}">
+    <input type="hidden" name="input_field" value="{{ input_field }}">
+    
 
     <div class="mt-4 flex justify-end space-x-2">
         <button type="button" class="btn btn-outline"

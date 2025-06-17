@@ -36,7 +36,7 @@
       <!-- วงกลมที่มีตัวเลข -->
       <span class="w-10 h-10 flex items-center justify-center bg-primary text-white rounded-full">
         {{ scope_items[0]['id']  }}
-        {%set num = loop.index%}
+        
       </span>
       {{ scope_name }}
       
@@ -71,24 +71,26 @@
               {{ item.progress }}%
             </div>
           </div>
-        
+          {%set num = loop.index%}
           <!-- Icons (อยู่ทางขวา) -->
           <div class="flex items-center gap-4">
             <!-- Gear Icon -->
             <button class="text-blue-500 hover:text-blue-700 p-1 rounded"
-              hx-get="{{ url_for('emissions_scope.edit_scope', ghg_scope=scope_name.split(' ')[1], ghg_sup_scope=item.id) }}"
+              hx-get="{{ url_for('emissions_scope.edit_scope', ghg_scope=scope_name[-1], ghg_sup_scope=num) }}"
               hx-target="#modal-content"
               hx-swap="innerHTML"
               hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')"
               title="แก้ไข Scope">
               <i data-feather="settings" class="w-5 h-5"></i>
             </button>
+            
             <!-- Edit Icon -->
             <form action="{{ url_for('emissions.view_emissions') }}" method="POST" style="display: inline;">
-              <input type="hidden" name="scope_id" value="{{ num }}">
-              <input type="hidden" name="sub_scope_id" value="{{ item.id }}">
+              <input type="hidden" name="scope_id" value="{{ scope_name[-1]}}">
+              <input type="hidden" name="sub_scope_id" value="{{ num }}">
               <button type="submit" class="text-blue-500 hover:text-blue-700">
                   <i data-feather="edit"></i>
+                  {{scope_name[-1]}}{{num}}
               </button>
           </form>
           </div>
