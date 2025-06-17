@@ -222,3 +222,16 @@
 .table-striped td:last-child, .table-striped th:last-child {
   border-right: none; /* ลบเส้นแบ่งคอลัมน์สุดท้าย */
 }
+
+/* เส้นแบ่งสำหรับส่วนหัวของตาราง */
+.table-striped thead th {
+  border-bottom: 1.9px solid #e5e7eb; /* เส้นแบ่งด้านล่างของหัวข้อ */
+  border-right: 1px solid #e5e7eb; /* เส้นแบ่งด้านขวาของแต่ละหัวข้อ */
+  background-color: #f9fafb; /* สีพื้นหลังของหัวข้อ */
+  text-align: center; /* จัดข้อความให้อยู่ตรงกลาง */
+}
+
+/* ลบเส้นแบ่งด้านขวาของหัวข้อสุดท้าย */
+.table-striped thead th:last-child {
+  border-right: none;
+}
