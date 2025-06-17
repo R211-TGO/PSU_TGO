@@ -47,6 +47,9 @@ def view_emissions():
 def load_emissions_table():
     scope_id = request.args.get("scope_id")
     sub_scope_id = request.args.get("sub_scope_id")
+    print(
+        f"Received scope_id>>>>>>>>>>>>>>>>>>>>z: {scope_id}, sub_scope_id: {sub_scope_id}"
+    )
     page = int(request.args.get("page", 1))
     year = request.args.get("year") or datetime.datetime.now().year  # ใช้ปีล่าสุดถ้าไม่ระบุ
     items_per_page = 4
@@ -123,6 +126,8 @@ def load_material_form():
     year = request.args.get("year")
     month = request.args.get("month")
     amount = request.args.get("amount")
+    input_label = request.args.get("input_label")
+    input_field = request.args.get("input_field")
 
     # ตรวจสอบข้อมูลที่จำเป็น
     if not month_id or not head:
@@ -141,6 +146,8 @@ def load_material_form():
         month=month,  # ส่งค่าเดือนด้วย
         user=current_user,  # ส่งข้อมูลผู้ใช้ปัจจุบัน
         amount=amount,  # ส่งค่า amount ด้วย
+        input_label=input_label,  # ส่งค่า input_label ด้วย
+        input_field=input_field,  # ส่งค่า input_field ด้วย
     )
 
 
@@ -182,6 +189,92 @@ def load_materials_form():
     )
 
 
+def save_material(scope_id, sub_scope_id, month_id, year, material_data):
+    """
+    Save a single material to the database.
+    """
+    head = material_data["head"]
+    field = material_data["field"]
+    amount = material_data["amount"]
+
+    # ตรวจสอบว่า scope และ sub_scope มีอยู่ในฐานข้อมูล
+    scope = Scope.objects(ghg_scope=int(scope_id)).first()
+    sub_scope = Scope.objects(
+        ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
+    ).first()
+
+    if not scope or not sub_scope:
+        print(
+            f"Scope or Sub-Scope not found: scope_id={scope_id}, sub_scope_id={sub_scope_id}"
+        )
+        return False
+
+    material = Material.objects(
+        month=int(month_id),
+        name=head,
+        scope=int(scope_id),
+        sub_scope=int(sub_scope_id),
+        year=year,
+    ).first()
+
+    form_and_formula = FormAndFormula.objects(material_name=head).first()
+    if not form_and_formula:
+        print(f"Form and Formula not found for material: {head}")
+        return False
+
+    # Find the input type for the given field
+    input_type = form_and_formula.input_types.filter(field=field).first()
+    if not input_type:
+        print(f"Input type not found for field: {field} in material: {head}")
+        return False
+    else:
+        print(f"Input type found: {input_type.label} for field: {field}")
+
+    if material:
+        # Update existing material
+        updated = False
+        for qt in material.quantity_type:
+            if qt.field == field:
+                qt.amount = float(amount)
+                updated = True
+        if not updated:
+            # Add new field to quantity_type if not found
+            material.quantity_type.append(
+                QuantityType(
+                    field=field,
+                    label=input_type.label,
+                    amount=float(amount),
+                    unit=input_type.unit,
+                )
+            )
+        material.save()
+        print(
+            f"Material updated: {material.quantity_type[0].field} for month: {month_id}"
+        )
+    else:
+        # Create new material
+        new_material = Material(
+            month=int(month_id),
+            name=head,
+            scope=int(scope_id),
+            sub_scope=int(sub_scope_id),
+            year=year,
+            day=1,
+            form_and_formula=form_and_formula.name,
+            quantity_type=[
+                QuantityType(
+                    field=input_type.field,
+                    label=input_type.label,
+                    amount=float(amount) if input_type.field == field else 0.0,
+                    unit=input_type.unit,
+                )
+                for input_type in form_and_formula.input_types
+            ],
+        )
+        new_material.save()
+    return True
+
+
 @module.route("/save-materials", methods=["POST"])
 @login_required
 def save_materials():
@@ -190,22 +283,45 @@ def save_materials():
     month_id = request.form.get("month_id")
     year = request.form.get("year")
     page = int(request.form.get("page", 1))
+    input_label = request.form.get("input_label")
+    input_field = request.form.get("input_field")
 
-    # Debugging: พิมพ์ค่าที่ได้รับจากฟอร์ม
-    print(
-        f"scope_id: {scope_id}, sub_scope_id: {sub_scope_id}, month_id: {month_id}, year: {year}, page: {page}"
-    )
-    print(f"Form data: {request.form}")
+    # Debugging: Print received form data
+    print(f"Received form data: {request.form}")
 
-    # ดึงข้อมูล materials จากฟอร์ม
+    # ตรวจสอบว่า scope และ sub_scope มีอยู่ในฐานข้อมูล
+    scope = Scope.objects(ghg_scope=int(scope_id)).first()
+    sub_scope = Scope.objects(
+        ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
+    ).first()
+
+    if not scope or not sub_scope:
+        print(
+            f"Invalid scope or sub-scope ID: scope_id={scope_id}, sub_scope_id={sub_scope_id}"
+        )
+        return jsonify({"error": "Invalid scope or sub-scope ID"}), 400
+
+    # Extract materials from form
     materials = []
     if "head" in request.form and "amount" in request.form:
-        # กรณีบันทึกข้อมูลเดี่ยว (จาก material-form.html)
+        # Single material case (from material-form.html)
         head = request.form.get("head")
         amount = request.form.get("amount")
-        materials.append({"head": head, "field": "default", "amount": amount})
+
+        form_and_formula = FormAndFormula.objects(material_name=head).first()
+        if not form_and_formula:
+            print(f"Form and Formula not found for material: {head}")
+            return jsonify({"error": "Form and Formula not found"}), 400
+
+        label = input_label
+        field = input_field
+        if not field:
+            print(f"No input types found for material: {head}")
+            return jsonify({"error": "No input types found"}), 400
+
+        materials.append({"head": head, "field": field, "amount": amount})
     else:
-        # กรณีบันทึกข้อมูลหลายรายการ (จาก materials-form.html)
+        # Multiple materials case (from materials-form.html)
         for key in request.form.keys():
             if key.startswith("amount_"):
                 parts = key.split("_")
@@ -217,68 +333,18 @@ def save_materials():
                 amount = request.form.get(key)
                 materials.append({"head": head, "field": field, "amount": amount})
 
-    # Debugging: พิมพ์ข้อมูล materials
+    # Debugging: Print materials data
     print(f"Materials: {materials}")
 
     if not scope_id or not sub_scope_id or not month_id or not year or not materials:
         print("Missing required data")
         return jsonify({"error": "Missing data"}), 400
 
-    # บันทึกข้อมูล materials
+    # Save each material
     for material_data in materials:
-        head = material_data["head"]
-        field = material_data["field"]
-        amount = material_data["amount"]
+        save_material(scope_id, sub_scope_id, month_id, year, material_data)
 
-        material = Material.objects(
-            month=int(month_id),
-            name=head,
-            scope=int(scope_id),
-            sub_scope=int(sub_scope_id),
-            year=year,
-        ).first()
-
-        if material:
-            # อัปเดตข้อมูลใน quantity_type
-            updated = False
-            for qt in material.quantity_type:
-                if qt.field == field:
-                    qt.amount = float(amount)
-                    updated = True
-            if not updated:
-                # เพิ่มฟิลด์ใหม่ใน quantity_type หากไม่มีอยู่
-                material.quantity_type.append(
-                    QuantityType(
-                        field=field,
-                        label="Default Label",
-                        amount=float(amount),
-                        unit="Default Unit",
-                    )
-                )
-            material.save()
-        else:
-            # สร้าง Material ใหม่
-            new_material = Material(
-                month=int(month_id),
-                name=head,
-                scope=int(scope_id),
-                sub_scope=int(sub_scope_id),
-                year=year,
-                day=1,
-                form_and_formula="Default Formula",
-                quantity_type=[
-                    QuantityType(
-                        field=field,
-                        label="Default Label",
-                        amount=float(amount),
-                        unit="Default Unit",
-                    )
-                ],
-            )
-            new_material.save()
-
-    # สร้าง materials_form ใหม่
-    scope = Scope.objects(ghg_scope=scope_id, ghg_sup_scope=sub_scope_id).first()
+    # Update emissions table
     head_table = scope.head_table if scope else []
     materials_form = []
     for head in head_table:
@@ -286,7 +352,6 @@ def save_materials():
         if form_and_formula:
             materials_form.append(form_and_formula.input_types)
 
-    # อัปเดตตาราง emissions
     materials = Material.objects(
         scope=int(scope_id), sub_scope=int(sub_scope_id), year=int(year)
     )
@@ -309,7 +374,7 @@ def save_materials():
             page=page,
             user=current_user,
             year=year,
-            materials_form=materials_form,  # ส่ง materials_form ไปยังเทมเพลต
+            materials_form=materials_form,
         )
     else:
         return redirect(
