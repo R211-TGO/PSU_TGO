@@ -1,9 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, request, jsonify
 from flask_login import login_required, current_user
-from ...models import FormAndFormula, Scope
+from ...models import FormAndFormula, Scope, Material
 
 module = Blueprint("emissions_scope", __name__, url_prefix="/emissions-scope")
-
 @module.route("/", methods=["GET"])
 @login_required
 def emissions_scope():
@@ -13,32 +12,102 @@ def emissions_scope():
         department=current_user.department
     ).order_by("ghg_scope")
     
+    # ดึงปีทั้งหมดที่มีในฐานข้อมูล Material
+    all_years = Material.objects().distinct("year")
+    total_years = len(all_years) if all_years else 1  # ถ้าไม่มีปีให้ใช้ 1
+    
     # จัดกลุ่ม Scope ตาม ghg_scope
     grouped_scopes = {}
+    overall_progress = 0
+    total_sources = len(scopes)
+    completed = 0
+    in_progress = 0
+    not_started = 0
+    
     for scope in scopes:
         main_scope = f"Scope {scope.ghg_scope}"
         if main_scope not in grouped_scopes:
             grouped_scopes[main_scope] = []
+        
+        # คำนวณ Progress สำหรับ Scope นี้
+        progress = calculate_scope_progress(scope, total_years)
+        
+        # กำหนดสถานะตาม Progress
+        if progress == 100:
+            status = "Completed"
+            completed += 1
+        elif progress > 0:
+            status = "In progress"
+            in_progress += 1
+        else:
+            status = "Not started"
+            not_started += 1
+        
+        # เพิ่ม Progress รวม
+        overall_progress += progress
+        
         grouped_scopes[main_scope].append({
-            "id": scope.ghg_scope,
-            "sup_id": scope.ghg_sup_scope,
+            "id": scope.ghg_sup_scope,  # เปลี่ยนจาก ghg_scope เป็น ghg_sup_scope
             "title": scope.ghg_name,
-            "progress": 0,
-            "status": "Not started"
+            "progress": round(progress, 1),  # ปัดเศษให้ 1 ตำแหน่ง
+            "status": status
         })
+    
+    # คำนวณ Overall Progress
+    overall_progress = round(overall_progress / total_sources, 1) if total_sources > 0 else 0
     
     return render_template(
         "/emissions-scope/emissions-scope.html",
         user=current_user,
         mockup_data={
-            "overall_progress": 0,
-            "total_sources": len(scopes),
-            "in_progress": 0,
-            "not_started": len(scopes),
-            "completed": 0,
+            "overall_progress": overall_progress,
+            "total_sources": total_sources,
+            "in_progress": in_progress,
+            "not_started": not_started,
+            "completed": completed,
             "scopes": grouped_scopes
         }
     )
+
+def calculate_scope_progress(scope, total_years):
+    """
+    คำนวณ Progress ของ Scope
+    Progress = (จำนวนช่องที่กรอกแล้ว / (head_table × 12 × จำนวนปี)) × 100
+    """
+    # จำนวน head_table
+    num_head_table = len(scope.head_table)
+    
+    if num_head_table == 0:
+        return 0  # ถ้าไม่มี head_table ให้ progress = 0
+    
+    # จำนวนช่องทั้งหมดที่ต้องกรอก = head_table × 12 เดือน × จำนวนปี
+    total_fields_required = num_head_table * 12 * total_years
+    
+    if total_fields_required == 0:
+        return 0
+    
+    
+    # ดึง Material ที่เกี่ยวข้องกับ Scope นี้
+    materials = Material.objects(
+        scope=scope.ghg_scope,
+        sub_scope=scope.ghg_sup_scope,
+        campus=current_user.campus,
+        department=current_user.department
+    )
+
+    # นับจำนวนช่องที่กรอกข้อมูลแล้ว
+    filled_fields = len(materials)
+    
+
+
+
+    
+    # คำนวณ Progress
+    progress = (filled_fields / total_fields_required) * 100
+    print(f"{filled_fields} / {total_fields_required} = {progress}%")  # Debugging output
+    
+    # จำกัดไม่ให้เกิน 100%
+    return min(progress, 100)
 
 
 @module.route("/add", methods=["GET", "POST"])
