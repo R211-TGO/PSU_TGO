@@ -246,7 +246,7 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
                     amount=float(amount),
                     unit=input_type.unit,
                 )
-            )
+            )  # เพิ่มเฉพาะช่องที่กรอก
         material.department = current_user.department  # อ้างอิง department จากผู้ใช้ปัจจุบัน
         material.campus = current_user.campus  # อ้างอิง campus จากผู้ใช้ปัจจุบัน
         material.save()
@@ -264,13 +264,12 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
             campus=current_user.campus,  # อ้างอิง campus จากผู้ใช้ปัจจุบัน
             quantity_type=[
                 QuantityType(
-                    field=input_type.field,
+                    field=field,
                     label=input_type.label,
-                    amount=float(amount) if input_type.field == field else 0.0,
+                    amount=float(amount),
                     unit=input_type.unit,
                 )
-                for input_type in form_and_formula.input_types
-            ],
+            ],  # เซฟเฉพาะช่องที่กรอก
         )
         new_material.save()
     return True
