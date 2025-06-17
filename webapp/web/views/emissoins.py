@@ -47,13 +47,14 @@ def view_emissions():
 def load_emissions_table():
     scope_id = request.args.get("scope_id")
     sub_scope_id = request.args.get("sub_scope_id")
-    print(
-        f"Received scope_id>>>>>>>>>>>>>>>>>>>>z: {scope_id}, sub_scope_id: {sub_scope_id}"
-    )
-    page = int(request.args.get("page", 1))
     year = request.args.get("year") or datetime.datetime.now().year  # ใช้ปีล่าสุดถ้าไม่ระบุ
+    page = int(request.args.get("page", 1))
     items_per_page = 4
-    print(f"Received year: {year}")
+
+    print(
+        f"Received scope_id: {scope_id}, sub_scope_id: {sub_scope_id}, year: {year}, page: {page}"
+    )
+
     if not scope_id or not sub_scope_id:
         return jsonify({"error": "Invalid scope or sub-scope ID"}), 400
 
@@ -70,28 +71,20 @@ def load_emissions_table():
     start_index = (page - 1) * items_per_page
     end_index = start_index + items_per_page
     current_headers = head_table[start_index:end_index]
+
+    # กรองข้อมูล Material ตามปี
+    materials = Material.objects(
+        scope=int(scope_id), sub_scope=int(sub_scope_id), year=int(year)  # กรองตามปี
+    )
+
     materials_form = []
     for head in head_table:
         form_and_formula_item = FormAndFormula.objects(material_name=head).first()
-        # for i in form_and_formula_item.input_types:
-        #     print(f"Input Type: {i.input_type}, Field: {i.field}")
-
         if form_and_formula_item:
             materials_form.append(form_and_formula_item.input_types)
-            print(f"Form and Formula found for head: {head}")
 
-    print(f"form_and_formula: {materials_form[0][0].input_type}")
-    materials = Material.objects(
-        scope=int(scope_id), sub_scope=int(sub_scope_id), year=year
-    )
-    print(f"Materials found: {len(materials_form),materials_form}")
+    print(f"Materials found: {len(materials)}")
 
-    # Debugging: ตรวจสอบค่าที่ส่งกลับ
-    print(
-        f"Scope ID: {scope_id}, Sub Scope ID: {sub_scope_id}, Page: {page}, Total Pages: {total_pages}"
-    )
-
-    # ตรวจสอบว่าเป็นคำขอ HTMX หรือไม่
     if request.headers.get("HX-Request"):
         return render_template(
             "emissions-scope/partials/emissions-table.html",
@@ -107,14 +100,13 @@ def load_emissions_table():
             materials_form=materials_form,
         )
 
-    # ถ้าไม่ใช่ HTMX ให้โหลดหน้าเต็ม
     return render_template(
         "emissions-scope/view-emissions.html",
         scope_id=scope_id,
         sub_scope_id=sub_scope_id,
         user=current_user,
         year=year,
-        materials_form=materials_form,  # ส่งค่า materials_form ด้วย
+        materials_form=materials_form,
     )
 
 
@@ -352,9 +344,11 @@ def save_materials():
         if form_and_formula:
             materials_form.append(form_and_formula.input_types)
 
+    # กรองข้อมูล Material ตามปีที่เลือก
     materials = Material.objects(
         scope=int(scope_id),
         sub_scope=int(sub_scope_id),
+        year=int(year),  # เพิ่มการกรองปี
         department=current_user.department,  # อ้างอิง department จากผู้ใช้ปัจจุบัน
         campus=current_user.campus,  # อ้างอิง campus จากผู้ใช้ปัจจุบัน
     )
