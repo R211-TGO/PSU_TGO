@@ -21,12 +21,37 @@
             <label for="ghg_scope" class="block text-sm font-medium text-gray-700 mb-2">
                 GHG Scope <span class="text-red-500">*</span>
             </label>
-            <select id="ghg_scope" name="ghg_scope" class="select select-bordered w-full" required onchange="updateSubScope()">
-                <option value="">เลือก GHG Scope</option>
-                <option value="1">Scope 1 - Direct GHG emissions</option>
-                <option value="2">Scope 2 - Electricity indirect GHG emissions</option>
-                <option value="3">Scope 3 - Other indirect GHG emissions</option>
-            </select>
+            <div class="flex items-center gap-2">
+                <div class="relative flex-1">
+                    <input type="number" 
+                           id="ghg_scope" 
+                           name="ghg_scope" 
+                           class="input input-bordered w-full pr-12" 
+                           placeholder="ระบุหมายเลข Scope (เช่น 1, 2, 3)" 
+                           min="1" 
+                           max="99" 
+                           required 
+                           onchange="updateSubScope()"
+                           oninput="updateSubScope()">
+                    <div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col">
+                        <button type="button" 
+                                class="btn btn-xs btn-ghost p-0 h-3 min-h-3 leading-none" 
+                                onclick="incrementScope()"
+                                title="เพิ่ม">
+                            <i data-feather="chevron-up" class="w-3 h-3"></i>
+                        </button>
+                        <button type="button" 
+                                class="btn btn-xs btn-ghost p-0 h-3 min-h-3 leading-none" 
+                                onclick="decrementScope()"
+                                title="ลด">
+                            <i data-feather="chevron-down" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-xs text-gray-500 mt-1">
+                หมายเลข Scope (ตัวอย่าง: 1=Direct GHG emissions, 2=Electricity indirect, 3=Other indirect)
+            </div>
         </div>
 
         <!-- Sub-Scope -->
@@ -122,12 +147,32 @@
 </div>
 
 <script>
+    // ฟังก์ชันเพิ่มค่า Scope
+    function incrementScope() {
+        const scopeInput = document.getElementById("ghg_scope");
+        let currentValue = parseInt(scopeInput.value) || 0;
+        if (currentValue < 99) {
+            scopeInput.value = currentValue + 1;
+            updateSubScope();
+        }
+    }
+
+    // ฟังก์ชันลดค่า Scope
+    function decrementScope() {
+        const scopeInput = document.getElementById("ghg_scope");
+        let currentValue = parseInt(scopeInput.value) || 1;
+        if (currentValue > 1) {
+            scopeInput.value = currentValue - 1;
+            updateSubScope();
+        }
+    }
+
     // ฟังก์ชันอัปเดต Sub-Scope อัตโนมัติ
     function updateSubScope() {
         const ghgScope = document.getElementById("ghg_scope").value;
         const subScopeInput = document.getElementById("ghg_sup_scope");
 
-        if (ghgScope) {
+        if (ghgScope && ghgScope > 0) {
             // แสดง loading
             subScopeInput.value = "กำลังโหลด...";
             subScopeInput.disabled = true;
@@ -171,5 +216,8 @@
         });
     }
 
-
+    // เรียกใช้ Feather icons
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
 </script>
