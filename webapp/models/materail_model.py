@@ -23,6 +23,9 @@ class Material(me.Document):
     create_date = me.DateTimeField(default=datetime.datetime.now)
     update_date = me.DateTimeField(default=datetime.datetime.now)
     sub_scope = me.IntField(required=True)
+    department = me.StringField(required=True)
+    campus = me.StringField(required=True)
+    result = me.StringField(required=True, default="")  # แก้ไขให้เป็น StringField
 
     meta = {
         "collection": "materials",

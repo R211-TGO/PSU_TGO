@@ -238,7 +238,6 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
                 qt.amount = float(amount)
                 updated = True
         if not updated:
-            # Add new field to quantity_type if not found
             material.quantity_type.append(
                 QuantityType(
                     field=field,
@@ -247,10 +246,9 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
                     unit=input_type.unit,
                 )
             )
+        material.department = current_user.department  # อ้างอิง department จากผู้ใช้ปัจจุบัน
+        material.campus = current_user.campus  # อ้างอิง campus จากผู้ใช้ปัจจุบัน
         material.save()
-        print(
-            f"Material updated: {material.quantity_type[0].field} for month: {month_id}"
-        )
     else:
         # Create new material
         new_material = Material(
@@ -261,6 +259,8 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
             year=year,
             day=1,
             form_and_formula=form_and_formula.name,
+            department=current_user.department,  # อ้างอิง department จากผู้ใช้ปัจจุบัน
+            campus=current_user.campus,  # อ้างอิง campus จากผู้ใช้ปัจจุบัน
             quantity_type=[
                 QuantityType(
                     field=input_type.field,
@@ -353,8 +353,12 @@ def save_materials():
             materials_form.append(form_and_formula.input_types)
 
     materials = Material.objects(
-        scope=int(scope_id), sub_scope=int(sub_scope_id), year=int(year)
+        scope=int(scope_id),
+        sub_scope=int(sub_scope_id),
+        department=current_user.department,  # อ้างอิง department จากผู้ใช้ปัจจุบัน
+        campus=current_user.campus,  # อ้างอิง campus จากผู้ใช้ปัจจุบัน
     )
+
     items_per_page = 4
     total_headers = len(head_table)
     total_pages = (total_headers + items_per_page - 1) // items_per_page
