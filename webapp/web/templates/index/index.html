@@ -137,14 +137,14 @@
     </nav>
 
     <!-- Main Content -->
-    <div id="main-content" class="flex-1 transition-all duration-300">
-      <!-- Hero Video Section -->
-      <section class="relative w-full h-screen overflow-hidden">
+    <div id="main-content">
+      <!-- Hero Video Section - อยู่ที่เดิม ไม่เลื่อน -->
+      <section class="hero-video-section relative w-full h-screen overflow-hidden">
         <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover z-0">
           <source src="/static/imagines/dashboard-image.mp4" type="video/mp4">
           Your browser does not support the video tag.
         </video>
-        <div class="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4 ">
+        <div class="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
           <h1 class="text-4xl font-bold animate-fade-up">Understand Your Impact on the Planet</h1>
           <p class="mt-4 text-lg animate-fade-up delay-100">ถ้าเปลี่ยนมาใช้ชีวิตอย่างใส่ใจ ยั่งยืนต่อสิ่งแวดล้อม เรื่องที่สอนคือ Basic Python</p>
           <div class="mt-6 space-x-4 animate-fade-up delay-200">
@@ -154,44 +154,12 @@
         </div>
       </section>
 
-      <!-- Scrollable Body -->
-      <div class="relative z-10 -mt-20 px-4 lg:px-0 pb-10">
+      <!-- Content Area - เลื่อนตาม sidebar -->
+      <div class="content-area relative z-10 -mt-20 px-4 lg:px-0 pb-10">
         {% block body %}
         <div class="px-3 lg:px-5 py-10 mx-auto">
           {% block content %}
-          
-          <!-- Dashboard Section -->
-          <section class="bg-white py-16 px-8 mt-8 rounded-3xl shadow-lg max-w-6xl mx-auto">
-            <div class="text-center">
-              <h2 class="text-2xl font-semibold text-green-900">Your Carbon Dashboard</h2>
-              <p class="mt-2 text-gray-700">
-                Track your process and see the impact of your daily choices on your overall carbon footprint.
-              </p>
-              <div class="mt-6 flex justify-center space-x-4 border-b border-gray-200">
-                <button class="px-4 py-2 text-green-600 border-b-2 border-green-600 font-medium">Week</button>
-                <button class="px-4 py-2 text-gray-600 hover:text-green-600">Month</button>
-                <button class="px-4 py-2 text-gray-600 hover:text-green-600">Year</button>
-              </div>
-            </div>
-            <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-              <div class="bg-gray-50 p-6 rounded-xl shadow">
-                <p class="text-gray-500">Total Emissions</p>
-                <h3 class="text-2xl font-bold">236.8 kg</h3>
-                <p class="text-sm text-gray-400">This week</p>
-              </div>
-              <div class="bg-gray-50 p-6 rounded-xl shadow">
-                <p class="text-gray-500">Daily Average</p>
-                <h3 class="text-2xl font-bold">33.8 kg</h3>
-                <p class="text-sm text-gray-400">15 kg/goal</p>
-              </div>
-              <div class="bg-gray-50 p-6 rounded-xl shadow">
-                <p class="text-gray-500">Reduction</p>
-                <h3 class="text-2xl font-bold text-green-600">16.7%</h3>
-                <p class="text-sm text-gray-400">From previous week</p>
-              </div>
-            </div>
-          </section>
-
+          <!-- เนื้อหาหน้าต่าง ๆ จะแสดงที่นี่ -->
           {% endblock content %}
         </div>
         {% endblock body %}
@@ -206,11 +174,6 @@
     </div>
   </div>
 
-  <!-- Feather Replace Script -->
-  <script>
-    feather.replace();
-  </script>
-
   <style>
     /* Sidebar Transition - สมูธการขยายและหด */
     .sidebar {
@@ -223,54 +186,72 @@
       transition: transform 0.4s ease-in-out;
       z-index: 30;
     }
-
+    
     #sidebar-toggle:checked ~ .sidebar {
       transform: translateX(0);
     }
-
-    /* Navbar - เลื่อนไปขวาเมื่อ sidebar เปิด */
+    
+    /* Navbar - หดขยายตาม sidebar */
     .navbar {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       z-index: 15;
-      transition: margin-left 0.4s ease-in-out;
+      transition: margin-left 0.4s ease-in-out, width 0.4s ease-in-out;
     }
-
+    
     #sidebar-toggle:checked ~ .navbar {
       margin-left: 16rem;
+      width: calc(100% - 16rem);
     }
-
-    /* Main Content - เลื่อนไปขวาเมื่อ sidebar เปิด */
+    
+    /* Main Content */
     #main-content {
-      transition: margin-left 0.4s ease-in-out;
-      margin-top: 5rem; /* เพิ่ม margin-top เพื่อไม่ให้ navbar บังเนื้อหา */
+      margin-top: 5rem;
     }
-
-    #sidebar-toggle:checked ~ #main-content {
+    
+    /* Hero Video Section - ไม่เลื่อนตาม sidebar */
+    .hero-video-section {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+    }
+    
+    /* Content Area - เลื่อนไปขวาเมื่อ sidebar เปิด */
+    .content-area {
+      position: relative;
+      z-index: 10;
+      transition: margin-left 0.4s ease-in-out;
+    }
+    
+    #sidebar-toggle:checked ~ #main-content .content-area {
       margin-left: 16rem;
     }
-
+    
     /* Overlay */
     #sidebar-overlay {
       z-index: 20;
       transition: opacity 0.3s ease;
       pointer-events: none;
     }
-
+    
     #sidebar-toggle:checked ~ #sidebar-overlay {
       opacity: 0.5;
       pointer-events: auto;
     }
-
+    
     /* Responsive Design */
     @media (max-width: 768px) {
       #sidebar-toggle:checked ~ .navbar {
         margin-left: 0;
+        width: 100%;
       }
       
-      #sidebar-toggle:checked ~ #main-content {
+      #sidebar-toggle:checked ~ #main-content .content-area {
         margin-left: 0;
       }
       
@@ -279,15 +260,34 @@
         pointer-events: auto;
       }
     }
-
-    /* ปิดไซด์บาร์เมื่อคลิกที่ overlay */
-    label[for="sidebar-toggle"] {
-      cursor: pointer;
-      z-index: 40;
+    
+    /* Animation Classes */
+    .animate-fade-up {
+      animation: fadeUp 1s ease-out forwards;
+      opacity: 0;
+      transform: translateY(30px);
     }
-  </style>
+    
+    .delay-100 {
+      animation-delay: 0.1s;
+    }
+    
+    .delay-200 {
+      animation-delay: 0.2s;
+    }
+    
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    </style>
 
   <script>
+    // Feather Replace Script
+    feather.replace();
+
     document.addEventListener('DOMContentLoaded', function () {
       const sidebarToggle = document.getElementById('sidebar-toggle');
       const overlay = document.getElementById('sidebar-overlay');
