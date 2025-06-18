@@ -39,6 +39,7 @@ def view_emissions():
         user=current_user,
         years=years,
         ghg_name=ghg_name,
+        current_year=current_year,  # ส่งปีปัจจุบันไปยังเทมเพลต
     )
 
 
