@@ -1,0 +1,432 @@
+{% extends "/base/default_page.html" %}
+{% import "/components/forms/form_renderer.html" as form_renderer %}
+
+
+{% block content %}
+<div class="flex h-screen overflow-hidden">
+    <!-- Main Content - ลบ ml-64 ออก -->
+    <div id="main-content" class="flex-1 flex flex-col">
+      <!-- Scrollable Body - ลบ overflow-y-auto ออก -->
+      <div class="p-6 flex-grow bg-base-200 z-0 overflow-hidden">
+        <!-- Dashboard Header -->
+        <div class="text-center mb-6">
+          <h1 class="text-2xl font-bold text-base-content mb-2">Your Carbon Dashboard</h1>
+          <p class="text-gray-600 text-sm">Track your progress and see the impact of your daily choices on your overall carbon footprint.</p>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="bg-white rounded-lg p-4 mb-4 shadow-sm">
+          <div class="flex items-center mb-3">
+            <i data-feather="filter" class="mr-2"></i>
+            <h2 class="text-lg font-semibold">Filters</h2>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3">
+            <div>
+              <label class="block text-sm font-medium mb-1">Campus</label>
+              <select class="select select-bordered select-sm w-full">
+                <option>Phuket Campus</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Department</label>
+              <select class="select select-bordered select-sm w-full">
+                <option>Hospitality & Tourism</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Scope</label>
+              <select class="select select-bordered select-sm w-full">
+                <option>Select Scopes</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Sub Scope</label>
+              <select class="select select-bordered select-sm w-full">
+                <option>Select Scope first</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Time Period</label>
+              <div class="btn-group">
+                <button class="btn btn-xs btn-primary">Week</button>
+                <button class="btn btn-xs btn-outline">Month</button>
+                <button class="btn btn-xs btn-outline">Year</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <span class="text-sm font-medium">Active Filter :</span>
+            <span class="badge badge-primary badge-sm">Phuket Campus</span>
+            <span class="badge badge-secondary badge-sm">Hospitality & T...</span>
+            <span class="badge badge-warning badge-sm">Scope 2</span>
+            <span class="badge badge-error badge-sm">Administration/Management</span>
+          </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <!-- Total Emissions -->
+          <div class="bg-white rounded-lg p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-medium text-gray-600">Total Emissions</h3>
+              <i data-feather="calendar" class="w-4 h-4 text-gray-400"></i>
+            </div>
+            <div class="text-2xl font-bold text-base-content mb-1">236.8 kg</div>
+            <div class="text-xs text-gray-500">This week</div>
+          </div>
+
+          <!-- Daily Average -->
+          <div class="bg-white rounded-lg p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-medium text-gray-600">Daily Average</h3>
+              <i data-feather="target" class="w-4 h-4 text-gray-400"></i>
+            </div>
+            <div class="text-2xl font-bold text-base-content mb-1">33.8 kg</div>
+            <div class="flex items-center mt-2">
+              <div class="w-full bg-gray-200 rounded-full h-2 mr-3">
+                <div class="bg-primary h-2 rounded-full" style="width: 75%"></div>
+              </div>
+              <div class="text-xs text-gray-500">75%</div>
+            </div>
+            <div class="flex justify-between text-xs text-gray-500 mt-1">
+              <span>0 kg</span>
+              <span>15 kg/day ↓</span>
+            </div>
+          </div>
+
+          <!-- Reduction -->
+          <div class="bg-white rounded-lg p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-medium text-gray-600">Reduction</h3>
+              <i data-feather="trending-down" class="w-4 h-4 text-gray-400"></i>
+            </div>
+            <div class="text-2xl font-bold text-success mb-1">16.7%</div>
+            <div class="text-xs text-gray-500">From previous week</div>
+          </div>
+        </div>
+
+                <!-- Charts Section - ความสูงคงเดิม -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 h-64">
+                    <!-- Emissions Over Time - ขยายให้กว้างขึ้น -->
+                    <div class="lg:col-span-2 bg-white rounded-lg p-4 shadow-sm flex flex-col">
+                      <h3 class="text-lg font-semibold mb-3">Emissions Over Time</h3>
+                      <div class="chart-container flex-1 min-h-0">
+                        <canvas id="emissionsChart"></canvas>
+                      </div>
+                    </div>
+          
+                                        <!-- Category Breakdown -->
+                                        <div class="bg-white rounded-lg p-4 shadow-sm flex flex-col">
+                                            <h3 class="text-lg font-semibold mb-2">Category Breakdown</h3>
+                                            <div class="flex flex-col items-center flex-1">
+                                              <!-- Chart ด้านบน - ใหญ่ขึ้น -->
+                                              <div class="flex items-center justify-center mb-3">
+                                                <div style="width: 130px; height: 130px; position: relative;">
+                                                  <canvas id="categoryChart"></canvas>
+                                                  <div class="absolute inset-0 flex items-center justify-center">
+                                                    <div class="text-center">
+                                                      <div class="text-lg font-bold" id="totalValue">237</div>
+                                                      <div class="text-xs text-gray-500">kg CO2</div>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              
+                                              <!-- Legend ด้านล่าง - แสดงแค่ 3 รายการ -->
+                                              <div class="w-full flex-1 overflow-y-auto" style="max-height: 90px;">
+                                                <div class="space-y-1" id="categoryLegend">
+                                                  <!-- จะถูกสร้างโดย JavaScript -->
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          <script>
+                                            // Initialize Feather Icons
+                                            feather.replace();
+                                        
+                                            // ข้อมูลสำหรับกราฟวงกลม (เรียงจากมากไปน้อย)
+                                            const categoryData = [
+                                              { name: 'Other', value: 72.1, color: '#f59e0b', description: 'Miscellaneous emissions from office equipment, waste management, and other activities' },
+                                              { name: 'Transportation', value: 70.8, color: '#3b82f6', description: 'Vehicle fuel consumption, public transport, and business travel emissions' },
+                                              { name: 'Home Energy', value: 53.8, color: '#22c55e', description: 'Electricity usage, heating, cooling, and home appliances consumption' },
+                                              { name: 'Food & Diet', value: 40.5, color: '#10b981', description: 'Food production, processing, transportation, and waste related emissions' }
+                                            ];
+                                        
+                                            const totalValue = categoryData.reduce((a, b) => a + b.value, 0);
+                                        
+                                            // Emissions Over Time Chart - เพิ่มเส้น trend
+                                            const emissionsCtx = document.getElementById('emissionsChart').getContext('2d');
+                                            const weeklyData = [35, 32, 38, 34, 36, 33, 31];
+                                            
+                                            new Chart(emissionsCtx, {
+                                              type: 'bar',
+                                              data: {
+                                                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                                                datasets: [
+                                                  {
+                                                    type: 'bar',
+                                                    label: 'Daily Emissions (kg CO2)',
+                                                    data: weeklyData,
+                                                    backgroundColor: '#3b82f6',
+                                                    borderRadius: 6,
+                                                    barThickness: 'flex',
+                                                    maxBarThickness: 50,
+                                                    order: 2
+                                                  },
+                                                  {
+                                                    type: 'line',
+                                                    label: 'Trend',
+                                                    data: weeklyData,
+                                                    borderColor: '#ef4444',
+                                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                                    borderWidth: 3,
+                                                    pointBackgroundColor: '#ef4444',
+                                                    pointBorderColor: '#ffffff',
+                                                    pointBorderWidth: 2,
+                                                    pointRadius: 5,
+                                                    pointHoverRadius: 7,
+                                                    tension: 0.4,
+                                                    fill: false,
+                                                    order: 1
+                                                  }
+                                                ]
+                                              },
+                                              options: {
+                                                responsive: true,
+                                                maintainAspectRatio: false,
+                                                interaction: {
+                                                  mode: 'index',
+                                                  intersect: false,
+                                                },
+                                                plugins: {
+                                                  legend: {
+                                                    display: false
+                                                  },
+                                                  tooltip: {
+                                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                                    titleColor: 'white',
+                                                    bodyColor: 'white',
+                                                    borderColor: '#3b82f6',
+                                                    borderWidth: 1,
+                                                    titleFont: {
+                                                      size: 14,
+                                                      weight: 'bold'
+                                                    },
+                                                    bodyFont: {
+                                                      size: 12
+                                                    },
+                                                    padding: 12,
+                                                    callbacks: {
+                                                      title: function(context) {
+                                                        return context[0].label;
+                                                      },
+                                                      label: function(context) {
+                                                        if (context.datasetIndex === 0) {
+                                                          return 'Emissions: ' + context.parsed.y + ' kg CO2';
+                                                        } else {
+                                                          const trend = context.parsed.y > (weeklyData[context.dataIndex - 1] || context.parsed.y) ? '↗️ Increasing' : '↘️ Decreasing';
+                                                          return 'Trend: ' + trend;
+                                                        }
+                                                      },
+                                                      afterBody: function(context) {
+                                                        const index = context[0].dataIndex;
+                                                        const current = weeklyData[index];
+                                                        const previous = weeklyData[index - 1];
+                                                        if (previous) {
+                                                          const change = ((current - previous) / previous * 100).toFixed(1);
+                                                          return change > 0 ? `+${change}% from yesterday` : `${change}% from yesterday`;
+                                                        }
+                                                        return '';
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                scales: {
+                                                  y: {
+                                                    beginAtZero: true,
+                                                    grid: {
+                                                      color: '#f3f4f6'
+                                                    },
+                                                    ticks: {
+                                                      font: {
+                                                        size: 12
+                                                      },
+                                                      callback: function(value) {
+                                                        return value + ' kg';
+                                                      }
+                                                    }
+                                                  },
+                                                  x: {
+                                                    grid: {
+                                                      display: false
+                                                    },
+                                                    ticks: {
+                                                      font: {
+                                                        size: 12
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                layout: {
+                                                  padding: {
+                                                    top: 10,
+                                                    bottom: 10,
+                                                    left: 10,
+                                                    right: 10
+                                                  }
+                                                }
+                                              }
+                                            });
+                                        
+                                            // Category Breakdown Donut Chart
+                                            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+                                            let categoryChart = new Chart(categoryCtx, {
+                                              type: 'doughnut',
+                                              data: {
+                                                labels: categoryData.map(item => item.name),
+                                                datasets: [{
+                                                  data: categoryData.map(item => item.value),
+                                                  backgroundColor: categoryData.map(item => item.color),
+                                                  borderWidth: 2,
+                                                  borderColor: '#ffffff',
+                                                  cutout: '60%',
+                                                  hoverBorderWidth: 4,
+                                                  hoverBorderColor: '#333333'
+                                                }]
+                                              },
+                                              options: {
+                                                responsive: true,
+                                                maintainAspectRatio: false,
+                                                plugins: {
+                                                  legend: {
+                                                    display: false
+                                                  },
+                                                  tooltip: {
+                                                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                                                    titleColor: 'white',
+                                                    bodyColor: 'white',
+                                                    borderColor: '#333333',
+                                                    borderWidth: 1,
+                                                    titleFont: {
+                                                      size: 16,
+                                                      weight: 'bold'
+                                                    },
+                                                    bodyFont: {
+                                                      size: 12,
+                                                      lineHeight: 1.4
+                                                    },
+                                                    padding: 16,
+                                                    displayColors: true,
+                                                    callbacks: {
+                                                      title: function(context) {
+                                                        return '📊 ' + context[0].label;
+                                                      },
+                                                      label: function(context) {
+                                                        const percentage = ((context.parsed / totalValue) * 100).toFixed(1);
+                                                        const item = categoryData[context.dataIndex];
+                                                        return [
+                                                          `💰 Amount: ${context.parsed} kg CO2`,
+                                                          `📈 Percentage: ${percentage}%`,
+                                                          `📊 Total: ${totalValue.toFixed(1)} kg CO2`,
+                                                          '',
+                                                          `📝 Description:`,
+                                                          `${item.description}`
+                                                        ];
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                onHover: (event, elements) => {
+                                                  event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                                                  
+                                                  // Update center value when hovering
+                                                  const totalValueElement = document.getElementById('totalValue');
+                                                  if (elements.length > 0) {
+                                                    const index = elements[0].index;
+                                                    const value = categoryData[index].value;
+                                                    const percentage = ((value / totalValue) * 100).toFixed(1);
+                                                    totalValueElement.textContent = value + ' kg';
+                                                    totalValueElement.nextElementSibling.textContent = percentage + '%';
+                                                  } else {
+                                                    totalValueElement.textContent = totalValue.toFixed(1);
+                                                    totalValueElement.nextElementSibling.textContent = 'kg CO2';
+                                                  }
+                                                }
+                                              }
+                                            });
+                                        
+                                            // สร้าง Legend แบบ 1 คอลัมน์ - แสดงแค่ 3 รายการ
+                                            function createCategoryLegend() {
+                                              const legendContainer = document.getElementById('categoryLegend');
+                                              
+                                              categoryData.forEach((item, index) => {
+                                                const percentage = ((item.value / totalValue) * 100).toFixed(1);
+                                                
+                                                const legendItem = document.createElement('div');
+                                                legendItem.className = 'flex items-center justify-between p-2 rounded hover:bg-gray-50 cursor-pointer transition-all duration-200';
+                                                legendItem.setAttribute('data-index', index);
+                                                
+                                                legendItem.innerHTML = `
+                                                  <div class="flex items-center flex-1">
+                                                    <div class="w-3 h-3 rounded-full mr-2 transition-all duration-200" style="background-color: ${item.color}"></div>
+                                                    <span class="text-sm font-medium">${item.name}</span>
+                                                  </div>
+                                                  <div class="text-right">
+                                                    <div class="text-sm font-bold">${item.value} kg</div>
+                                                    <div class="text-xs text-gray-500">${percentage}%</div>
+                                                  </div>
+                                                `;
+                                                
+                                                // เพิ่ม hover effect และ highlight
+                                                legendItem.addEventListener('mouseenter', () => {
+                                                  // Highlight legend item
+                                                  legendItem.style.backgroundColor = '#e5e7eb';
+                                                  legendItem.style.transform = 'scale(1.02)';
+                                                  
+                                                  // Highlight segment ในกราฟ
+                                                  categoryChart.setActiveElements([{datasetIndex: 0, index: index}]);
+                                                  categoryChart.update('none');
+                                                  
+                                                  // Update center value
+                                                  const totalValueElement = document.getElementById('totalValue');
+                                                  totalValueElement.textContent = item.value + ' kg';
+                                                  totalValueElement.nextElementSibling.textContent = percentage + '%';
+                                                  
+                                                  // Show tooltip-like effect
+                                                  const colorDot = legendItem.querySelector('.w-3');
+                                                  colorDot.style.transform = 'scale(1.3)';
+                                                  colorDot.style.boxShadow = `0 0 8px ${item.color}`;
+                                                });
+                                                
+                                                legendItem.addEventListener('mouseleave', () => {
+                                                  // Remove highlight
+                                                  legendItem.style.backgroundColor = '';
+                                                  legendItem.style.transform = '';
+                                                  
+                                                  // Remove chart highlight
+                                                  categoryChart.setActiveElements([]);
+                                                  categoryChart.update('none');
+                                                  
+                                                  // Reset center value
+                                                  const totalValueElement = document.getElementById('totalValue');
+                                                  totalValueElement.textContent = totalValue.toFixed(1);
+                                                  totalValueElement.nextElementSibling.textContent = 'kg CO2';
+                                                  
+                                                  // Reset color dot
+                                                  const colorDot = legendItem.querySelector('.w-3');
+                                                  colorDot.style.transform = '';
+                                                  colorDot.style.boxShadow = '';
+                                                });
+                                                
+                                                legendContainer.appendChild(legendItem);
+                                              });
+                                            }
+                                        
+                                            // สร้าง legend หลังจากที่ DOM โหลดเสร็จ
+                                            createCategoryLegend();
+                                          </script>
+
+{% endblock content %}
