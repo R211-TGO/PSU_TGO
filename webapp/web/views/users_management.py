@@ -25,6 +25,13 @@ def load_edit_user_role():
     if not user:
         return jsonify({"error": "User not found"}), 404
 
+    campuses = [
+        "hatyai",
+        "phuket", 
+        "surat",
+        "trang"
+    ]
+    
     departments = [
         "IT Department",
         "HR Department",
@@ -35,6 +42,7 @@ def load_edit_user_role():
     form = EditUserForm()
     if request.method == "POST":
         form.username.data = user.username
+        form.campus.data = request.form.get("campus")
         form.department.data = request.form.get("department")
         form.roles.data = request.form.get("roles")
 
@@ -43,6 +51,7 @@ def load_edit_user_role():
             return render_template(
                 "/users-management/form-edit-user-role.html",
                 user=user,
+                campuses=campuses,
                 departments=departments,
                 roles=roles,
                 form=form,
@@ -67,13 +76,16 @@ def load_edit_user_role():
         else:
             return redirect(url_for("users_management.users_management"))
 
+    # โหลดข้อมูลเดิมของผู้ใช้ (ใช้ค่าจาก user object โดยตรง)
     form.username.data = user.username
-    form.department.data = user.department
-    form.roles.data = ",".join(user.roles)
+    form.campus.data = user.campus if user.campus else "none"
+    form.department.data = user.department if user.department else "none" 
+    form.roles.data = ",".join(user.roles) if user.roles and len(user.roles) > 0 else ""
 
     return render_template(
         "/users-management/form-edit-user-role.html",
         user=user,
+        campuses=campuses,
         departments=departments,
         roles=roles,
         form=form,
@@ -92,9 +104,6 @@ def load_users_table():
     # ดึงข้อมูลผู้ใช้เฉพาะหน้าปัจจุบัน
     users = User.objects.skip((page - 1) * per_page).limit(per_page)
 
-    # Debug: ตรวจสอบข้อมูล
-    print(f"Users: {users}")
-    print(f"Page: {page}, Total Pages: {total_pages}")
 
     return render_template(
         "/users-management/users-table.html",

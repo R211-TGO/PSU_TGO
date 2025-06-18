@@ -44,7 +44,9 @@ class UserService:
             return {"success": False, "error_msg": "ไม่พบผู้ใช้"}
 
         user.username = form.username.data
+        user.campus = form.campus.data
         user.department = form.department.data
+        user.email = form.email.data
         user.roles = form.roles.data.split(",")
         user.save()
         return {"success": True, "error_msg": ""}
