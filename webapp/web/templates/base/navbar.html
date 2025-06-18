@@ -9,27 +9,79 @@
   <!-- Page Title -->
   <div class="flex-1 flex flex-col pl-4">
     <span class="text-lg font-bold text-base-content">
-      {% if request.path == '/users/users-management' %}
+      {% if request.path == '/' %}
+        Dashboard
+      {% elif request.path == '/users-management/' %}
         User Management
-      {% elif request.path == '/users/roles-management' %}
+      {% elif request.path.startswith('/users-management/') %}
+        User Management
+      {% elif request.path == '/role-management/' %}
         Role Management
+      {% elif request.path.startswith('/role-management/') %}
+        Role Management
+      {% elif request.path == '/form-management/' %}
+        Form Management
+      {% elif request.path.startswith('/form-management/') %}
+        Form Management
+      {% elif request.path == '/emissions-scope/' %}
+        Emissions Scope
+      {% elif request.path.startswith('/emissions-scope/') %}
+        Emissions Scope
+      {% elif request.path == '/emissions/' %}
+        Emissions Data
+      {% elif request.path.startswith('/emissions/') %}
+        Emissions Data
+      {% elif request.path == '/summary/' %}
+        Summary
+      {% elif request.path.startswith('/summary/') %}
+        Summary
       {% elif request.path == '/reports' %}
         Reports
       {% elif request.path == '/settings' %}
         Settings
+      {% elif request.path == '/profile/' %}
+        Profile
+      {% elif request.path.startswith('/profile/') %}
+        Profile
       {% else %}
         PSU-TGO
       {% endif %}
     </span>
     <span class="text-sm">
-      {% if request.path == '/users/users-management' %}
+      {% if request.path == '/' %}
+        Overview of system status and activities
+      {% elif request.path == '/users-management/' %}
         Manage user accounts and permissions
-      {% elif request.path == '/users/roles-management' %}
+      {% elif request.path.startswith('/users-management/') %}
+        Manage user accounts and permissions
+      {% elif request.path == '/role-management/' %}
         Manage roles and permissions
+      {% elif request.path.startswith('/role-management/') %}
+        Manage roles and permissions
+      {% elif request.path == '/form-management/' %}
+        Create and manage calculation forms
+      {% elif request.path.startswith('/form-management/') %}
+        Create and manage calculation forms
+      {% elif request.path == '/emissions-scope/' %}
+        Manage emission scope categories
+      {% elif request.path.startswith('/emissions-scope/') %}
+        Manage emission scope categories
+      {% elif request.path == '/emissions/' %}
+        Input and track emissions data
+      {% elif request.path.startswith('/emissions/') %}
+        Input and track emissions data
+      {% elif request.path == '/summary/' %}
+        View emissions summary and analysis
+      {% elif request.path.startswith('/summary/') %}
+        View emissions summary and analysis
       {% elif request.path == '/reports' %}
         View and analyze reports
       {% elif request.path == '/settings' %}
         Configure system settings
+      {% elif request.path == '/profile/' %}
+        Manage your account settings
+      {% elif request.path.startswith('/profile/') %}
+        Manage your account settings
       {% else %}
         Welcome to PSU-TGO
       {% endif %}
