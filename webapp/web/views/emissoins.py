@@ -342,7 +342,10 @@ def save_materials():
                 head = parts[1]
                 field = parts[2]
                 amount = request.form.get(key)
-                materials.append({"head": head, "field": field, "amount": amount})
+
+                # เพิ่มเงื่อนไขตรวจสอบ amount ก่อน append
+                if amount and amount.strip():  # เซฟเฉพาะฟิลด์ที่มีการกรอกข้อมูล
+                    materials.append({"head": head, "field": field, "amount": amount})
 
     # Debugging: Print materials data
     print(f"Materials: {materials}")

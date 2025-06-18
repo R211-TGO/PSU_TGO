@@ -1,7 +1,6 @@
 <form hx-post="{{ url_for('emissions.save_materials') }}"
       hx-target="#table-container"
-      hx-swap="innerHTML"
-      onsubmit="return validateForm(event)">
+      hx-swap="innerHTML">
       
     <!-- ส่วนหัวข้อ -->
     <div class="mb-4">
@@ -27,7 +26,6 @@
                       class="input input-bordered w-full"
                       placeholder="ระบุ-{{ input.label }}"
                       value="{{ matched_quantity[0].amount if matched_quantity else '' }}"
-                      required
                     >
                 </div>
             {% endfor %}
@@ -48,37 +46,10 @@
                 hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
             Cancel
         </button>
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" class="btn btn-primary"
+                hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
             Save Changes
         </button>
     </div>
 </form>
 
-<script>
-    function validateForm(event) {
-        const inputs = document.querySelectorAll('input[type="number"]');
-        let isValid = true;
-    
-        inputs.forEach(input => {
-            if (!input.value.trim()) {
-                isValid = false;
-                input.classList.add('border-red-500'); // เพิ่มสไตล์เพื่อแสดงข้อผิดพลาด
-            } else {
-                input.classList.remove('border-red-500');
-            }
-        });
-    
-        if (!isValid) {
-            alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-            event.preventDefault(); // ป้องกันการส่งฟอร์ม
-        } else {
-            // ปิดหน้าโมดัลเมื่อกรอกข้อมูลครบถ้วน
-            const modal = document.getElementById('modal');
-            if (modal) {
-                modal.classList.remove('modal-open');
-            }
-        }
-    
-        return isValid;
-    }
-    </script>
