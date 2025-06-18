@@ -1,7 +1,7 @@
 from flask import abort, Flask, request, redirect, url_for
 from flask_login import current_user, LoginManager, login_url
 from functools import wraps
-from ...models.user_model import User
+from ...models import User, Role, Permission
 
 login_manager = LoginManager()
 
@@ -26,7 +26,47 @@ def roles_required(required_roles: list[str]):
     return decorator
 
 
-def permissions_required(permission: list[str]):
+def permissions_required(required_permissions: list[str]):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if not current_user or not current_user.is_authenticated:
+                abort(401)  # Unauthorized
+            print(55555555555555555)
+            # Query role ของ user
+            try:
+                user_role = Role.objects(name=current_user.roles[0]).first()
+                print(user_role)
+                if not user_role:
+
+                    print(55555555555555555)
+                    abort(403)  # ไม่พบ role
+                print(user_role.name)
+                
+                # เช็คว่า user มี permission ที่ต้องการหรือไม่
+                user_permissions = user_role.permission
+                print(user_permissions)
+                
+                # เช็คว่ามี permission อย่างน้อย 1 ตัวที่ตรงกับที่ต้องการ
+                print(required_permissions)
+                has_permission = user_permissions in required_permissions
+                
+                if has_permission:
+                    print(111111111)
+                    return func(*args, **kwargs)
+                else:
+                    abort(403)  # Forbidden - ไม่มี permission
+                    
+            except Exception as e:
+                print(8888)
+                abort(403)  # Error occurred
+
+        return wrapper
+
+    return decorator
+
+
+def permissions_required2(permission: list[str]):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
