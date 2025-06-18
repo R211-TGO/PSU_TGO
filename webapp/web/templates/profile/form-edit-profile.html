@@ -18,25 +18,15 @@
   <label class="block text-sm font-medium">
       Campus
   </label>
-  <select name="campus" class="select select-bordered w-full">
-      {% for campus in campuses %}
-      <option value="{{ campus }}" {% if campus == form.campus.data %}selected{% endif %}>
-          {{ campus | capitalize }}
-      </option>
-      {% endfor %}
-  </select>
+  <input type="text" name="campus" class="input input-bordered w-full bg-gray-100 cursor-not-allowed" 
+         value="{{ form.campus.data | capitalize }}" readonly disabled>
 </div>
 <div class="mb-2">
   <label class="block text-sm font-medium">
       Department
   </label>
-  <select name="department" class="select select-bordered w-full">
-      {% for department in departments %}
-      <option value="{{ department }}" {% if department == form.department.data %}selected{% endif %}>
-          {{ department }}
-      </option>
-      {% endfor %}
-  </select>
+  <input type="text" name="department" class="input input-bordered w-full bg-gray-100 cursor-not-allowed" 
+         value="{{ form.department.data }}" readonly disabled>
 </div>
 <div class="mt-4 flex justify-end space-x-2">
   <!-- ปุ่ม Cancel -->

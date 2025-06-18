@@ -19,23 +19,14 @@ def load_edit_profile():
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    # ตัวอย่างข้อมูล Department
-    departments = [
-        "IT Department",
-        "HR Department",
-        "Finance Department",
-        "Marketing Department",
-    ]
-    
-    campuses = ["hatyai", "phuket", "surat", "pattani"]
-
     form = EditprofileForm()
     if request.method == "POST":
-        # กรอกข้อมูลจากฟอร์ม
+        # กรอกข้อมูลจากฟอร์ม (ไม่รวม campus และ department)
         form.username.data = request.form.get("username")
         form.email.data = request.form.get("email")
-        form.department.data = request.form.get("department")
-        form.campus.data = request.form.get("campus")  # ดึงข้อมูล campus จากฟอร์ม
+        # เก็บ campus และ department เดิมไว้ (ไม่ให้แก้ไข)
+        form.campus.data = user.campus
+        form.department.data = user.department
 
         # เรียกใช้ UserService เพื่อแก้ไขข้อมูล
         edit_result = UserService.edit_profile(form)
@@ -43,8 +34,6 @@ def load_edit_profile():
             return render_template(
                 "/profile/form-edit-profile.html",
                 user=user,
-                campuses=campuses,
-                departments=departments,
                 form=form,
                 error_msg=edit_result["error_msg"],
             )
@@ -53,14 +42,12 @@ def load_edit_profile():
     # แสดงฟอร์มพร้อมข้อมูลผู้ใช้งาน
     form.username.data = user.username
     form.email.data = user.email
-    form.campus.data = user.campus  # เติมข้อมูล campus เดิมให้ form
+    form.campus.data = user.campus
     form.department.data = user.department
 
     return render_template(
         "/profile/form-edit-profile.html",
         user=user,
-        departments=departments,
-        campuses=campuses,
         form=form,
     )
 

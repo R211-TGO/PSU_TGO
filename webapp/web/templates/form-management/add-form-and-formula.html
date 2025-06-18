@@ -1,14 +1,13 @@
 <div class="max-w-6xl mx-auto px-6 py-8">
-  <!-- <h2 class="text-2xl font-bold text-gray-800 mb-8 border-b pb-2"> -->
-    {{ "Edit Form and Formula" if form else "" }}
-  <!-- </h2> -->
+  <h2 class="text-2xl font-bold text-gray-800 mb-8 border-b pb-2">
+    Add New Form and Formula
+  </h2>
 
-  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 ">
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
     <!-- Left: Create Form Field -->
     <div class="bg-white rounded-[7px] border border-gray-300 shadow-md p-6">
       <h3 class="text-black-600 font-bold text-lg mb-4 border-b border-b-gray-200 pb-3">Create Form Field</h3>
       <form method="POST" action="{{ url_for('form_management.add_form_and_formula') }}">
-        <input type="hidden" name="form_id" value="{{ form.id if form else '' }}">
 
         <!-- Form Metadata -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -19,7 +18,6 @@
               name="name" 
               class="input input-bordered w-full mt-1" 
               placeholder="Enter form name" 
-              value="{{ form.name if form else '' }}" 
               oninput="updatePreview()" 
               required>
           </div>
@@ -31,7 +29,6 @@
               name="material_name" 
               class="input input-bordered w-full mt-1" 
               placeholder="Enter material name" 
-              value="{{ form.material_name if form else '' }}" 
               oninput="updatePreview()" 
               required>
           </div>
@@ -43,7 +40,7 @@
               class="textarea textarea-bordered w-full mt-1" 
               placeholder="Enter form description" 
               oninput="updatePreview()"
-            >{{ form.desc_form if form else '' }}</textarea>
+            ></textarea>
           </div>
         </div>
 
@@ -63,47 +60,47 @@
           </button>
         </div>
 
-<!-- Formula Section -->
-<div class="mt-6">
-  <label class="text-font">Formula</label>
-  <input 
-    type="text" 
-    name="formula" 
-    id="formula" 
-    class="input input-bordered w-full mb-4" 
-    placeholder="e.g. diesel * 2.68" 
-    readonly 
-    required>
+        <!-- Formula Section -->
+        <div class="mt-6">
+          <label class="text-font">Formula</label>
+          <input 
+            type="text" 
+            name="formula" 
+            id="formula" 
+            class="input input-bordered w-full mb-4" 
+            placeholder="e.g. diesel * 2.68" 
+            readonly 
+            required>
 
-  <!-- Formula Buttons Card -->
-  <div class="card bg-white shadow-md p-4">
-    <h4 class="text-lg font-semibold text-gray-700 mb-3">Formula Builder</h4>
+          <!-- Formula Buttons Card -->
+          <div class="card bg-white shadow-md p-4">
+            <h4 class="text-lg font-semibold text-gray-700 mb-3">Formula Builder</h4>
 
-    <!-- Variables Section -->
-    <div class="mb-4">
-      <h5 class="text-md font-medium text-gray-600 mb-2">Variables</h5>
-      <div class="grid grid-cols-4 gap-2" id="variables-buttons">
-        <!-- ปุ่มตัวแปรจะถูกเพิ่มที่นี่ -->
-      </div>
-    </div>
+            <!-- Variables Section -->
+            <div class="mb-4">
+              <h5 class="text-md font-medium text-gray-600 mb-2">Variables</h5>
+              <div class="grid grid-cols-4 gap-2" id="variables-buttons">
+                <!-- ปุ่มตัวแปรจะถูกเพิ่มที่นี่ -->
+              </div>
+            </div>
 
-    <!-- Numbers Section -->
-    <div class="mb-4">
-      <h5 class="text-md font-medium text-gray-600 mb-2">Numbers</h5>
-      <div class="grid grid-cols-3 gap-2" id="numbers-buttons">
-        <!-- ปุ่มตัวเลขจะถูกเพิ่มที่นี่ -->
-      </div>
-    </div>
+            <!-- Numbers Section -->
+            <div class="mb-4">
+              <h5 class="text-md font-medium text-gray-600 mb-2">Numbers</h5>
+              <div class="grid grid-cols-3 gap-2" id="numbers-buttons">
+                <!-- ปุ่มตัวเลขจะถูกเพิ่มที่นี่ -->
+              </div>
+            </div>
 
-    <!-- Operators Section -->
-    <div>
-      <h5 class="text-md font-medium text-gray-600 mb-2">Operators</h5>
-      <div class="grid grid-cols-4 gap-2" id="operators-buttons">
-        <!-- ปุ่มสัญลักษณ์ทางคณิตศาสตร์จะถูกเพิ่มที่นี่ -->
-      </div>
-    </div>
-  </div>
-</div>
+            <!-- Operators Section -->
+            <div>
+              <h5 class="text-md font-medium text-gray-600 mb-2">Operators</h5>
+              <div class="grid grid-cols-4 gap-2" id="operators-buttons">
+                <!-- ปุ่มสัญลักษณ์ทางคณิตศาสตร์จะถูกเพิ่มที่นี่ -->
+              </div>
+            </div>
+          </div>
+        </div>
         
         <div class="sm:col-span-2 mt-4">
           <label class="text-font">Formula Description</label>
@@ -112,7 +109,7 @@
             class="textarea textarea-bordered w-full mt-1" 
             placeholder="Enter formula description" 
             oninput="updatePreview()"
-          >{{ form.desc_formula if form else '' }}</textarea>
+          ></textarea>
         </div>
 
         {% if error_msg %}
@@ -121,7 +118,7 @@
 
         <div class="mt-6 flex justify-end gap-3">
           <button type="button" class="btn btn-outline" onclick="document.getElementById('modal').classList.remove('modal-open')">Cancel</button>
-          <button type="submit" class="btn btn-primary">{{ "Save Changes" if form else "Add Form" }}</button>
+          <button type="submit" class="btn btn-primary">Add Form</button>
         </div>
       </form>
     </div>
@@ -140,9 +137,17 @@
 let inputFieldCount = 0;
 
 function initializeForm() {
-    addInputField(); // เพิ่มฟิลด์เริ่มต้น 1 อันเมื่อโหลดหน้า
-    updatePreview(); // อัปเดตตัวอย่างเมื่อโหลดหน้า
-    updateFormulaButtons(); // อัปเดตปุ่มสำหรับ FORMULA
+    console.log("Initializing add form...");
+    
+    // เพิ่มฟิลด์เริ่มต้น 1 อันเมื่อสร้างใหม่
+    addInputField();
+    
+    // รอให้ DOM อัปเดตแล้วค่อย update
+    setTimeout(() => {
+        updatePreview();
+        updateFormulaButtons();
+        feather.replace();
+    }, 100);
 }
 
 function addInputField(fieldData = {}) {
@@ -197,8 +202,6 @@ function addInputField(fieldData = {}) {
     </div>`;
 
     container.insertAdjacentHTML("beforeend", html);
-    updatePreview();
-    updateFormulaButtons();
 }
 
 function removeField(button) {
@@ -243,7 +246,7 @@ function updateFormulaButtons() {
     }
 
     // เพิ่มปุ่มสำหรับการดำเนินการทางคณิตศาสตร์
-    const operators = ["+", "-", "*", "/", "^", "(", ")"];
+    const operators = ["+", "-", "*", "/", "^", "(", ")", "."];
     operators.forEach(op => {
         const button = document.createElement("button");
         button.type = "button";
@@ -260,18 +263,32 @@ function updateFormulaButtons() {
     backspaceButton.textContent = "⌫";
     backspaceButton.onclick = () => removeLastCharacter();
     operatorsButtons.appendChild(backspaceButton);
+
+    // เพิ่มปุ่มลบทั้งหมด (Clear)
+    const clearButton = document.createElement("button");
+    clearButton.type = "button";
+    clearButton.className = "btn btn-sm btn-warning";
+    clearButton.textContent = "C";
+    clearButton.onclick = () => clearFormula();
+    operatorsButtons.appendChild(clearButton);
 }
 
 function addToFormula(value) {
     const formulaInput = document.getElementById("formula");
     formulaInput.value += value;
-    updatePreview(); // อัปเดตตัวอย่างเมื่อเพิ่มค่า
+    updatePreview();
 }
 
 function removeLastCharacter() {
     const formulaInput = document.getElementById("formula");
-    formulaInput.value = formulaInput.value.slice(0, -1); // ลบตัวอักษรตัวสุดท้าย
-    updatePreview(); // อัปเดตตัวอย่างเมื่อมีการลบ
+    formulaInput.value = formulaInput.value.slice(0, -1);
+    updatePreview();
+}
+
+function clearFormula() {
+    const formulaInput = document.getElementById("formula");
+    formulaInput.value = "";
+    updatePreview();
 }
 
 function updatePreview() {
@@ -332,8 +349,8 @@ function updatePreview() {
     </div>`;
 
     // เพิ่มส่วนล่างสุดสำหรับผู้สร้างและเวลา
-    const currentUser = "current_user"; // เปลี่ยนเป็นตัวแปรที่ส่งมาจาก backend
-    const currentTime = new Date().toLocaleString(); // เวลาปัจจุบันในรูปแบบที่อ่านง่าย
+    const currentUser = "{{ current_user.username if current_user else 'Unknown User' }}";
+    const currentTime = new Date().toLocaleString();
 
     html += `
     <div class="mt-6 text-xs text-gray-500">
@@ -348,8 +365,18 @@ function updatePreview() {
     </div>`;
 
     preview.innerHTML = html || `<p class="italic text-sm text-gray-500">No fields added.</p>`;
-    feather.replace(); // อัปเดตไอคอน Feather
+    feather.replace();
 }
 
-document.addEventListener("DOMContentLoaded", initializeForm);
+// เรียกใช้เมื่อ DOM โหลดเสร็จ
+document.addEventListener("DOMContentLoaded", function() {
+    console.log("DOM loaded, initializing add form...");
+    initializeForm();
+});
+
+// เรียกใช้เมื่อ HTMX โหลดเนื้อหาเสร็จ
+document.addEventListener("htmx:afterSettle", function() {
+    console.log("HTMX settled, initializing add form...");
+    initializeForm();
+});
 </script>

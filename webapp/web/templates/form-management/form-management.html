@@ -11,13 +11,16 @@
           </div>
           <h2 class="text-xl font-semibold">{{ form.name }}</h2>
         </div>
-        <button class="btn btn-ghost" title="Edit"
-          hx-get="{{ url_for('form_management.load_add_form_and_formula', form_id=form.id) }}"
-          hx-target="#modal-content"
-          hx-swap="innerHTML"
-          onclick="document.getElementById('modal').classList.add('modal-open')">
-          <i data-feather="edit" class="w-5 h-5"></i>
-        </button>
+        <div class="flex gap-2">
+          <!-- Edit Button -->
+          <button class="btn btn-ghost" title="Edit"
+            hx-get="{{ url_for('form_management.load_edit_form_and_formula', form_id=form.id) }}"
+            hx-target="#modal-content"
+            hx-swap="innerHTML"
+            onclick="document.getElementById('modal').classList.add('modal-open')">
+            <i data-feather="edit" class="w-5 h-5"></i>
+          </button>
+        </div>
       </div>
       <p class="text-base mt-5">{{ form.desc_form or "-" }}</p>
       <div class="mt-2">
@@ -46,7 +49,7 @@
         hx-get="{{ url_for('form_management.load_add_form_and_formula') }}" 
         hx-target="#modal-content" 
         hx-swap="innerHTML"
-        hx-on="htmx:afterRequest: initializeForm(); document.getElementById('modal').classList.add('modal-open')">
+        onclick="document.getElementById('modal').classList.add('modal-open')">
         <i data-feather="plus-circle" class="w-6 h-6"></i>
         <span>Add New Form</span>
       </button>
