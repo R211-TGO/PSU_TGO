@@ -412,3 +412,169 @@ def save_materials():
                 year=year,
             )
         )
+
+
+@module.route("/delete-material", methods=["POST"])
+@login_required
+def delete_material():
+    scope_id = request.form.get("scope_id")
+    sub_scope_id = request.form.get("sub_scope_id")
+    month_id = request.form.get("month_id")
+    year = request.form.get("year")
+    head = request.form.get("head")
+    page = int(request.form.get("page", 1))  # รับค่าหน้าปัจจุบัน
+
+    print(
+        f"Deleting material: scope_id={scope_id}, sub_scope_id={sub_scope_id}, month_id={month_id}, year={year}, head={head}"
+    )
+
+    if not scope_id or not sub_scope_id or not month_id or not year or not head:
+        return jsonify({"error": "Missing required data"}), 400
+
+    material = Material.objects(
+        month=int(month_id),
+        name=head,
+        scope=int(scope_id),
+        sub_scope=int(sub_scope_id),
+        year=int(year),
+        department=current_user.department,
+        campus=current_user.campus,
+    ).first()
+
+    if material:
+        material.delete()
+        print(f"Material {head} deleted successfully.")
+    else:
+        print(f"Material {head} not found.")
+
+    # รีเฟรชตารางหลังจากลบ
+    scope = Scope.objects(
+        ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
+    ).first()
+    head_table = scope.head_table if scope else []
+    items_per_page = 4
+    total_headers = len(head_table)
+    total_pages = (total_headers + items_per_page - 1) // items_per_page
+    start_index = (page - 1) * items_per_page
+    end_index = start_index + items_per_page
+    current_headers = head_table[start_index:end_index]
+
+    materials_form = []
+    for head in current_headers:
+        form_and_formula = FormAndFormula.objects(material_name=head).first()
+        if form_and_formula:
+            materials_form.append(form_and_formula.input_types)
+
+    materials = Material.objects(
+        scope=int(scope_id),
+        sub_scope=int(sub_scope_id),
+        year=int(year),
+        department=current_user.department,
+        campus=current_user.campus,
+    )
+
+    if request.headers.get("HX-Request"):
+        return render_template(
+            "emissions-scope/partials/emissions-table.html",
+            scope=scope,
+            scope_id=scope_id,
+            sub_scope_id=sub_scope_id,
+            materials=materials,
+            head_table=current_headers,
+            total_pages=total_pages,
+            page=page,
+            user=current_user,
+            year=year,
+            materials_form=materials_form,
+        )
+    else:
+        return redirect(
+            url_for(
+                "emissions.view_emissions",
+                scope_id=scope_id,
+                sub_scope_id=sub_scope_id,
+                year=year,
+            )
+        )
+
+
+@module.route("/delete-all-materials", methods=["POST"])
+@login_required
+def delete_all_materials():
+    scope_id = request.form.get("scope_id")
+    sub_scope_id = request.form.get("sub_scope_id")
+    month_id = request.form.get("month_id")
+    year = request.form.get("year")
+    page = int(request.form.get("page", 1))  # รับค่าหน้าปัจจุบัน
+
+    print(
+        f"Deleting all materials: scope_id={scope_id}, sub_scope_id={sub_scope_id}, month_id={month_id}, year={year}"
+    )
+
+    if not scope_id or not sub_scope_id or not month_id or not year:
+        return jsonify({"error": "Missing required data"}), 400
+
+    materials = Material.objects(
+        month=int(month_id),
+        scope=int(scope_id),
+        sub_scope=int(sub_scope_id),
+        year=int(year),
+        department=current_user.department,
+        campus=current_user.campus,
+    )
+
+    if materials:
+        materials.delete()
+        print(f"All materials deleted successfully.")
+    else:
+        print("No materials found to delete.")
+
+    # รีเฟรชตารางหลังจากลบ
+    scope = Scope.objects(
+        ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
+    ).first()
+    head_table = scope.head_table if scope else []
+    items_per_page = 4
+    total_headers = len(head_table)
+    total_pages = (total_headers + items_per_page - 1) // items_per_page
+    start_index = (page - 1) * items_per_page
+    end_index = start_index + items_per_page
+    current_headers = head_table[start_index:end_index]
+
+    materials_form = []
+    for head in current_headers:
+        form_and_formula = FormAndFormula.objects(material_name=head).first()
+        if form_and_formula:
+            materials_form.append(form_and_formula.input_types)
+
+    materials = Material.objects(
+        scope=int(scope_id),
+        sub_scope=int(sub_scope_id),
+        year=int(year),
+        department=current_user.department,
+        campus=current_user.campus,
+    )
+
+    if request.headers.get("HX-Request"):
+        return render_template(
+            "emissions-scope/partials/emissions-table.html",
+            scope=scope,
+            scope_id=scope_id,
+            sub_scope_id=sub_scope_id,
+            materials=materials,
+            head_table=current_headers,
+            total_pages=total_pages,
+            page=page,
+            user=current_user,
+            year=year,
+            materials_form=materials_form,
+        )
+    else:
+        return redirect(
+            url_for(
+                "emissions.view_emissions",
+                scope_id=scope_id,
+                sub_scope_id=sub_scope_id,
+                year=year,
+            )
+        )

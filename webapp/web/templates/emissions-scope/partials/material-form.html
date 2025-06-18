@@ -31,14 +31,33 @@
     <input type="hidden" name="input_field" value="{{ input_field }}">
     
 
-    <div class="mt-4 flex justify-end space-x-2">
-        <button type="button" class="btn btn-outline"
+    <div class="mt-4 flex justify-between items-center">
+        <!-- ปุ่มลบ -->
+        <button type="button" class="btn btn-danger px-4 py-2 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out"
+                hx-post="{{ url_for('emissions.delete_material') }}"
+                hx-target="#table-container"
+                hx-swap="innerHTML"
+                hx-vals='{
+                    "scope_id": "{{ request.args.get("scope_id") }}",
+                    "sub_scope_id": "{{ request.args.get("sub_scope_id") }}",
+                    "month_id": "{{ month_id }}",
+                    "year": "{{ request.args.get("year") }}",
+                    "head": "{{ head }}"
+                }'
                 hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
-            Cancel
+            Delete
         </button>
-        <button type="submit" class="btn btn-primary"
-                hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
-            Save Changes
-        </button>
+
+        <!-- ปุ่ม Cancel และ Save Changes -->
+        <div class="flex space-x-2">
+            <button type="button" class="btn btn-outline"
+                    hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
+                Cancel
+            </button>
+            <button type="submit" class="btn btn-primary"
+                    hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
+                Save Changes
+            </button>
+        </div>
     </div>
 </form>
