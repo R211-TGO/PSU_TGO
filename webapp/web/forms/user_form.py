@@ -16,7 +16,9 @@ class RegisterForm(FlaskForm):
 
 class EditUserForm(FlaskForm):
     username = StringField("Username", validators=[DataRequired()])
+    campus = StringField("Campus")
     department = StringField("Department")
+    email = EmailField("Email", validators=[DataRequired()])
     roles = StringField("Roles")
     # Add any other fields you need for editing the user
 

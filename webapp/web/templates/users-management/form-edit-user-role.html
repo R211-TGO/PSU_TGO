@@ -2,12 +2,23 @@
       hx-target="#users-table-container"
       hx-swap="innerHTML">
     <div class="mb-2">
-        <label class="block text-sm font-medium">Full Name</label>
-        <input type="text" name="username" class="input input-bordered w-full" value="{{ form.username.data }}" readonly>
+        <label class="block text-sm font-medium">User Name</label>
+        <input type="text" name="username" class="input input-bordered w-full" value="{{ form.username.data }}" readonly disabled>
     </div>
     <div class="mb-2">
         <label class="block text-sm font-medium">Email</label>
-        <input type="email" name="email" class="input input-bordered w-full" value="{{ user.email }}" readonly>
+        <input type="email" name="email" class="input input-bordered w-full" value="{{ user.email }}" readonly disabled>
+    </div>
+    <div class="mb-2">
+        <label class="block text-sm font-medium">Campus</label>
+        <select name="campus" class="select select-bordered w-full">
+            <option value="none" {% if not user.campus or user.campus not in campuses %}selected{% endif %}>None</option>
+            {% for campus in campuses %}
+            <option value="{{ campus }}" {% if form.campus.data == campus %}selected{% endif %}>
+                {{ campus | capitalize }}
+            </option>
+            {% endfor %}
+        </select>
     </div>
     <div class="mb-2">
         <label class="block text-sm font-medium">Department</label>
@@ -35,7 +46,8 @@
                 hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
             Cancel
         </button>
-        <button type="submit" class="btn btn-primary"hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
-            Update</button>
+        <button type="submit" class="btn btn-primary" hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
+            Update
+        </button>
     </div>
 </form>

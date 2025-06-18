@@ -97,16 +97,23 @@
       </div>
 
       <!-- ปุ่ม -->
-      <div class="flex justify-end gap-3 pt-4 border-t">
-          <button type="button" class="btn btn-outline" 
-                  onclick="document.getElementById('modal').classList.remove('modal-open')">
-              <i data-feather="x" class="w-4 h-4 mr-2"></i>
-              ยกเลิก
-          </button>
-          <button type="submit" name="action" value="save" class="btn btn-primary">
-              <i data-feather="save" class="w-4 h-4 mr-2"></i>
-              บันทึกการแก้ไข
-          </button>
+      <div class="flex justify-between pt-4 border-t">
+          <!-- ปุ่มลบ - เหมือน Sign Out -->
+          <button type="button" class="btn btn-outline btn-error" 
+                  onclick="confirmDeleteScope({{ scope.ghg_scope }}, {{ scope.ghg_sup_scope }}, '{{ scope.ghg_name }}')">
+              Delete Scope
+          </button>  
+          
+          <!-- ปุ่มบันทึกและยกเลิก -->
+          <div class="flex gap-3">
+              <button type="button" class="btn btn-outline" 
+                      onclick="document.getElementById('modal').classList.remove('modal-open')">
+                  Cancel
+              </button>
+              <button type="submit" name="action" value="save" class="btn btn-primary">
+                  Save Changes
+              </button>
+          </div>
       </div>
   </form>
 </div>
@@ -126,6 +133,34 @@
       checkboxes.forEach(checkbox => {
           checkbox.checked = false;
       });
+  }
+
+  // ฟังก์ชันยืนยันการลบ Scope
+  function confirmDeleteScope(ghgScope, ghgSupScope, ghgName) {
+      if (confirm(`คุณแน่ใจหรือไม่ที่จะลบ Scope ${ghgScope}.${ghgSupScope}: "${ghgName}"?\n\nการดำเนินการนี้ไม่สามารถย้อนกลับได้`)) {
+          fetch(`{{ url_for('emissions_scope.delete_scope', ghg_scope=0, ghg_sup_scope=0) }}`.replace('0/0', `${ghgScope}/${ghgSupScope}`), {
+              method: 'DELETE',
+              headers: {
+                  'Content-Type': 'application/json',
+              }
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.success) {
+                  // ปิด modal และรีโหลดหน้า
+                  document.getElementById('modal').classList.remove('modal-open');
+                  setTimeout(() => {
+                      location.reload();
+                  }, 300);
+              } else {
+                  alert('Error: ' + data.message);
+              }
+          })
+          .catch(error => {
+              console.error('Error:', error);
+              alert('เกิดข้อผิดพลาดในการลบ Scope');
+          });
+      }
   }
 
   // เรียกใช้ Feather icons

@@ -104,7 +104,6 @@ def calculate_scope_progress(scope, total_years):
     
     # คำนวณ Progress
     progress = (filled_fields / total_fields_required) * 100
-    print(f"{filled_fields} / {total_fields_required} = {progress}%")  # Debugging output
     
     # จำกัดไม่ให้เกิน 100%
     return min(progress, 100)
@@ -283,3 +282,51 @@ def edit_scope(ghg_scope, ghg_sup_scope):
         scope=scope,
         material_names=material_names
     )
+
+
+@module.route("/delete/<int:ghg_scope>/<int:ghg_sup_scope>", methods=["DELETE"])
+@login_required
+def delete_scope(ghg_scope, ghg_sup_scope):
+    """ลบ Scope"""
+    try:
+        # ค้นหา Scope ที่ต้องการลบตาม campus และ department ของ current_user
+        scope = Scope.objects(
+            ghg_scope=ghg_scope,
+            ghg_sup_scope=ghg_sup_scope,
+            campus=current_user.campus,
+            department=current_user.department
+        ).first()
+        
+        if not scope:
+            return jsonify({
+                "success": False, 
+                "message": "ไม่พบ Scope ที่ต้องการลบ หรือคุณไม่มีสิทธิ์เข้าถึง"
+            }), 404
+        
+        # ตรวจสอบว่ามี Material ที่เชื่อมโยงกับ Scope นี้หรือไม่
+        related_materials = Material.objects(
+            scope=ghg_scope,
+            sub_scope=ghg_sup_scope,
+            campus=current_user.campus,
+            department=current_user.department
+        )
+        
+        if related_materials.count() > 0:
+            return jsonify({
+                "success": False,
+                "message": f"ไม่สามารถลบ Scope ได้ เนื่องจากมีข้อมูล Material {related_materials.count()} รายการที่เชื่อมโยงอยู่"
+            }), 400
+        
+        # ลบ Scope
+        scope.delete()
+        
+        return jsonify({
+            "success": True,
+            "message": f"ลบ Scope {ghg_scope}.{ghg_sup_scope} สำเร็จ"
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"เกิดข้อผิดพลาด: {str(e)}"
+        }), 500
