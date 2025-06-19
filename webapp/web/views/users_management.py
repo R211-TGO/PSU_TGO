@@ -99,12 +99,15 @@ def load_users_table():
 
     selected_campus = request.args.get("campus", None)
     selected_department = request.args.get("department", None)
+    search_query = request.args.get("search", "").strip()
 
     query = {}
     if selected_campus and selected_campus != "All Campuses":
         query["campus"] = selected_campus
     if selected_department and selected_department != "All Faculties":
         query["department"] = selected_department
+    if search_query:
+        query["username__icontains"] = search_query
 
     total_users = User.objects(**query).count()
     total_pages = (total_users + per_page - 1) // per_page
@@ -117,4 +120,6 @@ def load_users_table():
         total_pages=total_pages,
         campuses=get_campuses(),
         departments=get_departments(),
+        selected_campus=selected_campus,
+        selected_department=selected_department,
     )

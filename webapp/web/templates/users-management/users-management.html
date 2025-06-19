@@ -11,6 +11,11 @@
           type="text" 
           placeholder="Search users..." 
           class="input input-bordered pl-10 w-full"
+          name="search" 
+          hx-get="{{ url_for('users_management.load_users_table') }}" 
+          hx-target="#users-table-container" 
+          hx-swap="innerHTML"
+          hx-include="[name=search],[name=campus],[name=department]" 
         />
       </div>
       <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
@@ -20,11 +25,14 @@
             hx-get="{{ url_for('users_management.load_users_table') }}" 
             hx-target="#users-table-container" 
             hx-swap="innerHTML"
-            hx-include="[name=campus],[name=department]"
+            hx-trigger="change"  
+            hx-include="[name=department]"  
             name="campus">
-            <option>All Campuses</option>
+            <option {% if selected_campus == "All Campuses" or not selected_campus %}selected{% endif %}>All Campuses</option>
             {% for campus in campuses %}
-              <option value="{{ campus }}">{{ campus | capitalize }}</option>
+              <option value="{{ campus }}" {% if selected_campus == campus %}selected{% endif %}>
+                {{ campus | capitalize }}
+              </option>
             {% endfor %}
           </select>
           <i data-feather="chevron-down" class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 w-4 h-4"></i>
@@ -35,11 +43,14 @@
             hx-get="{{ url_for('users_management.load_users_table') }}" 
             hx-target="#users-table-container" 
             hx-swap="innerHTML"
-            hx-include="[name=campus],[name=department]"
+            hx-trigger="change"  
+            hx-include="[name=campus]" 
             name="department">
-            <option>All Faculties</option>
+            <option {% if selected_department == "All Faculties" or not selected_department %}selected{% endif %}>All Faculties</option>
             {% for department in departments %}
-              <option value="{{ department }}">{{ department }}</option>
+              <option value="{{ department }}" {% if selected_department == department %}selected{% endif %}>
+                {{ department }}
+              </option>
             {% endfor %}
           </select>
           <i data-feather="chevron-down" class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 w-4 h-4"></i>
@@ -54,7 +65,8 @@
      hx-get="{{ url_for('users_management.load_users_table') }}" 
      hx-trigger="load" 
      hx-target="#users-table-container" 
-     hx-swap="innerHTML">
+     hx-swap="innerHTML"
+     hx-include="[name=campus],[name=department],[name=search]">
     <!-- ตารางจะถูกโหลดที่นี่ -->
 </div>
     <!-- Feather Replace Script -->
