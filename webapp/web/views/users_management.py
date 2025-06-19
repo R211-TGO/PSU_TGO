@@ -3,9 +3,22 @@ from flask_login import login_required, logout_user, current_user
 from ..forms.user_form import LoginForm, RegisterForm, EditUserForm, EditprofileForm
 from ...services.user_service import UserService
 from ...models import User, Role, Permission
-from ..utils.acl import permissions_required 
+from ..utils.acl import permissions_required
 
 module = Blueprint("users_management", __name__, url_prefix="/users-management")
+
+
+def get_campuses():
+    return ["hatyai", "phuket", "surat", "trang"]
+
+
+def get_departments():
+    return [
+        "IT Department",
+        "HR Department",
+        "Finance Department",
+        "Marketing Department",
+    ]
 
 
 @module.route("/", methods=["get", "post"])
@@ -13,7 +26,12 @@ module = Blueprint("users_management", __name__, url_prefix="/users-management")
 # @permissions_required(['edit_management', 'view_management'])
 def users_management():
     users = User.objects()
-    return render_template("/users-management/users-management.html", users=users)
+    return render_template(
+        "/users-management/users-management.html",
+        users=users,
+        campuses=get_campuses(),
+        departments=get_departments(),
+    )
 
 
 @module.route("/load-edit-user-role", methods=["GET", "POST"])
@@ -25,19 +43,6 @@ def load_edit_user_role():
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    campuses = [
-        "hatyai",
-        "phuket", 
-        "surat",
-        "trang"
-    ]
-    
-    departments = [
-        "IT Department",
-        "HR Department",
-        "Finance Department",
-        "Marketing Department",
-    ]
     roles = Role.objects()
     form = EditUserForm()
     if request.method == "POST":
@@ -51,42 +56,35 @@ def load_edit_user_role():
             return render_template(
                 "/users-management/form-edit-user-role.html",
                 user=user,
-                campuses=campuses,
-                departments=departments,
+                campuses=get_campuses(),
+                departments=get_departments(),
                 roles=roles,
                 form=form,
                 error_msg=edit_result["error_msg"],
             )
 
-        # อัปเดตตารางผู้ใช้
         users = User.objects.skip((page - 1) * 10).limit(10)
-
-        # ตรวจสอบว่าเป็นคำขอ HTMX หรือไม่
-        # ถ้าใช่ให้ส่งกลับ HTML ของตารางผู้ใช้
 
         if request.headers.get("HX-Request"):
             return render_template(
                 "/users-management/users-table.html",
                 users=users,
                 page=page,
-                total_pages=(User.objects.count() + 9) // 10,  # + 9 เพื่อปัดเศษขึ้น
+                total_pages=(User.objects.count() + 9) // 10,
             )
-        # ถ้าไม่ใช่ให้เปลี่ยนเส้นทางไปยังหน้า users-management
-        # โดยไม่ต้องโหลดใหม่ทั้งหน้า
         else:
             return redirect(url_for("users_management.users_management"))
 
-    # โหลดข้อมูลเดิมของผู้ใช้ (ใช้ค่าจาก user object โดยตรง)
     form.username.data = user.username
     form.campus.data = user.campus if user.campus else "none"
-    form.department.data = user.department if user.department else "none" 
+    form.department.data = user.department if user.department else "none"
     form.roles.data = ",".join(user.roles) if user.roles and len(user.roles) > 0 else ""
 
     return render_template(
         "/users-management/form-edit-user-role.html",
         user=user,
-        campuses=campuses,
-        departments=departments,
+        campuses=get_campuses(),
+        departments=get_departments(),
         roles=roles,
         form=form,
         page=page,
@@ -96,18 +94,27 @@ def load_edit_user_role():
 @module.route("/load-users-table", methods=["GET", "POST"])
 @login_required
 def load_users_table():
-    page = int(request.args.get("page", 1))  # รับค่าหน้าปัจจุบันจาก query string
-    per_page = 10  # จำนวนผู้ใช้ต่อหน้า
-    total_users = User.objects.count()  # จำนวนผู้ใช้ทั้งหมด
-    total_pages = (total_users + per_page - 1) // per_page  # คำนวณจำนวนหน้าทั้งหมด
+    page = int(request.args.get("page", 1))
+    per_page = 10
 
-    # ดึงข้อมูลผู้ใช้เฉพาะหน้าปัจจุบัน
-    users = User.objects.skip((page - 1) * per_page).limit(per_page)
+    selected_campus = request.args.get("campus", None)
+    selected_department = request.args.get("department", None)
 
+    query = {}
+    if selected_campus and selected_campus != "All Campuses":
+        query["campus"] = selected_campus
+    if selected_department and selected_department != "All Faculties":
+        query["department"] = selected_department
+
+    total_users = User.objects(**query).count()
+    total_pages = (total_users + per_page - 1) // per_page
+    users = User.objects(**query).skip((page - 1) * per_page).limit(per_page)
 
     return render_template(
         "/users-management/users-table.html",
-        users=users,  # ส่งผู้ใช้ในหน้าปัจจุบัน
+        users=users,
         page=page,
-        total_pages=total_pages,  # จำนวนหน้าทั้งหมด
+        total_pages=total_pages,
+        campuses=get_campuses(),
+        departments=get_departments(),
     )
