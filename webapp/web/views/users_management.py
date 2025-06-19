@@ -39,6 +39,10 @@ def users_management():
 def load_edit_user_role():
     user_id = request.args.get("user_id")
     page = int(request.args.get("page", 1))
+    selected_campus = request.args.get("campus", None)
+    selected_department = request.args.get("department", None)
+    search_query = request.args.get("search", "").strip()  # รับค่าของ search
+
     user = User.objects.with_id(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
@@ -63,14 +67,27 @@ def load_edit_user_role():
                 error_msg=edit_result["error_msg"],
             )
 
-        users = User.objects.skip((page - 1) * 10).limit(10)
+        query = {}
+        if selected_campus and selected_campus != "All Campuses":
+            query["campus"] = selected_campus
+        if selected_department and selected_department != "All Faculties":
+            query["department"] = selected_department
+        if search_query:  # ใช้ search ในการคิวรี่
+            query["username__icontains"] = search_query
+
+        users = User.objects(**query).skip((page - 1) * 10).limit(10)
 
         if request.headers.get("HX-Request"):
             return render_template(
                 "/users-management/users-table.html",
                 users=users,
                 page=page,
-                total_pages=(User.objects.count() + 9) // 10,
+                total_pages=(User.objects(**query).count() + 9) // 10,
+                campuses=get_campuses(),
+                departments=get_departments(),
+                selected_campus=selected_campus,
+                selected_department=selected_department,
+                search_query=search_query,  # ส่ง search กลับไปด้วย
             )
         else:
             return redirect(url_for("users_management.users_management"))
@@ -88,6 +105,9 @@ def load_edit_user_role():
         roles=roles,
         form=form,
         page=page,
+        selected_campus=selected_campus,
+        selected_department=selected_department,
+        search_query=search_query,  # ส่ง search กลับไปด้วย
     )
 
 

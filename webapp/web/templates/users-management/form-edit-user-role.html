@@ -1,4 +1,4 @@
-<form hx-post="{{ url_for('users_management.load_edit_user_role', user_id=user.id, page=page) }}"
+<form hx-post="{{ url_for('users_management.load_edit_user_role', user_id=user.id, page=page, campus=selected_campus, department=selected_department, search=search_query) }}"
       hx-target="#users-table-container"
       hx-swap="innerHTML">
     <div class="mb-2">
