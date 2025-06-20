@@ -168,6 +168,7 @@ def load_materials_form():
     year = request.args.get("year")
     scope_id = request.args.get("scope_id")
     sub_scope_id = request.args.get("sub_scope_id")
+    month = request.args.get("month")
     print("<<<<<<<<<<<<<<<<<<<<<<", scope_id, sub_scope_id, month_id, year)
 
     # ดึงข้อมูล materials
@@ -197,6 +198,7 @@ def load_materials_form():
         year=year,
         scope_id=scope_id,
         sub_scope_id=sub_scope_id,
+        month=month,
     )
 
 

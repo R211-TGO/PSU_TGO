@@ -1,24 +1,28 @@
-<form hx-post="{{ url_for('emissions.save_materials') }}"
-      hx-target="#table-container"
-      hx-swap="innerHTML">
-    
-    <div class="mb-4">
-        <label class="text-gray-700">ประเภท:</label>
-        <div class="block text-sm font-medium mb-1">{{ head }}</div>
-        <input type="hidden" name="head" value="{{ head }}">
-    </div>
+<form 
+  hx-post="{{ url_for('emissions.save_materials') }}"
+  hx-target="#table-container"
+  hx-swap="innerHTML"
+>
+  <div class="mt-2">
+    <h2 class="font-medium text-2xl text-gray-900 px-1 mb-4">
+      แก้ไขข้อมูลประจำเดือน {{ month }} ({{ year }})
+    </h2>
 
-    <div class="mb-4">
-        <label class="block text-sm font-medium mb-1">ข้อมูล:</label>
-        <input
-          type="number"
-          step="any"
-          name="amount"
-          class="input input-bordered w-full"
-          placeholder="ระบุ-ข้อมูล"
-          value="{{ amount if amount is not none else '' }}"
-          required
-        >
+    <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50 mb-4">
+      <label class="text-gray-700">ประเภท :</label>
+      <div class="block text-sm font-medium mb-1">{{ head }}</div>
+      <input type="hidden" name="head" value="{{ head }}">
+
+      <label class="block text-sm font-medium mb-1">ข้อมูล:</label>
+      <input
+        type="number"
+        step="any"
+        name="amount"
+        class="input input-bordered w-full"
+        placeholder="ระบุ-ข้อมูล"
+        value="{{ amount if amount is not none else '' }}"
+        required
+      >
     </div>
 
     <!-- Hidden Inputs -->
@@ -29,35 +33,37 @@
     <input type="hidden" name="month_id" value="{{ month_id }}">
     <input type="hidden" name="input_label" value="{{ input_label }}">
     <input type="hidden" name="input_field" value="{{ input_field }}">
-    
 
     <div class="mt-4 flex justify-between items-center">
-        <!-- ปุ่มลบ -->
-        <button type="button" class="btn btn-danger px-4 py-2 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out"
-                hx-post="{{ url_for('emissions.delete_material') }}"
-                hx-target="#table-container"
-                hx-swap="innerHTML"
-                hx-vals='{
-                    "scope_id": "{{ request.args.get("scope_id") }}",
-                    "sub_scope_id": "{{ request.args.get("sub_scope_id") }}",
-                    "month_id": "{{ month_id }}",
-                    "year": "{{ request.args.get("year") }}",
-                    "head": "{{ head }}"
-                }'
-                hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
-            Delete
-        </button>
+      <!-- ปุ่มลบ -->
+      <button type="button"
+        class="btn btn-outline btn-error px-4 py-2 text-red rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out"
+        hx-post="{{ url_for('emissions.delete_material') }}"
+        hx-target="#table-container"
+        hx-swap="innerHTML"
+        hx-vals='{
+          "scope_id": "{{ request.args.get("scope_id") }}",
+          "sub_scope_id": "{{ request.args.get("sub_scope_id") }}",
+          "month_id": "{{ month_id }}",
+          "year": "{{ request.args.get("year") }}",
+          "head": "{{ head }}"
+        }'
+        hx-on="click: document.getElementById('modal').classList.remove('modal-open')"
+      >
+        Delete
+      </button>
 
-        <!-- ปุ่ม Cancel และ Save Changes -->
-        <div class="flex space-x-2">
-            <button type="button" class="btn btn-outline"
-                    hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
-                Cancel
-            </button>
-            <button type="submit" class="btn btn-primary"
-                    hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
-                Save Changes
-            </button>
-        </div>
+      <!-- ปุ่ม Cancel และ Save Changes -->
+      <div class="flex space-x-2">
+        <button type="button" class="btn btn-outline"
+          hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary"
+          hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
+          Save Changes
+        </button>
+      </div>
     </div>
+  </div>
 </form>
