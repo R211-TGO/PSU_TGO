@@ -26,44 +26,98 @@ def roles_required(required_roles: list[str]):
     return decorator
 
 
-def permissions_required(required_permissions: list[str]):
+def permissions_required_any(required_permissions: list[str]):
+    """
+    ตรวจสอบว่า user มี permission อย่างน้อย 1 ตัวใน list ที่ต้องการ
+    รองรับ: 1 user หลาย roles, 1 role หลาย permissions
+    
+    Example:
+    @permissions_required_any(['view_users', 'edit_users'])
+    # User ต้องมี permission อย่างน้อย 1 ใน 2 ตัวนี้
+    """
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             if not current_user or not current_user.is_authenticated:
-                abort(401)  # Unauthorized
-            print(55555555555555555)
-            # Query role ของ user
+                abort(401)
+            
+            if not current_user.roles:
+                abort(403)
+            
             try:
-                user_role = Role.objects(name=current_user.roles[0]).first()
-                print(user_role)
-                if not user_role:
-
-                    print(55555555555555555)
-                    abort(403)  # ไม่พบ role
-                print(user_role.name)
-                
-                # เช็คว่า user มี permission ที่ต้องการหรือไม่
-                user_permissions = user_role.permission
-                print(user_permissions)
-                
-                # เช็คว่ามี permission อย่างน้อย 1 ตัวที่ตรงกับที่ต้องการ
-                print(required_permissions)
-                has_permission = user_permissions in required_permissions
+                user_permissions = _get_user_permissions()
+                has_permission = any(perm in user_permissions for perm in required_permissions)
                 
                 if has_permission:
-                    print(111111111)
                     return func(*args, **kwargs)
                 else:
-                    abort(403)  # Forbidden - ไม่มี permission
+                    abort(403)
                     
-            except Exception as e:
-                print(8888)
-                abort(403)  # Error occurred
+            except Exception:
+                abort(403)
 
         return wrapper
-
     return decorator
+
+
+def permissions_required_all(required_permissions: list[str]):
+    """
+    ตรวจสอบว่า user มี permission ครบทุกตัวใน list ที่ต้องการ
+    รองรับ: 1 user หลาย roles, 1 role หลาย permissions
+    
+    Example:
+    @permissions_required_all(['view_users', 'edit_users', 'delete_users'])
+    # User ต้องมี permission ครบทั้ง 3 ตัว
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if not current_user or not current_user.is_authenticated:
+                abort(401)
+            
+            if not current_user.roles:
+                abort(403)
+            
+            try:
+                user_permissions = _get_user_permissions()
+                has_all_permissions = all(perm in user_permissions for perm in required_permissions)
+                
+                if has_all_permissions:
+                    return func(*args, **kwargs)
+                else:
+                    abort(403)
+                    
+            except Exception:
+                abort(403)
+
+        return wrapper
+    return decorator
+
+
+def permissions_required(required_permissions: list[str]):
+    """
+    Alias สำหรับ permissions_required_any เพื่อ backward compatibility
+    """
+    return permissions_required_any(required_permissions)
+
+
+def _get_user_permissions():
+    """
+    Helper function: รวม permissions จากทุก roles ของ user
+    """
+    user_permissions = set()  # ใช้ set เพื่อไม่ให้ซ้ำ
+    
+    for role_name in current_user.roles:
+        role = Role.objects(name=role_name).first()
+        if role and role.permission:
+            # ถ้า permission เป็น list
+            if isinstance(role.permission, list):
+                user_permissions.update(role.permission)
+            # ถ้า permission เป็น string
+            else:
+                user_permissions.add(role.permission)
+    
+    return list(user_permissions)
 
 
 def permissions_required2(permission: list[str]):

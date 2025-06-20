@@ -10,7 +10,7 @@ def emissions_scope():
     scopes = Scope.objects(
         campus=current_user.campus,
         department=current_user.department
-    ).order_by("ghg_scope")
+    ).order_by("ghg_scope", "ghg_sup_scope")
     
     # ดึงปีทั้งหมดที่มีในฐานข้อมูล Material
     all_years = Material.objects().distinct("year")
@@ -46,12 +46,12 @@ def emissions_scope():
         # เพิ่ม Progress รวม
         overall_progress += progress
         
-        grouped_scopes[main_scope].append({
-            "id": scope.ghg_sup_scope,  # เปลี่ยนจาก ghg_scope เป็น ghg_sup_scope
-            "title": scope.ghg_name,
-            "progress": round(progress, 1),  # ปัดเศษให้ 1 ตำแหน่ง
-            "status": status
-        })
+        # เพิ่ม progress และ status เข้าไปใน scope object
+        scope.progress = round(progress, 1)
+        scope.status = status
+        
+        # ส่ง scope object ทั้งหมดไปเลย
+        grouped_scopes[main_scope].append(scope)
     
     # คำนวณ Overall Progress
     overall_progress = round(overall_progress / total_sources, 1) if total_sources > 0 else 0
@@ -330,3 +330,34 @@ def delete_scope(ghg_scope, ghg_sup_scope):
             "success": False,
             "message": f"เกิดข้อผิดพลาด: {str(e)}"
         }), 500
+
+
+@module.route("/scope-description/<int:ghg_scope>/<int:ghg_sup_scope>", methods=["GET"])
+@login_required
+def scope_description(ghg_scope, ghg_sup_scope):
+    """แสดง popup description ของ Scope"""
+    try:
+        # ค้นหา Scope ที่ต้องการ
+        scope = Scope.objects(
+            ghg_scope=ghg_scope,
+            ghg_sup_scope=ghg_sup_scope,
+            campus=current_user.campus,
+            department=current_user.department
+        ).first()
+        
+        if not scope:
+            return render_template(
+                "/emissions-scope/partials/scope-description-modal.html",
+                error="ไม่พบข้อมูล Scope ที่ต้องการ"
+            )
+        
+        return render_template(
+            "/emissions-scope/partials/scope-description-modal.html",
+            scope=scope
+        )
+        
+    except Exception as e:
+        return render_template(
+            "/emissions-scope/partials/scope-description-modal.html",
+            error=f"เกิดข้อผิดพลาด: {str(e)}"
+        )

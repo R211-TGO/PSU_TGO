@@ -1,0 +1,127 @@
+{% if error %}
+  <!-- Error State -->
+  <div class="modal-box max-w-2xl">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-lg text-red-600">เกิดข้อผิดพลาด</h3>
+      <button class="btn btn-sm btn-circle btn-ghost" 
+        onclick="document.getElementById('modal').classList.remove('modal-open')">
+        <i data-feather="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+    
+    <div class="alert alert-error">
+      <i data-feather="alert-circle" class="w-5 h-5"></i>
+      <span>{{ error }}</span>
+    </div>
+    
+    <div class="modal-action">
+      <button class="btn btn-primary" 
+        onclick="document.getElementById('modal').classList.remove('modal-open')">
+        ปิด
+      </button>
+    </div>
+  </div>
+
+{% else %}
+  <!-- Success State -->
+  <div class="modal-box max-w-4xl">
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 flex items-center justify-center bg-primary text-white rounded-full text-sm font-bold">
+          {{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}
+        </span>
+        <h3 class="font-bold text-xl text-gray-800">{{ scope.ghg_name }}</h3>
+      </div>
+      <button class="btn btn-sm btn-circle btn-ghost hover:bg-gray-200" 
+        onclick="document.getElementById('modal').classList.remove('modal-open')">
+        <i data-feather="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    
+    <div class="divider my-4"></div>
+    
+    <!-- Description Content -->
+    <div class="space-y-4">
+      <div class="flex items-center gap-2 text-gray-600">
+        <i data-feather="file-text" class="w-5 h-5"></i>
+        <span class="font-semibold">รายละเอียด</span>
+      </div>
+      
+      {% if scope.ghg_desc %}
+        <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-500">
+          <div class="prose max-w-none">
+            <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ scope.ghg_desc }}</p>
+          </div>
+        </div>
+      {% else %}
+        <div class="bg-yellow-50 p-6 rounded-lg border-l-4 border-yellow-400">
+          <div class="flex items-center gap-2 text-yellow-700">
+            <i data-feather="info" class="w-5 h-5"></i>
+            <span>ไม่มีรายละเอียดสำหรับ Scope นี้</span>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+    
+    <!-- Additional Info -->
+    <div class="divider my-6"></div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+      <div class="flex items-center gap-2">
+        <i data-feather="layers" class="w-4 h-4"></i>
+        <span><strong>Scope:</strong> {{ scope.ghg_scope }}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i data-feather="hash" class="w-4 h-4"></i>
+        <span><strong>Sub-Scope:</strong> {{ scope.ghg_sup_scope }}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i data-feather="map-pin" class="w-4 h-4"></i>
+        <span><strong>Campus:</strong> {{ scope.campus | capitalize }}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i data-feather="building" class="w-4 h-4"></i>
+        <span><strong>Department:</strong> {{ scope.department }}</span>
+      </div>
+    </div>
+    
+    {% if scope.head_table %}
+    <div class="divider my-6"></div>
+    
+    <div class="space-y-3">
+      <div class="flex items-center gap-2 text-gray-600">
+        <i data-feather="list" class="w-5 h-5"></i>
+        <span class="font-semibold">Head Table</span>
+      </div>
+      
+      <div class="bg-blue-50 p-4 rounded-lg">
+        <div class="flex flex-wrap gap-2">
+          {% for item in scope.head_table %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              {{ item }}
+            </span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    
+    <!-- Modal Actions -->
+    <div class="modal-action mt-8">
+      <button class="btn btn-outline flex items-center justify-center gap-2" 
+        onclick="document.getElementById('modal').classList.remove('modal-open')">
+        <i data-feather="arrow-left" class="w-4 h-4"></i>
+        <span>Close</span>
+      </button>
+      
+      <button class="btn btn-primary flex items-center justify-center gap-2"
+        hx-get="{{ url_for('emissions_scope.edit_scope', ghg_scope=scope.ghg_scope, ghg_sup_scope=scope.ghg_sup_scope) }}"
+        hx-target="#modal-content"
+        hx-swap="innerHTML">
+        <i data-feather="edit" class="w-4 h-4"></i>
+        <span>Edit</span>
+      </button>
+    </div>
+  </div>
+
+{% endif %}
