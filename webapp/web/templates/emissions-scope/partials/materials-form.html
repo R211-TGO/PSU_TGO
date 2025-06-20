@@ -6,8 +6,8 @@
       id="materials-form">
       
     <!-- ส่วนหัวข้อ -->
-    <div class="mt-8 mb-4 flex justify-between items-center">
-        <h2 class="text-lg text-gray-900 px-8">แก้ไขข้อมูลประจำเดือน {{ month }} ({{ year }})</h2>
+    <div class="mt-2 flex justify-between items-center">
+        <h2 class="font-medium text-2xl text-gray-900 px-8">แก้ไขข้อมูลประจำเดือน {{ month }} ({{ year }})</h2>
         <button type="button" class="text-gray-500 hover:text-gray-700 focus:outline-none"
                 hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -20,9 +20,10 @@
 
         <!-- ลูปหัวข้อหลัก -->
         {% for head in head_table %}
-        <div class="card border border-gray-200 rounded-lg p-6">
+        <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
             <div class="mb-4">
-                <label class="text-gray-700 font-bold text-lg">{{ head }}:</label>
+                <label class="text-gray-700 font-medium text-lg">ประเภท :</label>
+                <label class="block mb-1 text-gray-500 ">{{ head }}</label>
             </div>
             
             {% set num_inputs = materials_form[loop.index0] | length %}
@@ -51,7 +52,7 @@
                           step="any"
                           name="amount_{{ head }}_{{ input.field }}"
                           class="w-full rounded-md px-3 py-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500" {# ใช้คลาส Tailwind โดยตรง ไม่ใช้ input-bordered #}
-                          placeholder="ระบุ-{{ input.label }}"
+                          placeholder="ระบุ-{{ input.unit }}"
                           value="{{ matched_quantity[0].amount if matched_quantity else '' }}"
                         >
                     </div>
@@ -69,9 +70,9 @@
     </div>
 
     <!-- ปุ่ม -->
-    <div class="mt-4 flex justify-between items-center px-8">
+    <div class="flex justify-between items-center px-8">
         <!-- ปุ่มลบ -->
-        <button type="button" class="btn btn-danger px-4 py-2 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out"
+        <button type="button" class="btn btn-outline btn-error px-4 py-2 text-red rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out"
                 hx-post="{{ url_for('emissions.delete_all_materials') }}"
                 hx-target="#table-container"
                 hx-swap="innerHTML"
