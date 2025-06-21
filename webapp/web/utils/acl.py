@@ -1,4 +1,4 @@
-from flask import abort, Flask, request, redirect, url_for
+from flask import abort, Flask, request, redirect, url_for, jsonify, render_template
 from flask_login import current_user, LoginManager, login_url
 from functools import wraps
 from ...models import User, Role, Permission
@@ -19,7 +19,7 @@ def roles_required(required_roles: list[str]):
             if current_user.role in required_roles:
                 return func(*args, **kwargs)
             else:
-                abort(403)  # Forbidden
+                return _handle_permission_denied("ไม่มีสิทธิ์ในการเข้าถึงหน้านี้")
 
         return wrapper
 
@@ -42,7 +42,7 @@ def permissions_required_any(required_permissions: list[str]):
                 abort(401)
             
             if not current_user.roles:
-                abort(403)
+                return _handle_permission_denied("ไม่มีสิทธิ์ในการใช้งานระบบ")
             
             try:
                 user_permissions = _get_user_permissions()
@@ -51,10 +51,11 @@ def permissions_required_any(required_permissions: list[str]):
                 if has_permission:
                     return func(*args, **kwargs)
                 else:
-                    abort(403)
+                    permission_names = ", ".join(required_permissions)
+                    return _handle_permission_denied(f"ไม่มีสิทธิ์: {permission_names}")
                     
-            except Exception:
-                abort(403)
+            except Exception as e:
+                return _handle_permission_denied("เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์")
 
         return wrapper
     return decorator
@@ -76,7 +77,7 @@ def permissions_required_all(required_permissions: list[str]):
                 abort(401)
             
             if not current_user.roles:
-                abort(403)
+                return _handle_permission_denied("ไม่มีสิทธิ์ในการใช้งานระบบ")
             
             try:
                 user_permissions = _get_user_permissions()
@@ -85,10 +86,12 @@ def permissions_required_all(required_permissions: list[str]):
                 if has_all_permissions:
                     return func(*args, **kwargs)
                 else:
-                    abort(403)
+                    missing_permissions = [perm for perm in required_permissions if perm not in user_permissions]
+                    permission_names = ", ".join(missing_permissions)
+                    return _handle_permission_denied(f"ไม่มีสิทธิ์: {permission_names}")
                     
-            except Exception:
-                abort(403)
+            except Exception as e:
+                return _handle_permission_denied("เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์")
 
         return wrapper
     return decorator
@@ -120,6 +123,29 @@ def _get_user_permissions():
     return list(user_permissions)
 
 
+def _handle_permission_denied(message):
+    """
+    Helper function: จัดการเมื่อไม่มี permission
+    """
+    # ตรวจสอบว่าเป็น HTMX request หรือไม่
+    if request.headers.get('HX-Request'):
+        # สำหรับ HTMX request ให้ return modal popup
+        return render_template(
+            '/shared/permission-denied-modal.html',
+            message=message,
+            user_permissions=_get_user_permissions() if current_user.is_authenticated else [],
+            user_roles=current_user.roles if current_user.is_authenticated else []
+        )
+    else:
+        # สำหรับ regular request ให้ return หน้า permission denied
+        return render_template(
+            '/shared/permission-denied.html',
+            message=message,
+            user_permissions=_get_user_permissions() if current_user.is_authenticated else [],
+            user_roles=current_user.roles if current_user.is_authenticated else []
+        ), 403
+
+
 def permissions_required2(permission: list[str]):
     def decorator(func):
         @wraps(func)
@@ -129,7 +155,7 @@ def permissions_required2(permission: list[str]):
             if current_user.has_permission(permission):
                 return func(*args, **kwargs)
             else:
-                abort(403)
+                return _handle_permission_denied("ไม่มีสิทธิ์ในการใช้งานฟีเจอร์นี้")
 
         return wrapper
 
