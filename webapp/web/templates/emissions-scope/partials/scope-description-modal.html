@@ -110,16 +110,14 @@
     <div class="modal-action mt-8">
       <button class="btn btn-outline flex items-center justify-center gap-2" 
         onclick="document.getElementById('modal').classList.remove('modal-open')">
-        <i data-feather="arrow-left" class="w-4 h-4"></i>
-        <span>Close</span>
+        Close
       </button>
       
       <button class="btn btn-primary flex items-center justify-center gap-2"
         hx-get="{{ url_for('emissions_scope.edit_scope', ghg_scope=scope.ghg_scope, ghg_sup_scope=scope.ghg_sup_scope) }}"
         hx-target="#modal-content"
         hx-swap="innerHTML">
-        <i data-feather="edit" class="w-4 h-4"></i>
-        <span>Edit</span>
+        Edit
       </button>
     </div>
   </div>

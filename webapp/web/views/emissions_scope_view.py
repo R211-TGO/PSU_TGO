@@ -1,20 +1,32 @@
 from flask import Blueprint, render_template, redirect, url_for, request, jsonify
 from flask_login import login_required, current_user
 from ...models import FormAndFormula, Scope, Material
+from datetime import datetime
+from ..utils.acl import permissions_required_all 
 
 module = Blueprint("emissions_scope", __name__, url_prefix="/emissions-scope")
 @module.route("/", methods=["GET"])
 @login_required
+@permissions_required_all(['view_scope'])
 def emissions_scope():
+    # รับปีที่เลือกจาก query parameter หรือใช้ปีปัจจุบันเป็นค่าเริ่มต้น
+    selected_year = request.args.get('year', default=datetime.now().year, type=int) 
     # ดึงข้อมูล Scope ที่ตรงกับ campus และ department ของ current_user
     scopes = Scope.objects(
         campus=current_user.campus,
         department=current_user.department
     ).order_by("ghg_scope", "ghg_sup_scope")
     
-    # ดึงปีทั้งหมดที่มีในฐานข้อมูล Material
+    # ดึงปีทั้งหมดที่มีในฐานข้อมูล Material สำหรับ dropdown
     all_years = Material.objects().distinct("year")
-    total_years = len(all_years) if all_years else 1  # ถ้าไม่มีปีให้ใช้ 1
+    all_years = sorted([year for year in all_years if year is not None], reverse=True)
+    
+    # ถ้าไม่มีปีในฐานข้อมูล ให้เพิ่มปีปัจจุบัน
+    if not all_years:
+        all_years = [datetime.now().year]
+    elif selected_year not in all_years:
+        all_years.append(selected_year)
+        all_years.sort(reverse=True)
     
     # จัดกลุ่ม Scope ตาม ghg_scope
     grouped_scopes = {}
@@ -29,8 +41,8 @@ def emissions_scope():
         if main_scope not in grouped_scopes:
             grouped_scopes[main_scope] = []
         
-        # คำนวณ Progress สำหรับ Scope นี้
-        progress = calculate_scope_progress(scope, total_years)
+        # คำนวณ Progress สำหรับ Scope นี้ (เฉพาะปีที่เลือก)
+        progress = calculate_scope_progress(scope, selected_year)
         
         # กำหนดสถานะตาม Progress
         if progress == 100:
@@ -65,14 +77,16 @@ def emissions_scope():
             "in_progress": in_progress,
             "not_started": not_started,
             "completed": completed,
-            "scopes": grouped_scopes
+            "scopes": grouped_scopes,
+            "selected_year": selected_year,
+            "all_years": all_years
         }
     )
 
-def calculate_scope_progress(scope, total_years):
+def calculate_scope_progress(scope, selected_year):
     """
-    คำนวณ Progress ของ Scope
-    Progress = (จำนวนช่องที่กรอกแล้ว / (head_table × 12 × จำนวนปี)) × 100
+    คำนวณ Progress ของ Scope สำหรับปีที่เลือก
+    Progress = (จำนวนช่องที่กรอกแล้ว / (head_table × 12)) × 100
     """
     # จำนวน head_table
     num_head_table = len(scope.head_table)
@@ -80,27 +94,23 @@ def calculate_scope_progress(scope, total_years):
     if num_head_table == 0:
         return 0  # ถ้าไม่มี head_table ให้ progress = 0
     
-    # จำนวนช่องทั้งหมดที่ต้องกรอก = head_table × 12 เดือน × จำนวนปี
-    total_fields_required = num_head_table * 12 * total_years
+    # จำนวนช่องทั้งหมดที่ต้องกรอก = head_table × 12 เดือน (เฉพาะปีที่เลือก)
+    total_fields_required = num_head_table * 12
     
     if total_fields_required == 0:
         return 0
     
-    
-    # ดึง Material ที่เกี่ยวข้องกับ Scope นี้
+    # ดึง Material ที่เกี่ยวข้องกับ Scope นี้ในปีที่เลือก
     materials = Material.objects(
         scope=scope.ghg_scope,
         sub_scope=scope.ghg_sup_scope,
+        year=selected_year,
         campus=current_user.campus,
         department=current_user.department
     )
 
     # นับจำนวนช่องที่กรอกข้อมูลแล้ว
     filled_fields = len(materials)
-    
-
-
-
     
     # คำนวณ Progress
     progress = (filled_fields / total_fields_required) * 100
@@ -111,6 +121,7 @@ def calculate_scope_progress(scope, total_years):
 
 @module.route("/add", methods=["GET", "POST"])
 @login_required
+@permissions_required_all(['edit_scope'])
 def add_scope():
     if request.method == "POST":
         action = request.form.get("action")  # ตรวจสอบการกระทำ (fetch_sub_scope หรือ save)
@@ -207,8 +218,10 @@ def add_scope():
     )
 
 
+
 @module.route("/get-latest-sub-scope", methods=["POST"])
 @login_required
+@permissions_required_all(['edit_scope'])
 def get_latest_sub_scope():
     ghg_scope = request.json.get("ghg_scope")  # รับข้อมูลจาก JSON
     if not ghg_scope or not ghg_scope.isdigit():
@@ -226,8 +239,11 @@ def get_latest_sub_scope():
     latest_sub_scope = latest_sub_scope.ghg_sup_scope + 1 if latest_sub_scope else 1
     return jsonify({"latest_sub_scope": latest_sub_scope})
     
+
+
 @module.route("/edit/<int:ghg_scope>/<int:ghg_sup_scope>", methods=["GET", "POST"])
 @login_required
+@permissions_required_all(['edit_scope'])
 def edit_scope(ghg_scope, ghg_sup_scope):
     # ค้นหา Scope ที่ต้องการแก้ไขตาม campus และ department ของ current_user
     scope = Scope.objects(
@@ -284,8 +300,10 @@ def edit_scope(ghg_scope, ghg_sup_scope):
     )
 
 
+
 @module.route("/delete/<int:ghg_scope>/<int:ghg_sup_scope>", methods=["DELETE"])
 @login_required
+@permissions_required_all(['delete_scope'])
 def delete_scope(ghg_scope, ghg_sup_scope):
     """ลบ Scope"""
     try:

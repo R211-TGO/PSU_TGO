@@ -3,10 +3,12 @@ from flask_login import login_required, logout_user, current_user
 from ..forms.user_form import LoginForm, RegisterForm, EditUserForm, EditprofileForm
 from ...services.user_service import UserService
 from ...models import User, Role, Permission
+from ..utils.acl import permissions_required_all 
 
 module = Blueprint("role_management", __name__, url_prefix="/role-management")
 
 @module.route("/", methods=["GET", "POST"])
+@permissions_required_all(['view_role_management'])
 @login_required
 def role_management():
     roles = Role.objects()
@@ -15,6 +17,7 @@ def role_management():
 
 @module.route("/load-add-role", methods=["GET"])
 @login_required
+@permissions_required_all(['edit_role_management'])
 def load_add_role():
     # ดึงข้อมูล Permission ทั้งหมดจากฐานข้อมูล
     permissions = Permission.objects()
@@ -27,6 +30,7 @@ def load_add_role():
 
 @module.route("/add-role", methods=["POST"])
 @login_required
+@permissions_required_all(['edit_role_management'])
 def add_role():
     name = request.form.get("name")
     description = request.form.get("description")
@@ -57,6 +61,7 @@ def add_role():
 
 
 @module.route("/load-edit-role/<role_id>", methods=["GET"])
+@permissions_required_all(['edit_role_management'])
 @login_required
 def load_edit_role(role_id):
     role = Role.objects(id=role_id).first()
@@ -77,6 +82,7 @@ def load_edit_role(role_id):
 
 @module.route("/edit-role/<role_id>", methods=["POST"])
 @login_required
+@permissions_required_all(['edit_role_management'])
 def edit_role(role_id):
     role = Role.objects(id=role_id).first()
     role.name = request.form.get("name")
