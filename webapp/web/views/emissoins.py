@@ -59,6 +59,7 @@ def view_emissions():
     # รับค่า scope_id และ sub_scope_id จาก POST request
     scope_id = request.form.get("scope_id")
     sub_scope_id = request.form.get("sub_scope_id")
+    # year = request.form.get("year")
     # ดึงปีจาก Material
     years = sorted(Material.objects().distinct("year"))
     # ถ้ามีปีใน database ใช้ปีแรก, ถ้าไม่มีให้ใช้ปีปัจจุบัน
@@ -83,6 +84,7 @@ def view_emissions():
         years=years,
         ghg_name=ghg_name,
         current_year=current_year,  # ส่งปีปัจจุบันไปยังเทมเพลต
+        # selected_year=year,  # ใช้ปีที่เลือกหรือปีปัจจุบัน
     )
 
 
@@ -149,6 +151,7 @@ def load_material_form():
     input_field = request.args.get("input_field")
     sub_scope_id = request.args.get("sub_scope_id")
     scope_id = request.args.get("scope_id")
+    unit = request.args.get("input_unit")
 
     # ตรวจสอบข้อมูลที่จำเป็น
     if not month_id or not head:
@@ -170,6 +173,7 @@ def load_material_form():
         input_field=input_field,
         sub_scope_id=sub_scope_id,
         scope_id=scope_id,
+        unit=unit,  # ส่งค่า unit ไปยังเทมเพลต
     )
 
 
