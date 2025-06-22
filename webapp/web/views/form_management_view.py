@@ -3,8 +3,11 @@ from flask_login import login_required, logout_user, current_user
 from ..forms.user_form import LoginForm, RegisterForm, EditUserForm, EditprofileForm
 from ...services.user_service import UserService
 from ...models import User, Role, Permission, FormAndFormula, Scope, Material, InputType
+from ..views.emissoins import calculate_result  # Import calculate_result
+
 
 module = Blueprint("form_management", __name__, url_prefix="/form-management")
+
 
 @module.route("/", methods=["GET"])
 @login_required
@@ -12,10 +15,12 @@ def form_management():
     forms = FormAndFormula.objects()  # ดึงข้อมูลฟอร์มทั้งหมด
     return render_template("/form-management/form-management.html", forms=forms)
 
+
 @module.route("/load-add-form", methods=["GET"])
 @login_required
 def load_add_form_and_formula():
     return render_template("/form-management/add-form-and-formula.html")
+
 
 @module.route("/load-edit-form", methods=["GET"])
 @login_required
@@ -27,9 +32,10 @@ def load_edit_form_and_formula():
         if not form:
             return render_template(
                 "/form-management/edit-form-and-formula.html",
-                error_msg="Form not found"
+                error_msg="Form not found",
             )
     return render_template("/form-management/edit-form-and-formula.html", form=form)
+
 
 @module.route("/add-form", methods=["POST"])
 @login_required
@@ -67,7 +73,7 @@ def add_form_and_formula():
         if existing_form:
             return render_template(
                 "/form-management/add-form-and-formula.html",
-                error_msg="Form with this name already exists"
+                error_msg="Form with this name already exists",
             )
 
         # สร้างฟอร์มใหม่
@@ -78,18 +84,19 @@ def add_form_and_formula():
             material_name=material_name,
             variables=variables,  # บันทึกตัวแปรที่ดึงมาจากฟิลด์
             formula=formula,
-            input_types=input_fields  # เพิ่ม input fields ลงในฟอร์ม
+            input_types=input_fields,  # เพิ่ม input fields ลงในฟอร์ม
         )
         form.save()
-            
+
     except Exception as e:
         return render_template(
             "/form-management/add-form-and-formula.html",
-            error_msg=f"Failed to create form: {str(e)}"
+            error_msg=f"Failed to create form: {str(e)}",
         )
 
     # สำเร็จ → redirect ไปหน้า form-management
     return redirect(url_for("form_management.form_management"))
+
 
 @module.route("/edit-form", methods=["POST"])
 @login_required
@@ -128,18 +135,18 @@ def edit_form_and_formula():
         if not form:
             return render_template(
                 "/form-management/edit-form-and-formula.html",
-                error_msg="Form not found"
+                error_msg="Form not found",
             )
-        
+
         # ตรวจสอบว่ามีฟอร์มที่ชื่อซ้ำหรือไม่ (ยกเว้นฟอร์มปัจจุบัน)
         existing_form = FormAndFormula.objects(name=name, id__ne=form_id).first()
         if existing_form:
             return render_template(
                 "/form-management/edit-form-and-formula.html",
                 form=form,
-                error_msg="Form with this name already exists"
+                error_msg="Form with this name already exists",
             )
-        
+
         # อัปเดตข้อมูลฟอร์ม
         form.update(
             name=name,
@@ -148,18 +155,24 @@ def edit_form_and_formula():
             material_name=material_name,
             variables=variables,
             formula=formula,
-            input_types=input_fields
+            input_types=input_fields,
         )
-            
+        # ตรวจสอบว่ามี Material ที่เกี่ยวข้องหรือไม่
+        materials = Material.objects(name=material_name)
+        if materials:
+            for material in materials:
+                calculate_result(material)  # คำนวณ result ใหม่สำหรับ Material
+
     except Exception as e:
         return render_template(
             "/form-management/edit-form-and-formula.html",
             form=FormAndFormula.objects(id=form_id).first() if form_id else None,
-            error_msg=f"Failed to update form: {str(e)}"
+            error_msg=f"Failed to update form: {str(e)}",
         )
 
     # สำเร็จ → redirect ไปหน้า form-management
     return redirect(url_for("form_management.form_management"))
+
 
 @module.route("/delete-form/<form_id>", methods=["DELETE"])
 @login_required
@@ -168,7 +181,7 @@ def delete_form(form_id):
         form = FormAndFormula.objects(id=form_id).first()
         if not form:
             return jsonify({"success": False, "message": "Form not found"}), 404
-        
+
         form.delete()
         return jsonify({"success": True, "message": "Form deleted successfully"})
     except Exception as e:
