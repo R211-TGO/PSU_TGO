@@ -25,7 +25,6 @@ class Material(me.Document):
     sub_scope = me.IntField(required=True)
     department = me.StringField(required=True)
     campus = me.StringField(required=True)
-    result = me.StringField(required=True, default="")  # แก้ไขให้เป็น StringField
     quantity_type = me.EmbeddedDocumentListField(QuantityType)
 
     meta = {
