@@ -10,6 +10,49 @@ import datetime
 module = Blueprint("emissions", __name__, url_prefix="/emissions")
 
 
+def calculate_grouped_input_types(head_table, page):
+    """
+    Calculate and group input types by headers for pagination.
+
+    Args:
+        head_table (list): List of headers from the scope.
+        items_per_page (int): Number of items per page.
+        page (int): Current page number.
+
+    Returns:
+        tuple: (current_headers, materials_form, total_pages)
+    """
+    items_per_page = 8  # จำนวนรายการต่อหน้า
+    all_input_types = []
+    for head in head_table:
+        form_and_formula_item = FormAndFormula.objects(material_name=head).first()
+        if form_and_formula_item:
+            all_input_types.extend(
+                [(head, input_type) for input_type in form_and_formula_item.input_types]
+            )
+
+    total_subcategories = len(all_input_types)
+    total_pages = (total_subcategories + items_per_page - 1) // items_per_page
+
+    # Determine which subcategories to display on the current page
+    start_index = (page - 1) * items_per_page
+    end_index = min(start_index + items_per_page, total_subcategories)
+
+    current_input_types = all_input_types[start_index:end_index]
+
+    # Group input types by their headers
+    grouped_input_types = {}
+    for head, input_type in current_input_types:
+        if head not in grouped_input_types:
+            grouped_input_types[head] = []
+        grouped_input_types[head].append(input_type)
+
+    current_headers = list(grouped_input_types.keys())
+    materials_form = list(grouped_input_types.values())
+
+    return current_headers, materials_form, total_pages, items_per_page
+
+
 @module.route("/emissions-table", methods=["POST"])
 @login_required
 def view_emissions():
@@ -48,16 +91,8 @@ def view_emissions():
 def load_emissions_table():
     scope_id = request.args.get("scope_id")
     sub_scope_id = request.args.get("sub_scope_id")
-    year = request.args.get("year") or datetime.datetime.now().year  # ใช้ปีล่าสุดถ้าไม่ระบุ
+    year = request.args.get("year") or datetime.datetime.now().year
     page = int(request.args.get("page", 1))
-    items_per_page = 4
-
-    print(
-        f"Received scope_id: {scope_id}, sub_scope_id: {sub_scope_id}, year: {year}, page: {page}"
-    )
-
-    if not scope_id or not sub_scope_id:
-        return jsonify({"error": "Invalid scope or sub-scope ID"}), 400
 
     scope = Scope.objects(
         ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
@@ -66,29 +101,15 @@ def load_emissions_table():
         return jsonify({"error": "Scope not found"}), 404
 
     head_table = scope.head_table
-    total_headers = len(head_table)
-    total_pages = (total_headers + items_per_page - 1) // items_per_page
 
-    # คำนวณ index สำหรับการแบ่งหน้า
-    start_index = (page - 1) * items_per_page
-    end_index = start_index + items_per_page
-    current_headers = head_table[start_index:end_index]
-
-    # สร้าง materials_form ใหม่ตาม current_headers
-    materials_form = []
-    for head in current_headers:
-        form_and_formula_item = FormAndFormula.objects(material_name=head).first()
-        if form_and_formula_item:
-            materials_form.append(form_and_formula_item.input_types)
-
-    # กรองข้อมูล Material ตามปี
-    materials = Material.objects(
-        scope=int(scope_id), sub_scope=int(sub_scope_id), year=int(year)  # กรองตามปี
+    # Use the new function to calculate grouped input types
+    current_headers, materials_form, total_pages, items_per_page = (
+        calculate_grouped_input_types(head_table, page)
     )
 
-    print(f"Materials found: {len(materials)}")
-    print(f"Current headers: {current_headers}")
-    print(f"Materials form: {materials_form}")
+    materials = Material.objects(
+        scope=int(scope_id), sub_scope=int(sub_scope_id), year=int(year)
+    )
 
     if request.headers.get("HX-Request"):
         return render_template(
@@ -97,12 +118,13 @@ def load_emissions_table():
             scope_id=scope_id,
             sub_scope_id=sub_scope_id,
             materials=materials,
-            head_table=current_headers,  # ส่งเฉพาะ headers ของหน้าปัจจุบัน
+            head_table=current_headers,
             total_pages=total_pages,
             page=page,
             user=current_user,
             year=year,
-            materials_form=materials_form,  # ส่ง materials_form ที่ตรงกับ current_headers
+            materials_form=materials_form,
+            items_per_page=items_per_page,  # ส่งจำนวนรายการต่อหน้า
         )
 
     return render_template(
@@ -127,15 +149,6 @@ def load_material_form():
     input_field = request.args.get("input_field")
     sub_scope_id = request.args.get("sub_scope_id")
     scope_id = request.args.get("scope_id")
-    print(
-        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",
-        amount,
-        sub_scope_id,
-        scope_id,
-        month_id,
-        year,
-        head,
-    )
 
     # ตรวจสอบข้อมูลที่จำเป็น
     if not month_id or not head:
@@ -143,21 +156,20 @@ def load_material_form():
         return jsonify({"error": "Invalid month or head"}), 400
 
     # สร้างฟอร์มใหม่
-    form = MaterialForm()  # สมมติว่าคุณมี MaterialForm อยู่แล้ว
-    print(head)
+    form = MaterialForm()
     return render_template(
         "emissions-scope/partials/material-form.html",
         form=form,
         month_id=month_id,
         head=head,
         year=year,
-        month=month,  # ส่งค่าเดือนด้วย
-        user=current_user,  # ส่งข้อมูลผู้ใช้ปัจจุบัน
-        amount=amount,  # ส่งค่า amount ด้วย
-        input_label=input_label,  # ส่งค่า input_label ด้วย
-        input_field=input_field,  # ส่งค่า input_field ด้วย
-        sub_scope_id=sub_scope_id,  # ส่งค่า sub_scope_id ด้วย
-        scope_id=scope_id,  # ส่งค่า scope_id ด้วย
+        month=month,
+        user=current_user,
+        amount=amount,
+        input_label=input_label,
+        input_field=input_field,
+        sub_scope_id=sub_scope_id,
+        scope_id=scope_id,
     )
 
 
@@ -210,7 +222,6 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
     field = material_data["field"]
     amount = material_data["amount"]
 
-    # ตรวจสอบว่า scope และ sub_scope มีอยู่ในฐานข้อมูล
     scope = Scope.objects(ghg_scope=int(scope_id)).first()
     sub_scope = Scope.objects(
         ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
@@ -235,16 +246,12 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
         print(f"Form and Formula not found for material: {head}")
         return False
 
-    # Find the input type for the given field
     input_type = form_and_formula.input_types.filter(field=field).first()
     if not input_type:
         print(f"Input type not found for field: {field} in material: {head}")
         return False
-    else:
-        print(f"Input type found: {input_type.label} for field: {field}")
 
     if material:
-        # Update existing material
         updated = False
         for qt in material.quantity_type:
             if qt.field == field:
@@ -258,12 +265,13 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
                     amount=float(amount),
                     unit=input_type.unit,
                 )
-            )  # เพิ่มเฉพาะช่องที่กรอก
-        material.department = current_user.department  # อ้างอิง department จากผู้ใช้ปัจจุบัน
-        material.campus = current_user.campus  # อ้างอิง campus จากผู้ใช้ปัจจุบัน
+            )
+        material.department = current_user.department
+        material.campus = current_user.campus
+        material.edit_by_id = str(current_user.id)  # อัปเดต edit_by_id
+        material.update_date = datetime.datetime.now()  # อัปเดต update_date
         material.save()
     else:
-        # Create new material
         new_material = Material(
             month=int(month_id),
             name=head,
@@ -272,8 +280,10 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
             year=year,
             day=1,
             form_and_formula=form_and_formula.name,
-            department=current_user.department,  # อ้างอิง department จากผู้ใช้ปัจจุบัน
-            campus=current_user.campus,  # อ้างอิง campus จากผู้ใช้ปัจจุบัน
+            department=current_user.department,
+            campus=current_user.campus,
+            edit_by_id=str(current_user.id),  # เซฟ edit_by_id
+            update_date=datetime.datetime.now(),  # เซฟ update_date
             quantity_type=[
                 QuantityType(
                     field=field,
@@ -281,7 +291,7 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
                     amount=float(amount),
                     unit=input_type.unit,
                 )
-            ],  # เซฟเฉพาะช่องที่กรอก
+            ],
         )
         new_material.save()
     return True
@@ -327,7 +337,7 @@ def save_materials():
             print(f"Form and Formula not found for material: {head}")
             return jsonify({"error": "Form and Formula not found"}), 400
 
-        label = input_label
+        # label = input_label
         field = input_field
         if not field:
             print(f"No input types found for material: {head}")
@@ -365,12 +375,9 @@ def save_materials():
     head_table = scope.head_table  # Re-fetch head_table after saving materials
     print(f"Head table after saving materials: {head_table}")  # Debugging
 
-    items_per_page = 4
-    total_headers = len(head_table)
-    total_pages = (total_headers + items_per_page - 1) // items_per_page
-    start_index = (page - 1) * items_per_page
-    end_index = start_index + items_per_page
-    current_headers = head_table[start_index:end_index]
+    current_headers, materials_form, total_pages, items_per_page = (
+        calculate_grouped_input_types(head_table, page)
+    )
 
     # สร้าง materials_form ใหม่ตาม current_headers
     materials_form = []
@@ -404,6 +411,7 @@ def save_materials():
             user=current_user,
             year=year,
             materials_form=materials_form,
+            items_per_page=items_per_page,  # ส่งจำนวนรายการต่อหน้า
         )
     else:
         return redirect(
@@ -424,14 +432,8 @@ def delete_material():
     month_id = request.form.get("month_id")
     year = request.form.get("year")
     head = request.form.get("head")
-    page = int(request.form.get("page", 1))  # รับค่าหน้าปัจจุบัน
-
-    print(
-        f"Deleting material: scope_id={scope_id}, sub_scope_id={sub_scope_id}, month_id={month_id}, year={year}, head={head}"
-    )
-
-    if not scope_id or not sub_scope_id or not month_id or not year or not head:
-        return jsonify({"error": "Missing required data"}), 400
+    input_field = request.form.get("input_field")
+    page = int(request.form.get("page", 1))
 
     material = Material.objects(
         month=int(month_id),
@@ -444,22 +446,23 @@ def delete_material():
     ).first()
 
     if material:
-        material.delete()
-        print(f"Material {head} deleted successfully.")
-    else:
-        print(f"Material {head} not found.")
+        original_count = len(material.quantity_type)
+        material.quantity_type = [
+            qt for qt in material.quantity_type if qt.field != input_field
+        ]
+        material.edit_by_id = str(current_user.id)  # อัปเดต edit_by_id
+        material.update_date = datetime.datetime.now()  # อัปเดต update_date
+        material.save()
 
     # รีเฟรชตารางหลังจากลบ
     scope = Scope.objects(
         ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
     ).first()
     head_table = scope.head_table if scope else []
-    items_per_page = 4
-    total_headers = len(head_table)
-    total_pages = (total_headers + items_per_page - 1) // items_per_page
-    start_index = (page - 1) * items_per_page
-    end_index = start_index + items_per_page
-    current_headers = head_table[start_index:end_index]
+
+    current_headers, materials_form, total_pages, items_per_page = (
+        calculate_grouped_input_types(head_table, page)
+    )
 
     materials_form = []
     for head in current_headers:
@@ -488,6 +491,7 @@ def delete_material():
             user=current_user,
             year=year,
             materials_form=materials_form,
+            items_per_page=items_per_page,  # ส่งจำนวนรายการต่อหน้า
         )
     else:
         return redirect(
@@ -507,14 +511,7 @@ def delete_all_materials():
     sub_scope_id = request.form.get("sub_scope_id")
     month_id = request.form.get("month_id")
     year = request.form.get("year")
-    page = int(request.form.get("page", 1))  # รับค่าหน้าปัจจุบัน
-
-    print(
-        f"Deleting all materials: scope_id={scope_id}, sub_scope_id={sub_scope_id}, month_id={month_id}, year={year}"
-    )
-
-    if not scope_id or not sub_scope_id or not month_id or not year:
-        return jsonify({"error": "Missing required data"}), 400
+    page = int(request.form.get("page", 1))
 
     materials = Material.objects(
         month=int(month_id),
@@ -526,10 +523,10 @@ def delete_all_materials():
     )
 
     if materials:
-        materials.delete()
-        print(f"All materials deleted successfully.")
-    else:
-        print("No materials found to delete.")
+        for material in materials:
+            material.edit_by_id = str(current_user.id)  # อัปเดต edit_by_id
+            material.update_date = datetime.datetime.now()  # อัปเดต update_date
+            material.delete()
 
     # รีเฟรชตารางหลังจากลบ
     scope = Scope.objects(
@@ -537,11 +534,9 @@ def delete_all_materials():
     ).first()
     head_table = scope.head_table if scope else []
     items_per_page = 4
-    total_headers = len(head_table)
-    total_pages = (total_headers + items_per_page - 1) // items_per_page
-    start_index = (page - 1) * items_per_page
-    end_index = start_index + items_per_page
-    current_headers = head_table[start_index:end_index]
+    current_headers, materials_form, total_pages, items_per_page = (
+        calculate_grouped_input_types(head_table, page)
+    )
 
     materials_form = []
     for head in current_headers:
@@ -570,6 +565,7 @@ def delete_all_materials():
             user=current_user,
             year=year,
             materials_form=materials_form,
+            items_per_page=items_per_page,  # ส่งจำนวนรายการต่อหน้า
         )
     else:
         return redirect(
