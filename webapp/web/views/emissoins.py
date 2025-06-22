@@ -237,7 +237,7 @@ def calculate_result(material):
     try:
         # Evaluate the formula using the variables
         result = eval(form_and_formula.formula, {}, variables)
-        material.result = str(result)  # Save the result as a string
+        material.result = float(result)  # Save the result as a float
         material.save()
     except Exception as e:
         print(f"Error calculating result for material {material.name}: {e}")
