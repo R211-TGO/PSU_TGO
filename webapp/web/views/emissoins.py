@@ -524,9 +524,11 @@ def delete_all_materials():
 
     if materials:
         for material in materials:
+            # ลบเฉพาะ object ที่อยู่ใน quantity_type
+            material.quantity_type = []  # ล้างข้อมูลใน quantity_type
             material.edit_by_id = str(current_user.id)  # อัปเดต edit_by_id
             material.update_date = datetime.datetime.now()  # อัปเดต update_date
-            material.delete()
+            material.save()
 
     # รีเฟรชตารางหลังจากลบ
     scope = Scope.objects(
