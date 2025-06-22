@@ -214,9 +214,38 @@ def load_materials_form():
     )
 
 
+def calculate_result(material):
+    """
+    Calculate the result based on the formula and update the material's result field.
+
+    Args:
+        material (Material): The material object to update.
+    """
+    form_and_formula = FormAndFormula.objects(material_name=material.name).first()
+    if not form_and_formula:
+        print(f"Form and Formula not found for material: {material.name}")
+        return
+
+    # Prepare variables for the formula
+    variables = {
+        var: 0 for var in form_and_formula.variables
+    }  # Default all variables to 0
+    for qt in material.quantity_type:
+        if qt.field in variables:
+            variables[qt.field] = qt.amount
+
+    try:
+        # Evaluate the formula using the variables
+        result = eval(form_and_formula.formula, {}, variables)
+        material.result = str(result)  # Save the result as a string
+        material.save()
+    except Exception as e:
+        print(f"Error calculating result for material {material.name}: {e}")
+
+
 def save_material(scope_id, sub_scope_id, month_id, year, material_data):
     """
-    Save a single material to the database.
+    Save a single material to the database and calculate its result.
     """
     head = material_data["head"]
     field = material_data["field"]
@@ -294,6 +323,10 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
             ],
         )
         new_material.save()
+        material = new_material
+
+    # Calculate and update the result
+    calculate_result(material)
     return True
 
 
@@ -446,7 +479,6 @@ def delete_material():
     ).first()
 
     if material:
-        original_count = len(material.quantity_type)
         material.quantity_type = [
             qt for qt in material.quantity_type if qt.field != input_field
         ]
@@ -454,7 +486,10 @@ def delete_material():
         material.update_date = datetime.datetime.now()  # อัปเดต update_date
         material.save()
 
-    # รีเฟรชตารางหลังจากลบ
+        # Calculate and update the result
+        calculate_result(material)
+
+    # Refresh the table after deletion
     scope = Scope.objects(
         ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
     ).first()
@@ -463,12 +498,6 @@ def delete_material():
     current_headers, materials_form, total_pages, items_per_page = (
         calculate_grouped_input_types(head_table, page)
     )
-
-    materials_form = []
-    for head in current_headers:
-        form_and_formula = FormAndFormula.objects(material_name=head).first()
-        if form_and_formula:
-            materials_form.append(form_and_formula.input_types)
 
     materials = Material.objects(
         scope=int(scope_id),
@@ -491,7 +520,7 @@ def delete_material():
             user=current_user,
             year=year,
             materials_form=materials_form,
-            items_per_page=items_per_page,  # ส่งจำนวนรายการต่อหน้า
+            items_per_page=items_per_page,
         )
     else:
         return redirect(
@@ -524,27 +553,23 @@ def delete_all_materials():
 
     if materials:
         for material in materials:
-            # ลบเฉพาะ object ที่อยู่ใน quantity_type
-            material.quantity_type = []  # ล้างข้อมูลใน quantity_type
-            material.edit_by_id = str(current_user.id)  # อัปเดต edit_by_id
-            material.update_date = datetime.datetime.now()  # อัปเดต update_date
+            material.quantity_type = []  # Clear quantity_type
+            material.edit_by_id = str(current_user.id)  # Update edit_by_id
+            material.update_date = datetime.datetime.now()  # Update update_date
             material.save()
 
-    # รีเฟรชตารางหลังจากลบ
+            # Calculate and update the result
+            calculate_result(material)
+
+    # Refresh the table after deletion
     scope = Scope.objects(
         ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
     ).first()
     head_table = scope.head_table if scope else []
-    items_per_page = 4
+
     current_headers, materials_form, total_pages, items_per_page = (
         calculate_grouped_input_types(head_table, page)
     )
-
-    materials_form = []
-    for head in current_headers:
-        form_and_formula = FormAndFormula.objects(material_name=head).first()
-        if form_and_formula:
-            materials_form.append(form_and_formula.input_types)
 
     materials = Material.objects(
         scope=int(scope_id),
@@ -567,7 +592,7 @@ def delete_all_materials():
             user=current_user,
             year=year,
             materials_form=materials_form,
-            items_per_page=items_per_page,  # ส่งจำนวนรายการต่อหน้า
+            items_per_page=items_per_page,
         )
     else:
         return redirect(
