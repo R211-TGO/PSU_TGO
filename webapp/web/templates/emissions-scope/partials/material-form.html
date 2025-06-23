@@ -4,22 +4,32 @@
   hx-swap="innerHTML"
 >
   <div class="mt-2">
-    <h2 class="font-medium text-2xl text-gray-900 px-1 mb-4">
-      แก้ไขข้อมูลประจำเดือน {{ month }} ({{ year }})
-    </h2>
+    <div class="flex items-center justify-between px-1 mb-4">
+      <h2 class="font-medium text-2xl text-gray-900">
+        แก้ไขข้อมูลประจำเดือน {{ month }} ({{ year }})
+      </h2>
+      <button type="button" class="text-gray-500 hover:text-gray-700 focus:outline-none"
+              hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
 
     <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50 mb-4">
       <label class="text-gray-700">ประเภท :</label>
-      <div class="block text-sm font-medium mb-1">{{ head }}</div>
+      <div class="block text-sm font-medium mb-2">{{ head }}</div>
       <input type="hidden" name="head" value="{{ head }}">
 
-      <label class="block text-sm font-medium mb-1">ข้อมูล:</label>
+      <label class="block text-sm font-medium text-gray-700">{{ input_label }} ({{ unit }}):</label>
       <input
         type="number"
         step="any"
         name="amount"
         class="input input-bordered w-full"
-        placeholder="ระบุ - {{unit}}"
+        placeholder="ระบุ - {{ unit }}"
         value="{{ amount if amount is not none else '' }}"
         required
       >

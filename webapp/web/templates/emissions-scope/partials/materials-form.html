@@ -7,7 +7,7 @@
       
     <!-- ส่วนหัวข้อ -->
     <div class="mt-2 flex justify-between items-center">
-        <h2 class="font-medium text-2xl text-gray-900 px-8">แก้ไขข้อมูลประจำเดือน {{ month }} ({{ year }})</h2>
+        <h2 class="font-medium text-2xl text-gray-900 px-6">แก้ไขข้อมูลประจำเดือน {{ month }} ({{ year }})</h2>
         <button type="button" class="text-gray-500 hover:text-gray-700 focus:outline-none"
                 hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -16,14 +16,14 @@
         </button>
     </div>
     
-    <div class="bg-white rounded-lg p-6 grid grid-cols-1 gap-6">
+    <div class="bg-white rounded-lg p-4 grid grid-cols-1 gap-6">
 
         <!-- ลูปหัวข้อหลัก -->
         {% for head in head_table %}
         <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
-            <div class="mb-4">
+            <div class="mb-">
                 <label class="text-gray-700 font-medium text-lg">ประเภท :</label>
-                <label class="block mb-1 text-gray-500 ">{{ head }}</label>
+                <label class="block mb-1 text-gray-500 text-sm ">{{ head }}</label>
             </div>
             
             {% set num_inputs = materials_form[loop.index0] | length %}
