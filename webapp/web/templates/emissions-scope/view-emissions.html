@@ -35,8 +35,10 @@
                             hx-trigger="change"
                             name="year"
                             id="year-select">
+                        
                         {% for year in years %}
-                        <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>ปีงบประมาณ: {{ year }}</option>
+
+                        <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>ปีงบประมาณ: {{ year }}</option>
                         {% endfor %}
                     </select>
                 </div>
