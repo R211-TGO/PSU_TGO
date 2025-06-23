@@ -1,6 +1,6 @@
 {% extends "/base/default_page.html" %}
 {% block content %}
-
+<script src="{{ 'js/auto-refresh.js' | static_url }}"></script>
 <div class="p-4">
   <!-- Header Section -->
   <div class="card shadow-lg p-6 bg-white rounded-lg">
@@ -195,6 +195,7 @@
             <form action="{{ url_for('emissions.view_emissions') }}" method="POST" style="display: inline;">
               <input type="hidden" name="scope_id" value="{{ scope.ghg_scope }}">
               <input type="hidden" name="sub_scope_id" value="{{ scope.ghg_sup_scope }}">
+              <input type="hidden" name="year_form_scope" value="{{ mockup_data.selected_year }}">
               <button type="submit" class="text-blue-500 hover:text-blue-700">
                 <i data-feather="edit"></i>
               </button>

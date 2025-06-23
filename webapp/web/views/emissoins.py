@@ -59,7 +59,7 @@ def view_emissions():
     # รับค่า scope_id และ sub_scope_id จาก POST request
     scope_id = request.form.get("scope_id")
     sub_scope_id = request.form.get("sub_scope_id")
-    # year = request.form.get("year")
+    selected_year = request.form.get("year_form_scope")
     # ดึงปีจาก Material
     years = sorted(Material.objects().distinct("year"))
     # ถ้ามีปีใน database ใช้ปีแรก, ถ้าไม่มีให้ใช้ปีปัจจุบัน
@@ -75,7 +75,7 @@ def view_emissions():
         ghg_name = scope.ghg_name
     else:
         ghg_name = "Unknown Scope"
-
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", selected_year)
     return render_template(
         "emissions-scope/view-emissions.html",
         scope_id=scope_id,
@@ -84,7 +84,7 @@ def view_emissions():
         years=years,
         ghg_name=ghg_name,
         current_year=current_year,  # ส่งปีปัจจุบันไปยังเทมเพลต
-        # selected_year=year,  # ใช้ปีที่เลือกหรือปีปัจจุบัน
+        selected_year=int(selected_year),  # ใช้ปีที่เลือกหรือปีปัจจุบัน
     )
 
 
