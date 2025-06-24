@@ -5,20 +5,22 @@
 <div id="charts-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
   
   <!-- Emissions Over Time Card -->
-  <div class="dashboard-card flex flex-col p-6 bg-white shadow-lg rounded-xl">
+  <div class="dashboard-card flex flex-col p-6 bg-white shadow-lg rounded-xl overflow-hidden">
     <h3 class="text-lg font-semibold text-gray-800 mb-4 flex-shrink-0">Emissions Over Time</h3>
-    <div class="relative flex-grow min-h-[300px] md:min-h-[350px]">
+    <div class="relative flex-grow min-h-[300px] md:min-h-[350px] overflow-auto">
       <canvas id="emissionsOverTimeChart"></canvas>
     </div>
   </div>
 
   <!-- Category Breakdown Card -->
-  <div class="dashboard-card flex flex-col p-6 bg-white shadow-lg rounded-xl">
+  <div class="dashboard-card flex flex-col p-6 bg-white shadow-lg rounded-xl overflow-hidden">
     <h3 class="text-lg font-semibold text-gray-800 mb-4 flex-shrink-0">Category Breakdown</h3>
-    <div class="relative w-full max-w-[220px] mx-auto my-4">
+    <div class="relative w-full max-w-[220px] mx-auto my-4 flex-shrink-0">
       <canvas id="categoryBreakdownChart"></canvas>
     </div>
-    <div id="category-legend" class="mt-auto space-y-4"></div>
+    <div id="category-legend" class="flex-grow overflow-y-auto min-h-0 space-y-4 pr-2 max-h-[200px]">
+      <!-- Legend items will be injected here by JavaScript -->
+    </div>
   </div>
 
 </div>
@@ -26,6 +28,7 @@
 <!-- 
   The script to initialize charts is included directly in the partial. 
   This ensures it runs every time HTMX loads this content.
+  NO CHANGES WERE MADE TO THE SCRIPT.
 -->
 <script>
   // Self-invoking function to avoid polluting the global scope
@@ -91,10 +94,9 @@
       if (!ctx) return;
       if (emissionsOverTimeChart) emissionsOverTimeChart.destroy();
       
-      // **NEW**: สร้างสีแบบไล่ระดับ (Gradient)
       const gradient = ctx.createLinearGradient(0, ctx.canvas.height, 0, 0);
-      gradient.addColorStop(0, '#3b82f6'); // Blue
-      gradient.addColorStop(1, '#14b8a6'); // Teal
+      gradient.addColorStop(0, '#3b82f6');
+      gradient.addColorStop(1, '#14b8a6');
 
       emissionsOverTimeChart = new Chart(ctx, {
         type: 'bar',
@@ -114,7 +116,6 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          // **NEW**: เพิ่ม Animation ที่นุ่มนวล
           animation: {
             duration: 1000,
             easing: 'easeInOutQuart'
@@ -132,7 +133,6 @@
               grid: { display: false }, 
               ticks: { color: '#6b7280' } 
             },
-            // **UPDATED**: แสดงค่าและเส้นกริดของแกน Y
             y: { 
               beginAtZero: true, 
               grid: { 
@@ -140,7 +140,7 @@
                 drawBorder: false,
               }, 
               ticks: { 
-                display: true, // <-- แสดงค่าแกน Y
+                display: true,
                 color: '#6b7280' 
               } 
             }
@@ -166,7 +166,6 @@
             borderWidth: 4,
             cutout: '75%',
             offset: new Array(values.length).fill(0),
-            // **NEW**: เพิ่ม Effect ตอนเอาเมาส์ชี้
             hoverOffset: 12, 
           }]
         },
@@ -195,7 +194,7 @@
                     label: function(context) {
                         const label = context.label || '';
                         const value = context.raw;
-                        const percentage = ((value / totalValue) * 100).toFixed(1);
+                        const percentage = totalValue > 0 ? ((value / totalValue) * 100).toFixed(1) : 0;
                         return ` ${label}: ${percentage}%`;
                     }
                 }
@@ -225,7 +224,6 @@
           const timeSeriesValues = monthOrder.map(month => rawDailyData[month] || 0);
           const timeSeriesLabels = monthOrder.map(month => month.substring(0, 3));
 
-          // **NEW**: เพิ่มชุดสีให้หลากหลายและสวยงามขึ้น
           const categoryColors = ['#4f46e5', '#10b981', '#f97316', '#3b82f6', '#ec4899', '#8b5cf6'];
       
           renderEmissionsOverTimeChart(timeSeriesLabels, timeSeriesValues);
