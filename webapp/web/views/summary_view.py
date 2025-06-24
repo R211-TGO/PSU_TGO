@@ -162,7 +162,6 @@ def get_charts():
 
 def calculate_emissions_data(user, sub_scopes, time_period):
     """คำนวณข้อมูล emissions"""
-    # (ใช้โค้ดเดิมที่มี)
     today = datetime.now()
     days = {"week": 7, "month": 30, "year": 365}
 
@@ -172,71 +171,45 @@ def calculate_emissions_data(user, sub_scopes, time_period):
     # ดึง scope objects จาก IDs
     scopes = Scope.objects(id__in=scope_object_ids)
 
-    seen = []
-    scope_ghg_scopes = [s.ghg_scope for s in scopes]
-    seen = []
-    scope_ghg_sup_scopes = [s.ghg_sup_scope for s in scopes]
-
-    print(scope_ghg_scopes)
-    print(scope_ghg_sup_scopes)
     materials = Material.objects(
         campus=user.campus,
         department=user.department,
-        scope__in=scope_ghg_scopes,
-        sub_scope__in=scope_ghg_sup_scopes,
+        scope__in=[s.ghg_scope for s in scopes],
+        sub_scope__in=[s.ghg_sup_scope for s in scopes],
     )
 
-    print(f"Found {len(materials)} materials")
+    # จัดกลุ่มตามวันที่
+    daily_data = {}
+    for material in materials:
+        date_key = datetime(material.year, material.month, material.day).strftime(
+            "%B"
+        )  # แปลงเป็นชื่อเดือน
+        daily_data[date_key] = daily_data.get(date_key, 0) + (material.result or 0)
 
-    # จัดกลุ่ม materials ตาม scope และคำนวณ carbon รวม
+    # จัดกลุ่มตาม scope
+    category_data = {}
     scope_data = {}
-
     for scope in scopes:
-        # ดึง materials ที่ตรงกับ scope นี้
-        scope_materials = [
-            m
-            for m in materials
-            if m.scope == scope.ghg_scope and m.sub_scope == scope.ghg_sup_scope
-        ]
+        scope_name = f"Scope {scope.ghg_scope}"
+        emissions = sum(
+            m.result or 0 for m in materials if m.sub_scope == scope.ghg_sup_scope
+        )
+        category_data[scope_name] = category_data.get(scope_name, 0) + emissions
 
-        # คำนวณ carbon รวมของ scope นี้
-        total_carbon = sum(m.result or 0 for m in scope_materials)
-
-        # เก็บข้อมูล scope พร้อม carbon รวม
-        scope_key = f"Scope {scope.ghg_scope}.{scope.ghg_sup_scope}"
-        scope_data[scope_key] = {
-            "scope_object": scope,  # เก็บ scope object
-            "materials": scope_materials,  # materials ของ scope นี้
-            "total_carbon": round(total_carbon, 2),  # carbon รวม
-            "materials_count": len(scope_materials),  # จำนวน materials
+        scope_data[scope_name] = {
+            "ghg_scope": scope.ghg_scope,
+            "ghg_sup_scope": scope.ghg_sup_scope,
+            "emissions": emissions,
         }
 
-        print(
-            f"Scope {scope.ghg_scope}.{scope.ghg_sup_scope} ({scope.ghg_name}): "
-            f"{len(scope_materials)} materials, {total_carbon} kg CO2"
-        )
-
-    # คำนวณข้อมูลรวมทั้งหมด
     total_emissions = sum(m.result or 0 for m in materials)
     daily_average = total_emissions / days[time_period] if days[time_period] > 0 else 0
-
-    print(f"Total emissions: {total_emissions} kg CO2")
-    print(f"Daily average: {daily_average} kg CO2")
-
-    # จัดกลุ่มตาม scope หลัก (1, 2, 3) สำหรับ chart
-    category_data = {}
-    print(scope_data.items())
-    for scope_key, scope_info in scope_data.items():
-        main_scope = f"Scope {scope_info['scope_object']}"
-        if main_scope in category_data:
-            category_data[main_scope] += scope_info["total_carbon"]
-        else:
-            category_data[main_scope] = scope_info["total_carbon"]
 
     return {
         "total_emissions": round(total_emissions, 2),
         "daily_average": round(daily_average, 2),
+        "daily_data": daily_data,
         "category_data": category_data,
         "materials_count": len(materials),
-        "scope_data": scope_data,  # เพิ่มข้อมูล scope แต่ละตัว
+        "scope_data": scope_data,
     }
