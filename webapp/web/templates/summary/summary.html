@@ -69,16 +69,25 @@
               <label class="block text-sm font-medium mb-1">Time Period</label>
               <div class="join">
                 <input class="join-item btn btn-xs" type="radio" name="time_period" value="week" aria-label="Week" checked 
-                       hx-post="/summary/stats" hx-target="#stats-container" hx-include="[name='selected_sub_scopes']:checked" />
+                       hx-post="/summary/stats" 
+                       hx-target="#stats-container" 
+                       hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked"
+                       hx-trigger="change" />
                 <input class="join-item btn btn-xs" type="radio" name="time_period" value="month" aria-label="Month"
-                       hx-post="/summary/stats" hx-target="#stats-container" hx-include="[name='selected_sub_scopes']:checked" />
+                       hx-post="/summary/stats" 
+                       hx-target="#stats-container" 
+                       hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked"
+                       hx-trigger="change" />
                 <input class="join-item btn btn-xs" type="radio" name="time_period" value="year" aria-label="Year"
-                       hx-post="/summary/stats" hx-target="#stats-container" hx-include="[name='selected_sub_scopes']:checked" />
+                       hx-post="/summary/stats" 
+                       hx-target="#stats-container" 
+                       hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked"
+                       hx-trigger="change" />
               </div>
             </div>
           </div>
 
-          <div class="flex flex-wrap gap-2">
+          <div id="active-filters" class="flex flex-wrap gap-2">
             <span class="text-sm font-medium">Active Filter :</span>
             <span class="badge badge-primary badge-sm">{{ user.campus }}</span>
             <span class="badge badge-secondary badge-sm">{{ user.department }}</span>

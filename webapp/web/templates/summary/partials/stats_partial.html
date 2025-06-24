@@ -1,0 +1,54 @@
+<div id="stats-container">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+      <!-- Total Emissions -->
+      <div class="bg-white rounded-lg p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-medium text-gray-600">Total Emissions</h3>
+          <i data-feather="zap" class="w-4 h-4 text-gray-400"></i>
+        </div>
+        <div class="text-2xl font-bold text-base-content mb-1">{{ data.total_emissions }} kg</div>
+        <div class="text-xs text-gray-500">This {{ time_period }}</div>
+      </div>
+  
+      <!-- Daily Average -->
+      <div class="bg-white rounded-lg p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-medium text-gray-600">Daily Average</h3>
+          <i data-feather="calendar" class="w-4 h-4 text-gray-400"></i>
+        </div>
+        <div class="text-2xl font-bold text-base-content mb-1">{{ data.daily_average }} kg</div>
+        <div class="text-xs text-gray-500">Per day</div>
+      </div>
+  
+      <!-- Materials Count -->
+      <div class="bg-white rounded-lg p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-medium text-gray-600">Total Records</h3>
+          <i data-feather="file-text" class="w-4 h-4 text-gray-400"></i>
+        </div>
+        <div class="text-2xl font-bold text-base-content mb-1">{{ data.materials_count }}</div>
+        <div class="text-xs text-gray-500">Materials recorded</div>
+      </div>
+  
+      <!-- Categories Count -->
+      <div class="bg-white rounded-lg p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-medium text-gray-600">Categories</h3>
+          <i data-feather="layers" class="w-4 h-4 text-gray-400"></i>
+        </div>
+        <div class="text-2xl font-bold text-base-content mb-1">{{ data.scope_data|length }}</div>
+        <div class="text-xs text-gray-500">Sub scopes active</div>
+      </div>
+    </div>
+    
+    <!-- Scope Details -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for scope_key, scope_info in data.scope_data.items() %}
+      <div class="bg-white rounded-lg p-4 shadow-sm">
+        <h4 class="font-semibold mb-2">{{ scope_key }}</h4>
+        <div class="text-lg font-bold text-green-600">{{ scope_info.emissions }} kg CO2</div>
+        <div class="text-xs text-gray-500">{{ scope_info.ghg_scope }}.{{ scope_info.ghg_sup_scope }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>

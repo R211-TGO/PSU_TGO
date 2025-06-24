@@ -6,9 +6,29 @@
            name="selected_scopes" value="{{ scope.ghg_scope }}"
            hx-post="/summary/sub-scopes" 
            hx-target="#sub-scope-list"
-           hx-include="[name='selected_scopes']:checked"
+           hx-include="[name='selected_scopes']:checked, [name='selected_sub_scopes']:checked"
+           hx-trigger="change"
            onclick="event.stopPropagation();">
     <span class="label-text" onclick="event.stopPropagation();">Scope {{ scope.ghg_scope }}</span>
   </label>
 </li>
 {% endfor %}
+
+<!-- Trigger update badges, stats และ charts เมื่อ scope เปลี่ยน -->
+<div hx-post="/summary/update-badges" 
+     hx-target="#active-filters"
+     hx-include="[name='selected_scopes']:checked, [name='selected_sub_scopes']:checked"
+     hx-trigger="change from:[name='selected_scopes']">
+</div>
+
+<div hx-post="/summary/stats" 
+     hx-target="#stats-container"
+     hx-include="[name='selected_sub_scopes']:checked, [name='time_period']:checked, [name='selected_scopes']:checked"
+     hx-trigger="change from:[name='selected_scopes']">
+</div>
+
+<div hx-post="/summary/charts" 
+     hx-target="#charts-container"
+     hx-include="[name='selected_sub_scopes']:checked, [name='time_period']:checked, [name='selected_scopes']:checked"
+     hx-trigger="change from:[name='selected_scopes']">
+</div>
