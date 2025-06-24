@@ -1,0 +1,14 @@
+{% for scope in scopes %}
+<li onclick="event.stopPropagation();">
+  <label class="label cursor-pointer justify-start w-full p-2 hover:bg-base-200" 
+         onclick="event.stopPropagation();">
+    <input type="checkbox" class="checkbox checkbox-sm mr-2" 
+           name="selected_scopes" value="{{ scope.ghg_scope }}"
+           hx-post="/summary/sub-scopes" 
+           hx-target="#sub-scope-list"
+           hx-include="[name='selected_scopes']:checked"
+           onclick="event.stopPropagation();">
+    <span class="label-text" onclick="event.stopPropagation();">Scope {{ scope.ghg_scope }}</span>
+  </label>
+</li>
+{% endfor %}
