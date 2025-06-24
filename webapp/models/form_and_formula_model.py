@@ -33,6 +33,7 @@ class FormAndFormula(me.Document):
     formula = me.StringField(
         required=True
     )  # สูตรคำนวณ เช่น "n * 1.2 + p * 1.1 + k * 0.9"
+    
     create_date = me.DateTimeField(default=datetime.datetime.now)  # วันที่สร้าง
     update_date = me.DateTimeField(default=datetime.datetime.now)  # วันที่อัปเดต
 
