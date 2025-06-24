@@ -1,0 +1,21 @@
+{% if sub_scopes %}
+  {% for sub_scope in sub_scopes %}
+  <li onclick="event.stopPropagation();">
+    <label class="label cursor-pointer justify-start w-full p-2 hover:bg-base-200"
+           onclick="event.stopPropagation();">
+      <input type="checkbox" class="checkbox checkbox-sm mr-2" 
+             name="selected_sub_scopes" value="{{ sub_scope.id }}"
+             hx-post="/summary/stats" 
+             hx-target="#stats-container"
+             hx-include="[name='selected_sub_scopes']:checked, [name='time_period']:checked"
+             hx-swap="outerHTML"
+             onclick="event.stopPropagation();">
+      <span class="label-text" onclick="event.stopPropagation();">Scope ({{ sub_scope.ghg_scope }}.{{ sub_scope.ghg_sup_scope }}) {{ sub_scope.ghg_name }}</span>
+    </label>
+  </li>
+  {% endfor %}
+{% else %}
+  <li onclick="event.stopPropagation();">
+    <span class="text-gray-500 p-2">Select scopes first</span>
+  </li>
+{% endif %}
