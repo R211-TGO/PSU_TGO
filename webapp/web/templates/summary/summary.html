@@ -17,7 +17,7 @@
             <h2 class="text-lg font-semibold">Filters</h2>
           </div>
           
-          <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3">
+          <div class="grid grid-cols-1 md:grid-cols-6 gap-3 mb-3">
             <div>
               <label class="block text-sm font-medium mb-1">Campus</label>
               <input type="text" class="input input-bordered input-sm w-full" value="{{ user.campus }}" readonly>
@@ -64,24 +64,43 @@
               </div>
             </div>
             
+            <!-- Year Selection -->
+            <div class="relative">
+              <label class="block text-sm font-medium mb-1">Year</label>
+              <div class="dropdown dropdown-bottom w-full">
+                <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between">
+                  <span>Select Year</span>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-full max-h-48 overflow-y-auto z-[1]"
+                     hx-get="/summary/years"
+                     hx-trigger="load, click from:previous div"
+                     onclick="event.stopPropagation();">
+                  <li><span class="text-gray-500 p-2">Loading years...</span></li>
+                </ul>
+              </div>
+            </div>
+            
             <!-- Time Period -->
             <div>
               <label class="block text-sm font-medium mb-1">Time Period</label>
               <div class="join">
+                <input class="join-item btn btn-xs" type="radio" name="time_period" value="year" aria-label="Day"
+                       hx-post="/summary/stats" 
+                       hx-target="#stats-container" 
+                       hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked, [name='selected_year']:checked"
+                       hx-trigger="change" />
                 <input class="join-item btn btn-xs" type="radio" name="time_period" value="week" aria-label="Week" checked 
                        hx-post="/summary/stats" 
                        hx-target="#stats-container" 
-                       hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked"
+                       hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked, [name='selected_year']:checked"
                        hx-trigger="change" />
                 <input class="join-item btn btn-xs" type="radio" name="time_period" value="month" aria-label="Month"
                        hx-post="/summary/stats" 
                        hx-target="#stats-container" 
-                       hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked"
-                       hx-trigger="change" />
-                <input class="join-item btn btn-xs" type="radio" name="time_period" value="year" aria-label="Year"
-                       hx-post="/summary/stats" 
-                       hx-target="#stats-container" 
-                       hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked"
+                       hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked, [name='selected_year']:checked"
                        hx-trigger="change" />
               </div>
             </div>
