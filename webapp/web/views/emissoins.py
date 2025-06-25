@@ -218,33 +218,85 @@ def load_materials_form():
     )
 
 
+import re
+
+# สมมติว่าคลาสเหล่านี้มีการ định nghĩa ไว้แล้ว (จากโค้ดเดิมของคุณ)
+# class FormAndFormula:
+#     ...
+#
+# class Material:
+#     ...
+
+
 def calculate_result(material):
     """
-    Calculate the result based on the formula and update the material's result field.
+    คำนวณผลลัพธ์จากสูตรและอัปเดต field result ของ material
+    ฟังก์ชันนี้ถูกแก้ไขให้รองรับชื่อตัวแปรภาษาไทยในสูตร
 
     Args:
-        material (Material): The material object to update.
+        material (Material): a object material ที่ต้องการอัปเดต
     """
+    # ดึงข้อมูลสูตรจากฐานข้อมูล
     form_and_formula = FormAndFormula.objects(material_name=material.name).first()
     if not form_and_formula:
-        print(f"Form and Formula not found for material: {material.name}")
+        print(f"ไม่พบสูตรสำหรับ material: {material.name}")
         return
 
-    # Prepare variables for the formula
-    variables = {
-        var: 0 for var in form_and_formula.variables
-    }  # Default all variables to 0
+    # --- ส่วนที่แก้ไข ---
+
+    # 1. สร้าง mapping ระหว่างชื่อตัวแปรภาษาไทย กับชื่อที่ปลอดภัย (Safe ASCII names)
+    # เช่น {'ความหนา': 'var_0', 'ความยาว': 'var_1'}
+    variable_mapping = {
+        original_var: f"var_{i}"
+        for i, original_var in enumerate(form_and_formula.variables)
+    }
+
+    # 2. เตรียม dictionary ของตัวแปรที่แปลงชื่อแล้วสำหรับใช้ใน eval()
+    sanitized_variables = {}
+    # กำหนดค่าเริ่มต้นสำหรับทุกตัวแปรเป็น 0
+    for safe_name in variable_mapping.values():
+        sanitized_variables[safe_name] = 0
+
+    # อัปเดตค่าจาก material ที่มีอยู่
     for qt in material.quantity_type:
-        if qt.field in variables:
-            variables[qt.field] = qt.amount
+        # ตรวจสอบว่า field จาก material เป็นหนึ่งในตัวแปรที่กำหนดไว้ในสูตรหรือไม่
+        if qt.field in variable_mapping:
+            # ดึงชื่อที่ปลอดภัย (เช่น 'var_0') มาใช้เป็น key
+            safe_name = variable_mapping[qt.field]
+            sanitized_variables[safe_name] = qt.amount
+
+    # 3. แปลงสตริงสูตร โดยแทนที่ชื่อตัวแปรภาษาไทยด้วยชื่อที่ปลอดภัย
+    sanitized_formula = form_and_formula.formula
+    # เรียงลำดับ key ตามความยาวจากมากไปน้อย เพื่อป้องกันการแทนที่ผิดพลาด
+    # เช่น ป้องกันการแทนที่ "ความหนา" ซึ่งเป็นส่วนหนึ่งของ "ความหนาแน่น" ก่อน
+    sorted_vars = sorted(variable_mapping.keys(), key=len, reverse=True)
+
+    for original_var in sorted_vars:
+        safe_name = variable_mapping[original_var]
+        # ใช้ regular expression (\b) เพื่อให้มั่นใจว่าแทนที่ทั้งคำเท่านั้น
+        sanitized_formula = re.sub(
+            r"\b" + re.escape(original_var) + r"\b", safe_name, sanitized_formula
+        )
+
+    # --- สิ้นสุดส่วนที่แก้ไข ---
 
     try:
-        # Evaluate the formula using the variables
-        result = eval(form_and_formula.formula, {}, variables)
-        material.result = float(result)  # Save the result as a float
+        # 4. ประมวลผลสูตรที่แปลงแล้วด้วยตัวแปรที่แปลงแล้ว
+        print(f"Executing sanitized formula: {sanitized_formula}")
+        print(f"With variables: {sanitized_variables}")
+
+        result = eval(sanitized_formula, {}, sanitized_variables)
+        material.result = float(result)  # บันทึกผลลัพธ์เป็น float
         material.save()
+        print(f"คำนวณผลลัพธ์สำหรับ {material.name} สำเร็จ: {material.result}")
+
     except Exception as e:
-        print(f"Error calculating result for material {material.name}: {e}")
+        print(f"เกิดข้อผิดพลาดในการคำนวณผลลัพธ์สำหรับ {material.name}: {e}")
+        print("--- Debug Information ---")
+        print(f"Original formula: {form_and_formula.formula}")
+        print(f"Sanitized formula: {sanitized_formula}")
+        print(f"Sanitized variables: {sanitized_variables}")
+        print("-----------------------")
 
 
 def save_material(scope_id, sub_scope_id, month_id, year, material_data):
