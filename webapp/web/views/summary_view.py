@@ -157,6 +157,7 @@ def get_stats():
     selected_scopes = request.form.getlist("selected_scopes")
     selected_sub_scopes = request.form.getlist("selected_sub_scopes")
     time_period = request.form.get("time_period", "week")
+    selected_year = request.form.get("selected_year", datetime.now().year)
 
     if not selected_sub_scopes:
         return '<div id="stats-container"><div class="text-center text-gray-500 p-8">Select Sub Scopes to view statistics</div></div>'
@@ -186,7 +187,7 @@ def get_stats():
     if not valid_sub_scope_ids:
         return '<div id="stats-container"><div class="text-center text-gray-500 p-8">No valid data for current selection</div></div>'
     
-    data = calculate_emissions_data(user, valid_sub_scope_ids, time_period)
+    data = calculate_emissions_data(user, valid_sub_scope_ids, time_period, selected_year)
     return render_template(
         "/summary/start_partial.html", data=data, time_period=time_period
     )
@@ -201,6 +202,7 @@ def get_charts():
     selected_scopes = request.form.getlist("selected_scopes")
     selected_sub_scopes = request.form.getlist("selected_sub_scopes")
     time_period = request.form.get("time_period", "week")
+    selected_year = request.form.get("selected_year", datetime.now().year)
 
     if not selected_sub_scopes:
         return '<div id="charts-container"><div class="text-center text-gray-500 p-8">Select Sub Scopes to view charts</div></div>'
@@ -230,16 +232,17 @@ def get_charts():
     if not valid_sub_scope_ids:
         return '<div id="charts-container"><div class="text-center text-gray-500 p-8">No valid data for current selection</div></div>'
     
-    data = calculate_emissions_data(user, valid_sub_scope_ids, time_period)
+    data = calculate_emissions_data(user, valid_sub_scope_ids, time_period, selected_year)
     return render_template("/summary/charts_partial.html", data=data)
 
 
-def calculate_emissions_data(user, sub_scopes, time_period):
+def calculate_emissions_data(user, sub_scopes, time_period, selected_year=None):
     """คำนวณข้อมูล emissions - คิวรี่ใหม่ทุกครั้ง"""
-    today = datetime.now()
-    days = {"week": 7, "month": 30, "year": 365}
-    start_date = today - timedelta(days=days[time_period])
-
+    if not selected_year:
+        selected_year = datetime.now().year
+    
+    print(f"Calculate emissions for sub scopes: {sub_scopes}")
+    print(f"Time period: {time_period}, Selected year: {selected_year}")
 
     # แปลง string IDs เป็น ObjectId
     scope_object_ids = [ObjectId(scope_id) for scope_id in sub_scopes]
@@ -251,20 +254,43 @@ def calculate_emissions_data(user, sub_scopes, time_period):
         department=user.department
     )
 
-    # คิวรี่ materials ใหม่ทุกครั้ง
+    print(f"Found {scopes.count()} valid scopes")
+
+    # คิวรี่ materials สำหรับปีที่เลือก
     materials = Material.objects(
         campus=user.campus,
         department=user.department,
         scope__in=[s.ghg_scope for s in scopes],
         sub_scope__in=[s.ghg_sup_scope for s in scopes],
-        create_date__gte=start_date
+        year=int(selected_year)
     )
 
-    # จัดกลุ่มตามวันที่
-    daily_data = {}
+    # คิวรี่ materials สำหรับปีที่แล้ว (เพื่อเปรียบเทียบ)
+    last_year_materials = Material.objects(
+        campus=user.campus,
+        department=user.department,
+        scope__in=[s.ghg_scope for s in scopes],
+        sub_scope__in=[s.ghg_sup_scope for s in scopes],
+        year=int(selected_year) - 1
+    )
+
+    print(f"Found {materials.count()} materials for year {selected_year}")
+    print(f"Found {last_year_materials.count()} materials for year {int(selected_year) - 1}")
+
+    # จัดกลุ่มตามเดือน (ทำให้ครบ 12 เดือน)
+    month_names = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ]
+    
+    # สร้าง daily_data ให้ครบ 12 เดือน โดยเริ่มต้นด้วย 0
+    daily_data = {month: 0 for month in month_names}
+    
+    # เพิ่มข้อมูลจริงจาก materials
     for material in materials:
-        date_key = datetime(material.year, material.month, material.day).strftime("%B")
-        daily_data[date_key] = daily_data.get(date_key, 0) + (material.result or 0)
+        month_name = month_names[material.month - 1]  # month เป็น 1-12, index เป็น 0-11
+        daily_data[month_name] += (material.result or 0)
+        print(material.result, month_name)
 
     # จัดกลุ่มตาม scope
     category_data = {}
@@ -286,16 +312,42 @@ def calculate_emissions_data(user, sub_scopes, time_period):
             "ghg_name": scope.ghg_name
         }
 
-    total_emissions = sum(m.result or 0 for m in materials)
-    daily_average = total_emissions / days[time_period] if days[time_period] > 0 else 0
+    # คำนวณ emissions ปีปัจจุบันและปีที่แล้ว
+    current_year_total = sum(m.result or 0 for m in materials)
+    last_year_total = sum(m.result or 0 for m in last_year_materials)
+    
+    # คำนวณเปอร์เซ็นต์การเปลี่ยนแปลง
+    if last_year_total > 0:
+        year_change_percent = ((current_year_total - last_year_total) / last_year_total) * 100
+    else:
+        year_change_percent = 100 if current_year_total > 0 else 0
+    
+    # คำนวณ daily average ตาม time period
+    if time_period == "week":
+        # เฉลี่ยต่อสัปดาห์ (สมมติว่า 1 ปี = 52 สัปดาห์)
+        daily_average = current_year_total / 52
+        average_label = "Per Week"
+    elif time_period == "month":
+        # เฉลี่ยต่อเดือน
+        daily_average = current_year_total / 12
+        average_label = "Per Month"
+    else:  # year
+        # เฉลี่ยต่อวัน (365 วัน)
+        daily_average = current_year_total / 365
+        average_label = "Per Day"
 
     return {
-        "total_emissions": round(total_emissions, 2),
+        "total_emissions": round(current_year_total, 2),
         "daily_average": round(daily_average, 2),
+        "average_label": average_label,
+        "year_change_percent": round(year_change_percent, 1),
+        "year_change_trend": "increase" if year_change_percent > 0 else "decrease" if year_change_percent < 0 else "stable",
+        "last_year_total": round(last_year_total, 2),
         "daily_data": daily_data,
         "category_data": category_data,
         "materials_count": materials.count(),
         "scope_data": scope_data,
+        "selected_year": selected_year
     }
 
 
@@ -385,3 +437,23 @@ def update_badges():
                          sub_scope_objects=sub_scope_objects,
                          scope_badges=scope_badges,
                          user=user)
+
+
+
+@module.route("/years", methods=["GET"])
+@login_required
+def get_years():
+    """HTMX endpoint สำหรับ load year dropdown"""
+    user = current_user
+    
+    # ดึงปีทั้งหมดที่มีข้อมูล materials
+    materials = Material.objects(campus=user.campus, department=user.department)
+    years = sorted(list(set([m.year for m in materials if m.year])), reverse=True)
+    
+    # ถ้าไม่มีข้อมูล ให้ใช้ปีปัจจุบัน
+    if not years:
+        years = [datetime.now().year]
+    
+    return render_template(
+        "/summary/partials/year_dropdown.html", years=years
+    )
