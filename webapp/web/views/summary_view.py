@@ -161,7 +161,15 @@ def get_stats():
     selected_year = request.form.get("selected_year", datetime.now().year)
 
     if not selected_sub_scopes:
-        return '<div id="stats-container"><div class="text-center text-gray-500 p-8">Select Sub Scopes to view statistics</div></div>'
+        # Return empty state for STATS only (not charts)
+        return '''
+        <div id="stats-container" class="mb-6">
+          <div class="text-center text-gray-500 p-8 bg-white rounded-lg shadow-sm">
+            <i data-feather="bar-chart-2" class="w-12 h-12 mx-auto mb-4 text-gray-300"></i>
+            <p class="text-lg">Select Sub Scopes to view statistics</p>
+          </div>
+        </div>
+        '''
 
     # คิวรี่ใหม่ทุกครั้ง - กรองตาม scope ที่เลือกและ sub scope ที่เลือก
     scope_object_ids = [ObjectId(scope_id) for scope_id in selected_sub_scopes]
@@ -186,11 +194,18 @@ def get_stats():
     valid_sub_scope_ids = [str(scope.id) for scope in valid_sub_scopes]
     
     if not valid_sub_scope_ids:
-        return '<div id="stats-container"><div class="text-center text-gray-500 p-8">No valid data for current selection</div></div>'
+        return '''
+        <div id="stats-container" class="mb-6">
+          <div class="text-center text-gray-500 p-8 bg-white rounded-lg shadow-sm">
+            <i data-feather="bar-chart-2" class="w-12 h-12 mx-auto mb-4 text-gray-300"></i>
+            <p class="text-lg">No valid data for current selection</p>
+          </div>
+        </div>
+        '''
     
     data = calculate_emissions_data(user, valid_sub_scope_ids, time_period, selected_year)
     return render_template(
-        "/summary/start_partial.html", data=data, time_period=time_period
+        "/summary/stats_partial.html", data=data, time_period=time_period
     )
 
 
@@ -206,7 +221,33 @@ def get_charts():
     selected_year = request.form.get("selected_year", datetime.now().year)
 
     if not selected_sub_scopes:
-        return '<div id="charts-container"><div class="text-center text-gray-500 p-8">Select Sub Scopes to view charts</div></div>'
+        # Return empty state for CHARTS only
+        return '''
+        <div id="charts-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="dashboard-card flex flex-col p-6 bg-white shadow-lg rounded-xl overflow-hidden">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex-shrink-0">Emissions Over Time</h3>
+            <div class="relative flex-grow min-h-[300px] md:min-h-[350px] flex items-center justify-center">
+              <div class="text-center text-gray-500">
+                <i data-feather="bar-chart-2" class="w-12 h-12 mx-auto mb-4 text-gray-300"></i>
+                <p class="text-lg">Select Sub Scopes to view charts</p>
+              </div>
+            </div>
+          </div>
+          <div class="dashboard-card flex flex-col p-6 bg-white shadow-lg rounded-xl overflow-hidden">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex-shrink-0">Category Breakdown</h3>
+            <div class="relative w-full max-w-[220px] mx-auto my-4 flex-shrink-0 flex items-center justify-center min-h-[200px]">
+              <div class="text-center text-gray-500">
+                <i data-feather="pie-chart" class="w-12 h-12 mx-auto mb-4 text-gray-300"></i>
+              </div>
+            </div>
+            <div class="flex-grow overflow-y-auto min-h-0 space-y-4 pr-2 max-h-[200px] flex items-center justify-center">
+              <div class="text-center text-gray-500">
+                <p class="text-sm">No category data available</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        '''
 
     # คิวรี่ใหม่ทุกครั้ง - กรองตาม scope ที่เลือกและ sub scope ที่เลือก
     scope_object_ids = [ObjectId(scope_id) for scope_id in selected_sub_scopes]
@@ -231,10 +272,37 @@ def get_charts():
     valid_sub_scope_ids = [str(scope.id) for scope in valid_sub_scopes]
     
     if not valid_sub_scope_ids:
-        return '<div id="charts-container"><div class="text-center text-gray-500 p-8">No valid data for current selection</div></div>'
+        return '''
+        <div id="charts-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="dashboard-card flex flex-col p-6 bg-white shadow-lg rounded-xl overflow-hidden">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex-shrink-0">Emissions Over Time</h3>
+            <div class="relative flex-grow min-h-[300px] md:min-h-[350px] flex items-center justify-center">
+              <div class="text-center text-gray-500">
+                <i data-feather="bar-chart-2" class="w-12 h-12 mx-auto mb-4 text-gray-300"></i>
+                <p class="text-lg">No valid data for current selection</p>
+              </div>
+            </div>
+          </div>
+          <div class="dashboard-card flex flex-col p-6 bg-white shadow-lg rounded-xl overflow-hidden">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex-shrink-0">Category Breakdown</h3>
+            <div class="relative w-full max-w-[220px] mx-auto my-4 flex-shrink-0 flex items-center justify-center min-h-[200px]">
+              <div class="text-center text-gray-500">
+                <i data-feather="pie-chart" class="w-12 h-12 mx-auto mb-4 text-gray-300"></i>
+              </div>
+            </div>
+            <div class="flex-grow overflow-y-auto min-h-0 space-y-4 pr-2 max-h-[200px] flex items-center justify-center">
+              <div class="text-center text-gray-500">
+                <p class="text-sm">No valid data for current selection</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        '''
     
     data = calculate_emissions_data(user, valid_sub_scope_ids, time_period, selected_year)
     return render_template("/summary/charts_partial.html", data=data)
+
+# ...existing code...
 
 
 def calculate_emissions_data(user, sub_scopes, time_period, selected_year=None):
