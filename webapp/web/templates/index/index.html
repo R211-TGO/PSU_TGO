@@ -72,6 +72,12 @@
           </a>
         </li>
         <li>
+          <a href="/summary" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/summary' or request.path == '/summary/' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
+            <i data-feather="pie-chart"></i>
+            <span class="text-md">Summary</span>
+          </a>
+        </li>
+        <li>
           <a href="/settings" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/settings' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
             <i data-feather="settings"></i>
             <span class="text-md">Settings</span>
