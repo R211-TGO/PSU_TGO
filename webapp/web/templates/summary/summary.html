@@ -1,129 +1,137 @@
 {% extends "/base/default_page.html" %}
 
 {% block content %}
-<div class="flex h-screen overflow-hidden">
-    <div id="main-content" class="flex-1 flex flex-col">
-      <div class="p-6 flex-grow bg-base-200 z-0 overflow-hidden">
-        <!-- Dashboard Header -->
-        <div class="text-center mb-6">
-          <h1 class="text-2xl font-bold text-base-content mb-2">Your Carbon Dashboard</h1>
-          <p class="text-gray-600 text-sm">Track your progress and see the impact of your daily choices on your overall carbon footprint.</p>
+<div class="min-h-screen bg-base-200">
+  <div class="container mx-auto px-4 py-6 max-w-7xl">
+    <!-- Dashboard Header -->
+    <div class="text-center mb-6">
+      <h1 class="text-2xl lg:text-3xl font-bold text-base-content mb-2">Your Carbon Dashboard</h1>
+      <p class="text-gray-600 text-sm lg:text-base max-w-2xl mx-auto">Track your progress and see the impact of your daily choices on your overall carbon footprint.</p>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-white rounded-lg p-4 lg:p-6 mb-6 shadow-sm">
+      <div class="flex items-center mb-4">
+        <i data-feather="filter" class="mr-2 w-5 h-5"></i>
+        <h2 class="text-lg font-semibold">Filters</h2>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
+        <div class="sm:col-span-1">
+          <label class="block text-sm font-medium mb-2">Campus</label>
+          <input type="text" class="input input-bordered input-sm w-full" value="{{ user.campus }}" readonly>
         </div>
-
-        <!-- Filters Section -->
-        <div class="bg-white rounded-lg p-4 mb-4 shadow-sm">
-          <div class="flex items-center mb-3">
-            <i data-feather="filter" class="mr-2"></i>
-            <h2 class="text-lg font-semibold">Filters</h2>
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-6 gap-3 mb-3">
-            <div>
-              <label class="block text-sm font-medium mb-1">Campus</label>
-              <input type="text" class="input input-bordered input-sm w-full" value="{{ user.campus }}" readonly>
+        <div class="sm:col-span-1">
+          <label class="block text-sm font-medium mb-2">Department</label>
+          <input type="text" class="input input-bordered input-sm w-full" value="{{ user.department }}" readonly>
+        </div>
+        
+        <!-- Scope Selection -->
+        <div class="relative sm:col-span-1">
+          <label class="block text-sm font-medium mb-2">Scope</label>
+          <div class="dropdown dropdown-bottom w-full">
+            <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between min-h-[2rem]">
+              <span class="truncate">Select Scopes</span>
+              <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
             </div>
-            <div>
-              <label class="block text-sm font-medium mb-1">Department</label>
-              <input type="text" class="input input-bordered input-sm w-full" value="{{ user.department }}" readonly>
-            </div>
-            
-            <!-- Scope Selection -->
-            <div class="relative">
-              <label class="block text-sm font-medium mb-1">Scope</label>
-              <div class="dropdown dropdown-bottom w-full">
-                <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between">
-                  <span>Select Scopes</span>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
-                </div>
-                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-full max-h-48 overflow-y-auto z-[1]"
-                     hx-get="/summary/scopes"
-                     hx-trigger="load, click from:previous div"
-                     onclick="event.stopPropagation();">
-                  <li><span class="text-gray-500 p-2">Loading scopes...</span></li>
-                </ul>
-              </div>
-            </div>
-            
-            <!-- Sub Scope Selection -->
-            <div class="relative">
-              <label class="block text-sm font-medium mb-1">Sub Scope</label>
-              <div class="dropdown dropdown-bottom w-full">
-                <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between">
-                  <span>Select Sub Scopes</span>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
-                </div>
-                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-full max-h-48 overflow-y-auto z-[1]" 
-                    id="sub-scope-list"
-                    onclick="event.stopPropagation();">
-                  <li><span class="text-gray-500 p-2">Select Scope first</span></li>
-                </ul>
-              </div>
-            </div>
-            
-            <!-- Year Selection -->
-            <div class="relative">
-              <label class="block text-sm font-medium mb-1">Year</label>
-              <div class="dropdown dropdown-bottom w-full">
-                <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between">
-                  <span>Select Year</span>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
-                </div>
-                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-full max-h-48 overflow-y-auto z-[1]"
-                     hx-get="/summary/years"
-                     hx-trigger="load, click from:previous div"
-                     onclick="event.stopPropagation();">
-                  <li><span class="text-gray-500 p-2">Loading years...</span></li>
-                </ul>
-              </div>
-            </div>
-            
-            <!-- Time Period -->
-            <div>
-              <label class="block text-sm font-medium mb-1">Time Period</label>
-              <div class="join">
-                <input class="join-item btn btn-xs" type="radio" name="time_period" value="year" aria-label="Day"
-                       hx-post="/summary/stats" 
-                       hx-target="#stats-container" 
-                       hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked, [name='selected_year']:checked"
-                       hx-trigger="change" />
-                <input class="join-item btn btn-xs" type="radio" name="time_period" value="week" aria-label="Week" checked 
-                       hx-post="/summary/stats" 
-                       hx-target="#stats-container" 
-                       hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked, [name='selected_year']:checked"
-                       hx-trigger="change" />
-                <input class="join-item btn btn-xs" type="radio" name="time_period" value="month" aria-label="Month"
-                       hx-post="/summary/stats" 
-                       hx-target="#stats-container" 
-                       hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked, [name='selected_year']:checked"
-                       hx-trigger="change" />
-              </div>
-            </div>
-          </div>
-
-          <div id="active-filters" class="flex flex-wrap gap-2">
-            <span class="text-sm font-medium">Active Filter :</span>
-            <span class="badge badge-primary badge-sm">{{ user.campus }}</span>
-            <span class="badge badge-secondary badge-sm">{{ user.department }}</span>
+            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-full max-h-48 overflow-y-auto z-[1]"
+                 hx-get="/summary/scopes"
+                 hx-trigger="load, click from:previous div"
+                 onclick="event.stopPropagation();">
+              <li><span class="text-gray-500 p-2">Loading scopes...</span></li>
+            </ul>
           </div>
         </div>
-
-        <!-- Stats Cards -->
-        <div id="stats-container">
-          <div class="text-center text-gray-500 p-8">Select Sub Scopes to view statistics</div>
+        
+        <!-- Sub Scope Selection -->
+        <div class="relative sm:col-span-1">
+          <label class="block text-sm font-medium mb-2">Sub Scope</label>
+          <div class="dropdown dropdown-bottom w-full">
+            <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between min-h-[2rem]">
+              <span class="truncate">Select Sub Scopes</span>
+              <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-full max-h-48 overflow-y-auto z-[1]" 
+                id="sub-scope-list"
+                onclick="event.stopPropagation();">
+              <li><span class="text-gray-500 p-2">Select Scope first</span></li>
+            </ul>
+          </div>
         </div>
-
-        <!-- Charts Section -->
-        <div id="charts-container">
-          <div class="text-center text-gray-500 p-8">Select Sub Scopes to view charts</div>
+        
+        <!-- Year Selection -->
+        <div class="relative sm:col-span-1">
+          <label class="block text-sm font-medium mb-2">Year</label>
+          <div class="dropdown dropdown-bottom w-full">
+            <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between min-h-[2rem]">
+              <span class="truncate">Select Year</span>
+              <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-full max-h-48 overflow-y-auto z-[1]"
+                 hx-get="/summary/years"
+                 hx-trigger="load, click from:previous div"
+                 onclick="event.stopPropagation();">
+              <li><span class="text-gray-500 p-2">Loading years...</span></li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Time Period -->
+        <div class="sm:col-span-2 xl:col-span-1">
+          <label class="block text-sm font-medium mb-2">Time Period</label>
+          <div class="join w-full">
+            <input class="join-item btn btn-xs flex-1" type="radio" name="time_period" value="year" aria-label="Year"
+                  hx-post="/summary/stats" 
+                  hx-target="#stats-container" 
+                  hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked, [name='selected_year']:checked"
+                  hx-trigger="change"
+                  hx-on::after-request="htmx.ajax('POST', '/summary/charts', {target: '#charts-container', include: '[name=selected_sub_scopes]:checked, [name=time_period], [name=selected_scopes]:checked, [name=selected_year]:checked'})" />
+            <input class="join-item btn btn-xs flex-1" type="radio" name="time_period" value="week" aria-label="Week" checked 
+                  hx-post="/summary/stats" 
+                  hx-target="#stats-container" 
+                  hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked, [name='selected_year']:checked"
+                  hx-trigger="change"
+                  hx-on::after-request="htmx.ajax('POST', '/summary/charts', {target: '#charts-container', include: '[name=selected_sub_scopes]:checked, [name=time_period], [name=selected_scopes]:checked, [name=selected_year]:checked'})" />
+            <input class="join-item btn btn-xs flex-1" type="radio" name="time_period" value="month" aria-label="Month"
+                  hx-post="/summary/stats" 
+                  hx-target="#stats-container" 
+                  hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked, [name='selected_year']:checked"
+                  hx-trigger="change"
+                  hx-on::after-request="htmx.ajax('POST', '/summary/charts', {target: '#charts-container', include: '[name=selected_sub_scopes]:checked, [name=time_period], [name=selected_scopes]:checked, [name=selected_year]:checked'})" />
+          </div>
         </div>
       </div>
+
+      <!-- Active Filters -->
+      <div id="active-filters" class="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+        <span class="text-sm font-medium">Active Filter :</span>
+        <span class="badge badge-primary badge-sm">{{ user.campus }}</span>
+        <span class="badge badge-secondary badge-sm">{{ user.department }}</span>
+      </div>
     </div>
+
+    <!-- Stats Cards -->
+    <div id="stats-container" class="mb-6">
+      <div class="text-center text-gray-500 p-8 bg-white rounded-lg shadow-sm">
+        <i data-feather="bar-chart-2" class="w-12 h-12 mx-auto mb-4 text-gray-300"></i>
+        <p class="text-lg">Select Sub Scopes to view statistics</p>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div id="charts-container">
+      <div class="text-center text-gray-500 p-8 bg-white rounded-lg shadow-sm">
+        <i data-feather="pie-chart" class="w-12 h-12 mx-auto mb-4 text-gray-300"></i>
+        <p class="text-lg">Select Sub Scopes to view charts</p>
+      </div>
+    </div>
+  </div>
 </div>
 
 
