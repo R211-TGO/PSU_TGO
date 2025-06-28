@@ -1,78 +1,103 @@
 <form hx-post="{{ url_for('emissions.save_materials') }}"
       hx-target="#table-container"
       hx-swap="innerHTML"
-      class="max-w-screen-xl mx-auto w-full" {# ขยายความกว้างของโมดัลเป็น max-w-screen-xl #}
+      class="max-w-screen-xl mx-auto w-full"
       style="max-height: 700px; overflow-y: auto;"
       id="materials-form">
       
-    <!-- ส่วนหัวข้อ -->
-    <div class="mt-2 flex justify-between items-center">
-        <h2 class="font-medium text-2xl text-gray-900 px-6">แก้ไขข้อมูลประจำเดือน {{ month }} ({{ year }})</h2>
-        <button type="button" class="text-gray-500 hover:text-gray-700 focus:outline-none"
-                hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-        </button>
-    </div>
-    
-    <div class="bg-white rounded-lg p-4 grid grid-cols-1 gap-6">
+    <div class="mt-2">
+        <div class="flex items-center justify-between px-1 mb-4">
+            <h2 class="font-medium text-2xl text-gray-900">
+                แก้ไขข้อมูลประจำเดือน {{ month }} ({{ year }})
+            </h2>
+            <button type="button" class="text-gray-500 hover:text-gray-700 focus:outline-none"
+                    hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
 
-        <!-- ลูปหัวข้อหลัก -->
-        {% for head in head_table %}
-        <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
-            <div class="mb-">
-                <label class="text-gray-700 font-medium text-lg">ประเภท :</label>
-                <label class="block mb-1 text-gray-500 text-sm ">{{ head }}</label>
+        <!-- ✅ Form Input Section (ที่จริงๆ ที่จะส่งข้อมูล) -->
+        <div id="form-inputs" class="bg-white rounded-[7px] border border-gray-300 shadow-md p-6">
+            <!-- ลูปหัวข้อหลัก -->
+            {% for head in head_table %}
+            <div class="mb-8 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <div class="mb-4">
+                    <p class="text-sm text-gray-400"><strong>ประเภท:</strong> {{ head.upper() }}</p>
+                </div>
+                
+                {% set num_inputs = materials_form[loop.index0] | length %}
+                
+                <!-- ลูปข้อมูลใน materials_form พร้อมปรับ grid ตามจำนวนหัวย่อย -->
+                <div class="grid 
+                    {% if num_inputs == 4 %}
+                        grid-cols-2 lg:grid-cols-4
+                    {% elif num_inputs == 2 %}
+                        grid-cols-1 lg:grid-cols-2
+                    {% else %}
+                        grid-cols-1
+                    {% endif %} 
+                    gap-4">
+                    {% for input in materials_form[loop.index0] %}
+                        {% set matched_material = materials | selectattr('name', 'equalto', head) | list %}
+                        {% set matched_quantity = matched_material | map(attribute='quantity_type') | sum(start=[]) | selectattr('field', 'equalto', input.field) | list %}
+                        <div class="mb-4 
+                            {% if num_inputs == 1 %}
+                                lg:col-span-1
+                            {% endif %}
+                        ">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ input.label }} ({{ input.unit }}):
+                            </label>
+                            <input
+                                type="number"
+                                step="any"
+                                name="amount_{{ head }}_{{ input.field }}"
+                                class="input input-bordered w-full"
+                                placeholder="ระบุ - {{ input.unit }}"
+                                value="{{ matched_quantity[0].amount if matched_quantity else '' }}"
+                            >
+                            <div class="flex gap-2 mt-2">
+                                <div class="text-xs text-gray-700 bg-gray-200 rounded-full px-3 py-1 inline-block">
+                                    Field: {{ input.field }}
+                                </div>
+                                <div class="text-xs text-gray-700 bg-blue-100 rounded-full px-3 py-1 inline-block">
+                                    Type: {{ input.input_type or 'number' }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
-            
-            {% set num_inputs = materials_form[loop.index0] | length %}
-            
-            <!-- ลูปข้อมูลใน materials_form พร้อมปรับ grid ตามจำนวนหัวย่อย -->
-            <div class="grid 
-                {% if num_inputs == 4 %}
-                    grid-cols-4
-                {% elif num_inputs == 2 %}
-                    grid-cols-2
-                {% else %} {# ถ้ามี 1 หัวย่อย ให้จัดเป็น 4 คอลัมน์ (เพื่อให้กว้างเท่าเดิม) #}
-                    grid-cols-4
-                {% endif %} 
-                gap-6">
-                {% for input in materials_form[loop.index0] %}
-                    {% set matched_material = materials | selectattr('name', 'equalto', head) | list %}
-                    {% set matched_quantity = matched_material | map(attribute='quantity_type') | sum(start=[]) | selectattr('field', 'equalto', input.field) | list %}
-                    <div class="mb-2 
-                        {% if num_inputs == 1 %}
-                            col-span-4 {# ถ้ามี 1 หัวย่อย ให้ input นั้นกินพื้นที่ 4 คอลัมน์ #}
-                        {% endif %}
-                    ">
-                        <label class="block text-sm font-medium text-gray-700">{{ input.label }} ({{ input.unit }}):</label>
-                        <input
-                          type="number"
-                          step="any"
-                          name="amount_{{ head }}_{{ input.field }}"
-                          class="w-full rounded-md px-3 py-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500" {# ใช้คลาส Tailwind โดยตรง ไม่ใช้ input-bordered #}
-                          placeholder="ระบุ - {{ input.unit }}"
-                          value="{{ matched_quantity[0].amount if matched_quantity else '' }}"
-                        >
-                    </div>
-                {% endfor %}
+            {% endfor %}
+
+            <!-- Add user info at the bottom -->
+            <div class="mt-6 text-xs text-gray-500 border-t pt-4">
+                <div class="flex items-center gap-2">
+                    <i data-feather="user" class="w-4 h-4"></i>
+                    <span>แก้ไขโดย: {{ current_user.username if current_user else 'Unknown User' }}</span>
+                </div>
+                <div class="flex items-center gap-2 mt-2">
+                    <i data-feather="clock" class="w-4 h-4"></i>
+                    <span id="current-time">แก้ไขเมื่อ: </span>
+                </div>
             </div>
         </div>
-        {% endfor %}
-        
+
         <!-- Hidden Inputs -->
         <input type="hidden" name="scope_id" value="{{ request.args.get('scope_id') }}">
         <input type="hidden" name="sub_scope_id" value="{{ request.args.get('sub_scope_id') }}">
         <input type="hidden" name="page" value="{{ request.args.get('page', 1) }}">
         <input type="hidden" name="year" value="{{ request.args.get('year', '') }}">
         <input type="hidden" name="month_id" value="{{ month_id }}">
-    </div>
 
-    <!-- ปุ่ม -->
-    <div class="flex justify-between items-center px-8">
-        <!-- ปุ่มลบ -->
-        <button type="button" class="btn btn-outline btn-error px-4 py-2 text-red rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out"
+        <div class="mt-4 flex justify-between items-center">
+            <!-- ปุ่มลบ -->
+            <button type="button"
+                class="btn btn-outline btn-error px-4 py-2 text-red rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out"
                 hx-post="{{ url_for('emissions.delete_all_materials') }}"
                 hx-target="#table-container"
                 hx-swap="innerHTML"
@@ -82,29 +107,89 @@
                     "month_id": "{{ month_id }}",
                     "year": "{{ request.args.get("year") }}"
                 }'
-                hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
-            Delete All
-        </button>
+                hx-on="click: document.getElementById('modal').classList.remove('modal-open')"
+            >
+                Clear All
+            </button>
 
-        <!-- ปุ่ม Cancel และ Save Changes -->
-        <div class="flex space-x-2">
-            <button type="button" class="btn btn-outline"
+            <div class="flex space-x-2">
+                <button type="button" class="btn btn-outline"
                     hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
-                Cancel
-            </button>
-            <button type="submit" class="btn btn-primary"
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary"
                     hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
-                Save Changes
-            </button>
+                    Save Changes
+                </button>
+            </div>
         </div>
     </div>
 </form>
 
 <script>
-    // สคริปต์นี้จะทำงานทันทีหลังจาก HTMX ทำการโหลดและแสดงผลฟอร์ม
-    // เพื่อเลื่อนเนื้อหาของโมดัลไปที่ด้านบนสุดตั้งแต่ครั้งแรก
-    const modalElement = document.getElementById('modal'); // สมมติว่า id ของโมดัลหลักของคุณคือ 'modal'
+// Auto-scroll to top when modal opens
+function scrollModalToTop() {
+    const modalElement = document.getElementById('modal');
     if (modalElement) {
-        modalElement.scrollTop = 0; // เลื่อนเนื้อหาโมดัลไปด้านบนสุด
+        modalElement.scrollTop = 0;
     }
+}
+
+// Update current time
+function updateCurrentTime() {
+    const timeElement = document.getElementById('current-time');
+    if (timeElement) {
+        const currentTime = new Date().toLocaleString('th-TH');
+        timeElement.textContent = `แก้ไขเมื่อ: ${currentTime}`;
+    }
+}
+
+// Event listeners
+document.addEventListener("DOMContentLoaded", function() {
+    scrollModalToTop();
+    updateCurrentTime();
+    
+    // Replace feather icons if available
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+});
+
+document.addEventListener("htmx:afterSettle", function() {
+    scrollModalToTop();
+    updateCurrentTime();
+    
+    // Replace feather icons if available
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+});
+
+// Add input validation and formatting
+document.addEventListener("input", function(e) {
+    if (e.target.type === "number" && e.target.name.startsWith("amount_")) {
+        // Optional: Add input formatting or validation here
+        if (e.target.value < 0) {
+            e.target.value = 0;
+        }
+    }
+});
+
+// Add form submission validation
+document.getElementById('materials-form').addEventListener('submit', function(e) {
+    const inputs = this.querySelectorAll('input[name^="amount_"]');
+    let hasValue = false;
+    
+    inputs.forEach(input => {
+        if (input.value && input.value.trim() !== '') {
+            hasValue = true;
+        }
+    });
+    
+    if (!hasValue) {
+        e.preventDefault();
+        alert('กรุณากรอกข้อมูลอย่างน้อย 1 ช่อง');
+        return false;
+    }
+});
 </script>
