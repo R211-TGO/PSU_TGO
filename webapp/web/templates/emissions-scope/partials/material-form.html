@@ -18,24 +18,13 @@
       </button>
     </div>
 
-    <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50 mb-4">
-      <label class="text-gray-700">ประเภท :</label>
-      <div class="block text-sm font-medium mb-2">{{ head }}</div>
-      <input type="hidden" name="head" value="{{ head }}">
+    <!-- ✅ Form Preview Section (รวมประเภท + ช่อง input ด้วย) -->
+      <div id="form-preview" class="bg-white rounded-[7px] border border-gray-300 shadow-md p-6">
+      </div>
 
-      <label class="block text-sm font-medium text-gray-700">{{ input_label }} ({{ unit }}):</label>
-      <input
-        type="number"
-        step="any"
-        name="amount"
-        class="input input-bordered w-full"
-        placeholder="ระบุ - {{ unit }}"
-        value="{{ amount if amount is not none else '' }}"
-        required
-      >
-    </div>
 
     <!-- Hidden Inputs -->
+    <input type="hidden" name="head" value="{{ head }}">
     <input type="hidden" name="scope_id" value="{{ request.args.get('scope_id') }}">
     <input type="hidden" name="sub_scope_id" value="{{ request.args.get('sub_scope_id') }}">
     <input type="hidden" name="page" value="{{ request.args.get('page', 1) }}">
@@ -56,15 +45,14 @@
           "sub_scope_id": "{{ request.args.get("sub_scope_id") }}",
           "month_id": "{{ month_id }}",
           "year": "{{ request.args.get("year") }}",
-          "head": "{{ head }}"
-          "input_field" : {{input_field}}
+          "head": "{{ head }}",
+          "input_field": "{{ input_field }}"
         }'
         hx-on="click: document.getElementById('modal').classList.remove('modal-open')"
       >
-        Delete
+        Clear
       </button>
 
-      <!-- ปุ่ม Cancel และ Save Changes -->
       <div class="flex space-x-2">
         <button type="button" class="btn btn-outline"
           hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
@@ -78,3 +66,92 @@
     </div>
   </div>
 </form>
+
+<!-- Hidden container สำหรับ preview -->
+<div id="input-fields-container" class="hidden">
+  {% if form and form.input_types %}
+    {% for input_field in form.input_types %}
+    <div data-index="field-{{ loop.index }}">
+      <input type="hidden" name="field" value="{{ input_field.field or '' }}">
+      <input type="hidden" name="label" value="{{ input_field.label or '' }}">
+      <input type="hidden" name="input_type" value="{{ input_field.input_type or 'number' }}">
+      <input type="hidden" name="unit" value="{{ input_field.unit or '' }}">
+    </div>
+    {% endfor %}
+  {% endif %}
+</div>
+
+<script>
+function updatePreview() {
+  const preview = document.getElementById("form-preview");
+  const container = document.getElementById("input-fields-container");
+  const fields = container.querySelectorAll("[data-index]");
+  let html = "";
+
+  const materialName = "{{ head }}".toUpperCase();
+  const formName = "{{ input_label }}";
+  const descForm = "{{ unit }}";
+
+  html += `
+    <div class="mb-6">
+      <p class="text-sm text-gray-400"><strong>ประเภท:</strong> ${materialName}</p>
+    </div>
+    <div class="mb-6">
+      <label class="block text-sm font-medium text-gray-700 mb-1">${formName} (${descForm}):</label>
+      <input
+        type="number"
+        step="any"
+        name="amount"
+        class="input input-bordered w-full"
+        placeholder="ระบุ - ${descForm}"
+        value="{{ amount if amount is not none else '' }}"
+        required
+      >
+    </div>
+  `;
+
+  fields.forEach(row => {
+    const field = row.querySelector("input[name='field']")?.value || "Unnamed Field";
+    const label = row.querySelector("input[name='label']")?.value || "";
+    const inputType = row.querySelector("input[name='input_type']")?.value || "number";
+    const unit = row.querySelector("input[name='unit']")?.value || "-";
+
+    html += `
+      <div class='mb-6'>
+        <label class='block text-sm text-gray-800 mb-1'><strong>${label || field} (${unit})</strong></label>
+        <input type='${inputType}' class='input input-bordered w-full mb-2' placeholder='Enter ${label || field}' readonly>
+        <div class="flex gap-2 mt-2">
+          <div class="text-xs text-gray-700 bg-gray-200 rounded-full px-3 py-1 inline-block">
+            Field: ${field}
+          </div>
+          <div class="text-xs text-gray-700 bg-blue-100 rounded-full px-3 py-1 inline-block">
+            Type: ${inputType}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  const currentUser = "{{ current_user.username if current_user else 'Unknown User' }}";
+  const currentTime = new Date().toLocaleString();
+
+  html += `
+    <div class="mt-6 text-xs text-gray-500">
+      <div class="flex items-center gap-2">
+        <i data-feather="user" class="w-4 h-4"></i>
+        <span>แก้ไขโดย: ${currentUser}</span>
+      </div>
+      <div class="flex items-center gap-2 mt-2">
+        <i data-feather="clock" class="w-4 h-4"></i>
+        <span>แก้ไขเมื่อ: ${currentTime}</span>
+      </div>
+    </div>
+  `;
+
+  preview.innerHTML = html;
+  feather.replace();
+}
+
+document.addEventListener("DOMContentLoaded", updatePreview);
+document.addEventListener("htmx:afterSettle", updatePreview);
+</script>
