@@ -5,32 +5,35 @@
   <div class="container mx-auto px-4 py-6 max-w-7xl">
     <!-- Dashboard Header -->
     <div class="text-center mb-6">
-      <h1 class="text-2xl lg:text-3xl font-bold text-base-content mb-2">Your Carbon Dashboard</h1>
+      <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-base-content mb-2">Your Carbon Dashboard</h1>
       <p class="text-gray-600 text-sm lg:text-base max-w-2xl mx-auto">Track your progress and see the impact of your daily choices on your overall carbon footprint.</p>
     </div>
 
     <!-- Filters Section -->
-    <div class="bg-white rounded-lg p-4 lg:p-6 mb-6 shadow-sm">
+    <div class="bg-white rounded-lg p-4 lg:p-6 mb-4 shadow-sm">
       <div class="flex items-center mb-4">
-        <i data-feather="filter" class="mr-2 w-5 h-5"></i>
-        <h2 class="text-lg font-semibold">Filters</h2>
+        <i data-feather="filter" class="mr-2 w-4 h-4 lg:w-5 lg:h-5"></i>
+        <h2 class="text-base lg:text-lg font-semibold">Filters</h2>
       </div>
       
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 lg:gap-4 mb-4">
+        <!-- Campus -->
         <div class="sm:col-span-1">
           <label class="block text-sm font-medium mb-2">Campus</label>
-          <input type="text" class="input input-bordered input-sm w-full" value="{{ user.campus }}" readonly>
+          <input type="text" class="input input-bordered input-sm w-full text-sm" value="{{ user.campus }}" readonly>
         </div>
+        
+        <!-- Department -->
         <div class="sm:col-span-1">
           <label class="block text-sm font-medium mb-2">Department</label>
-          <input type="text" class="input input-bordered input-sm w-full" value="{{ user.department }}" readonly>
+          <input type="text" class="input input-bordered input-sm w-full text-sm" value="{{ user.department }}" readonly>
         </div>
         
         <!-- Scope Selection -->
         <div class="relative sm:col-span-1">
           <label class="block text-sm font-medium mb-2">Scope</label>
           <div class="dropdown dropdown-bottom w-full">
-            <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between min-h-[2rem]">
+            <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between min-h-[2rem] text-sm">
               <span class="truncate">Select Scopes</span>
               <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -40,7 +43,7 @@
                  hx-get="/summary/scopes"
                  hx-trigger="load, click from:previous div"
                  onclick="event.stopPropagation();">
-              <li><span class="text-gray-500 p-2">Loading scopes...</span></li>
+              <li><span class="text-gray-500 p-2 text-sm">Loading scopes...</span></li>
             </ul>
           </div>
         </div>
@@ -49,7 +52,7 @@
         <div class="relative sm:col-span-1">
           <label class="block text-sm font-medium mb-2">Sub Scope</label>
           <div class="dropdown dropdown-bottom w-full">
-            <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between min-h-[2rem]">
+            <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between min-h-[2rem] text-sm">
               <span class="truncate">Select Sub Scopes</span>
               <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -58,7 +61,7 @@
             <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-full max-h-48 overflow-y-auto z-[1]" 
                 id="sub-scope-list"
                 onclick="event.stopPropagation();">
-              <li><span class="text-gray-500 p-2">Select Scope first</span></li>
+              <li><span class="text-gray-500 p-2 text-sm">Select Scope first</span></li>
             </ul>
           </div>
         </div>
@@ -67,7 +70,7 @@
         <div class="relative sm:col-span-1">
           <label class="block text-sm font-medium mb-2">Year</label>
           <div class="dropdown dropdown-bottom w-full">
-            <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between min-h-[2rem]">
+            <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between min-h-[2rem] text-sm">
               <span class="truncate">Select Year</span>
               <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -77,7 +80,7 @@
                  hx-get="/summary/years"
                  hx-trigger="load, click from:previous div"
                  onclick="event.stopPropagation();">
-              <li><span class="text-gray-500 p-2">Loading years...</span></li>
+              <li><span class="text-gray-500 p-2 text-sm">Loading years...</span></li>
             </ul>
           </div>
         </div>
@@ -86,24 +89,21 @@
         <div class="sm:col-span-2 xl:col-span-1">
           <label class="block text-sm font-medium mb-2">Time Period</label>
           <div class="join w-full">
-            <input class="join-item btn btn-xs flex-1" type="radio" name="time_period" value="year" aria-label="Year"
-                  hx-post="/summary/stats" 
-                  hx-target="#stats-container" 
-                  hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked, [name='selected_year']:checked"
-                  hx-trigger="change"
-                  hx-on::after-request="htmx.ajax('POST', '/summary/charts', {target: '#charts-container', include: '[name=selected_sub_scopes]:checked, [name=time_period], [name=selected_scopes]:checked, [name=selected_year]:checked'})" />
-            <input class="join-item btn btn-xs flex-1" type="radio" name="time_period" value="week" aria-label="Week" checked 
-                  hx-post="/summary/stats" 
-                  hx-target="#stats-container" 
-                  hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked, [name='selected_year']:checked"
-                  hx-trigger="change"
-                  hx-on::after-request="htmx.ajax('POST', '/summary/charts', {target: '#charts-container', include: '[name=selected_sub_scopes]:checked, [name=time_period], [name=selected_scopes]:checked, [name=selected_year]:checked'})" />
-            <input class="join-item btn btn-xs flex-1" type="radio" name="time_period" value="month" aria-label="Month"
-                  hx-post="/summary/stats" 
-                  hx-target="#stats-container" 
-                  hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked, [name='selected_year']:checked"
-                  hx-trigger="change"
-                  hx-on::after-request="htmx.ajax('POST', '/summary/charts', {target: '#charts-container', include: '[name=selected_sub_scopes]:checked, [name=time_period], [name=selected_scopes]:checked, [name=selected_year]:checked'})" />
+            <input class="join-item btn btn-xs flex-1 text-xs" type="radio" name="time_period" value="year" aria-label="Year"
+                   hx-post="/summary/stats" 
+                   hx-target="#stats-container" 
+                   hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked, [name='selected_year']:checked"
+                   hx-trigger="change" />
+            <input class="join-item btn btn-xs flex-1 text-xs" type="radio" name="time_period" value="week" aria-label="Week" checked 
+                   hx-post="/summary/stats" 
+                   hx-target="#stats-container" 
+                   hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked, [name='selected_year']:checked"
+                   hx-trigger="change" />
+            <input class="join-item btn btn-xs flex-1 text-xs" type="radio" name="time_period" value="month" aria-label="Month"
+                   hx-post="/summary/stats" 
+                   hx-target="#stats-container" 
+                   hx-include="[name='selected_sub_scopes']:checked, [name='time_period'], [name='selected_scopes']:checked, [name='selected_year']:checked"
+                   hx-trigger="change" />
           </div>
         </div>
       </div>
@@ -119,20 +119,79 @@
     <!-- Stats Cards -->
     <div id="stats-container" class="mb-6">
       <div class="text-center text-gray-500 p-8 bg-white rounded-lg shadow-sm">
-        <i data-feather="bar-chart-2" class="w-12 h-12 mx-auto mb-4 text-gray-300"></i>
-        <p class="text-lg">Select Sub Scopes to view statistics</p>
+        <i data-feather="bar-chart-2" class="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-4 text-gray-300"></i>
+        <p class="text-base sm:text-lg">Select Sub Scopes to view statistics</p>
       </div>
     </div>
 
     <!-- Charts Section -->
     <div id="charts-container">
       <div class="text-center text-gray-500 p-8 bg-white rounded-lg shadow-sm">
-        <i data-feather="pie-chart" class="w-12 h-12 mx-auto mb-4 text-gray-300"></i>
-        <p class="text-lg">Select Sub Scopes to view charts</p>
+        <i data-feather="pie-chart" class="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-4 text-gray-300"></i>
+        <p class="text-base sm:text-lg">Select Sub Scopes to view charts</p>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Additional CSS for better responsive behavior -->
+<style>
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3.xl\\:grid-cols-6 {
+    gap: 0.75rem;
+  }
+  
+  .btn-xs {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    min-height: 1.5rem;
+  }
+  
+  .input-sm {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1400px;
+  }
+}
+
+/* Fix dropdown content width on all screens */
+.dropdown-content {
+  min-width: 100%;
+}
+
+/* Ensure buttons don't break on small screens */
+.join .btn {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Better spacing for mobile */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .bg-white.rounded-lg {
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    border-radius: 0.5rem;
+  }
+}
+</style>
 
 {% endblock content %}
