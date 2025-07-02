@@ -19,41 +19,25 @@ class InputType(me.EmbeddedDocument):
 
 
 class FormAndFormula(me.Document):
-    name = me.StringField(
-        required=True, unique=True
-    )  # ชื่อฟอร์ม เช่น "สูตรคำนวณคาร์บอนฟุตพริ้นท์ปุ๋ย"
-    desc_form = me.StringField(required=True)  # คำอธิบายฟอร์ม
-    desc_formula = me.StringField(required=True)  # คำอธิบายสูตร
-    material_name = me.StringField(required=True)  # ชื่อวัสดุที่ใช้ในฟอร์ม
-    # input_types = me.EmbeddedDocumentListField(InputType)  # รายการของอินพุต
-    input_types = me.EmbeddedDocumentListField(InputType)  # รายการของอินพุต
-    variables = me.ListField(
-        me.StringField(), required=True
-    )  # ตัวแปรที่ใช้ในสูตร เช่น ["n", "p", "k"]
-    formula = me.StringField(
-        required=True
-    )  # สูตรคำนวณ เช่น "n * 1.2 + p * 1.1 + k * 0.9"
-    
-    create_date = me.DateTimeField(default=datetime.datetime.now)  # วันที่สร้าง
-    update_date = me.DateTimeField(default=datetime.datetime.now)  # วันที่อัปเดต
-
-
-    def add_input_type(self, input_type):
-        """
-        เพิ่ม InputType ลงในฟิลด์ input_types
-        """
-        self.input_types.append(input_type)
+    name = me.StringField(required=True, unique=True)
+    desc_form = me.StringField(required=True)
+    desc_formula = me.StringField(required=True)
+    desc_formula2 = me.StringField(required=False, default="")  # ตรวจสอบว่ามี field นี้
+    material_name = me.StringField(required=True)
+    input_types = me.EmbeddedDocumentListField(InputType)
+    variables = me.ListField(me.StringField(), required=True)
+    formula = me.StringField(required=True)
+    formula2 = me.StringField(required=False, default="")  # ตรวจสอบว่ามี field นี้
+    create_date = me.DateTimeField(default=datetime.datetime.now)
+    update_date = me.DateTimeField(default=datetime.datetime.now)
 
     def save_form(self):
-        """
-        บันทึกฟอร์มลงในฐานข้อมูล
-        """
         self.update_date = datetime.datetime.now()
         self.save()
 
     meta = {
-        "collection": "form_and_formula",  # ชื่อคอลเลกชันใน MongoDB
-        "indexes": ["name"],  # ดัชนีสำหรับการค้นหา
+        "collection": "form_and_formula",
+        "indexes": ["name"],
     }
 
 

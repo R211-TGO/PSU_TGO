@@ -39,6 +39,12 @@
         <p class="font-medium text-sm mb-2">FORMULA</p>
         <p class="text-sm bg-gray-100 p-2 rounded">{{ form.formula or "No formula provided" }}</p>
       </div>
+      {% if form.formula2 %}
+      <div class="mt-2">
+        <p class="font-medium text-sm mb-2">FORMULA 2</p>
+        <p class="text-sm bg-green-50 p-2 rounded border border-green-200">{{ form.formula2 }}</p>
+      </div>
+      {% endif %}
     </div>
     {% endfor %}
   
