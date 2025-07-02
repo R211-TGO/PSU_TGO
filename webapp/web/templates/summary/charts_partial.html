@@ -89,63 +89,82 @@
       legendContainer.appendChild(fragment);
     }
 
-    function renderEmissionsOverTimeChart(labels, values) {
+    function renderEmissionsOverTimeChart(labels, currentValues, previousValues) {
       const ctx = document.getElementById('emissionsOverTimeChart')?.getContext('2d');
       if (!ctx) return;
       if (emissionsOverTimeChart) emissionsOverTimeChart.destroy();
-      
-      const gradient = ctx.createLinearGradient(0, ctx.canvas.height, 0, 0);
-      gradient.addColorStop(0, '#3b82f6');
-      gradient.addColorStop(1, '#14b8a6');
+
+      const currentGradient = ctx.createLinearGradient(0, ctx.canvas.height, 0, 0);
+      currentGradient.addColorStop(0, '#3b82f6');
+      currentGradient.addColorStop(1, '#14b8a6');
+
+      const previousGradient = ctx.createLinearGradient(0, ctx.canvas.height, 0, 0);
+      previousGradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+      previousGradient.addColorStop(1, 'rgba(20, 184, 166, 0.3)');
 
       emissionsOverTimeChart = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: labels,
-          datasets: [{
-            label: 'Emissions',
-            data: values,
-            backgroundColor: gradient,
-            hoverBackgroundColor: '#14b8a6',
-            borderRadius: 6,
-            borderSkipped: false,
-            barPercentage: 0.6,
-            categoryPercentage: 0.7,
-          }]
+          datasets: [
+            {
+              label: 'Current Year',
+              data: currentValues,
+              backgroundColor: currentGradient,
+              hoverBackgroundColor: '#14b8a6',
+              borderRadius: 6,
+              borderSkipped: false,
+              barPercentage: 0.6,
+              categoryPercentage: 0.7,
+            },
+            {
+              label: 'Previous Year',
+              data: previousValues,
+              backgroundColor: previousGradient,
+              hoverBackgroundColor: 'rgba(20, 184, 166, 0.3)',
+              borderRadius: 6,
+              borderSkipped: false,
+              barPercentage: 0.6,
+              categoryPercentage: 0.7,
+            },
+          ],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           animation: {
             duration: 1000,
-            easing: 'easeInOutQuart'
+            easing: 'easeInOutQuart',
           },
           plugins: {
-            legend: { display: false },
+            legend: { display: true },
             tooltip: {
               callbacks: { label: (context) => ` ${context.raw.toFixed(1)} kg CO2` },
-              displayColors: false, padding: 10, backgroundColor: '#1f2937',
-              titleFont: { size: 14 }, bodyFont: { size: 12 },
-            }
+              displayColors: false,
+              padding: 10,
+              backgroundColor: '#1f2937',
+              titleFont: { size: 14 },
+              bodyFont: { size: 12 },
+            },
           },
           scales: {
-            x: { 
-              grid: { display: false }, 
-              ticks: { color: '#6b7280' } 
+            x: {
+              grid: { display: false },
+              ticks: { color: '#6b7280' },
             },
-            y: { 
-              beginAtZero: true, 
-              grid: { 
+            y: {
+              beginAtZero: true,
+              grid: {
                 color: 'rgba(0, 0, 0, 0.05)',
                 drawBorder: false,
-              }, 
-              ticks: { 
+              },
+              ticks: {
                 display: true,
-                color: '#6b7280' 
-              } 
-            }
-          }
-        }
+                color: '#6b7280',
+              },
+            },
+          },
+        },
       });
     }
     
@@ -213,20 +232,22 @@
     function initializeCharts() {
       try {
           const rawDailyData = {{ data.daily_data | tojson }};
+          const previousYearData = {{ previous_year_data.daily_data | tojson }};
           const categoryLabels = {{ data.category_data.keys() | list | tojson }};
           const categoryValues = {{ data.category_data.values() | list | tojson }};
           
-          if (!rawDailyData || !categoryLabels || !categoryValues) {
+          if (!rawDailyData || !previousYearData || !categoryLabels || !categoryValues) {
               throw new Error("Data from server is missing or empty.");
           }
 
           const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
           const timeSeriesValues = monthOrder.map(month => rawDailyData[month] || 0);
+          const previousYearValues = monthOrder.map(month => previousYearData[month] || 0);
           const timeSeriesLabels = monthOrder.map(month => month.substring(0, 3));
 
           const categoryColors = ['#4f46e5', '#10b981', '#f97316', '#3b82f6', '#ec4899', '#8b5cf6'];
       
-          renderEmissionsOverTimeChart(timeSeriesLabels, timeSeriesValues);
+          renderEmissionsOverTimeChart(timeSeriesLabels, timeSeriesValues, previousYearValues);
           renderCategoryBreakdownChart(categoryLabels, categoryValues, categoryColors);
 
       } catch (error) {
