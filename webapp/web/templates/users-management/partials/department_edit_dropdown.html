@@ -1,0 +1,6 @@
+<option value="none" {% if not selected_department or selected_department == "none" or selected_department == "" %}selected{% endif %}>None</option>
+{% for department in departments %}
+  <option value="{{ department }}" {% if selected_department == department %}selected{% endif %}>
+    {{ department }}
+  </option>
+{% endfor %}

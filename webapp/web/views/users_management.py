@@ -8,17 +8,90 @@ from ..utils.acl import permissions_required_all
 module = Blueprint("users_management", __name__, url_prefix="/users-management")
 
 
-def get_campuses():
-    return ["hatyai", "phuket", "surat", "trang"]
-
-
-def get_departments():
-    return [
+# Centralized campus and department data
+CAMPUS_DEPARTMENTS = {
+    "hatyai": [
+        "president",
+        "IT Department",
+        "HR Department1",
+        "Finance Department1",
+        "Marketing Department1",
+    ],
+    "phuket": [
+        "president",
+        "IT Department",
+        "HR Department",
+        "Finance Department", 
+        "Marketing Department",
+    ],
+    "surat": [
+        "president",
         "IT Department",
         "HR Department",
         "Finance Department",
         "Marketing Department",
-    ]
+    ],
+    "trang": [
+        "president",
+        "IT Department",
+        "HR Department",
+        "Finance Department",
+        "Marketing Department",
+    ],
+}
+
+
+def get_campuses():
+    """Get list of all available campuses"""
+    return list(CAMPUS_DEPARTMENTS.keys())
+
+
+def get_departments(campus):
+    """Get departments for a specific campus"""
+    if not campus or campus == "none" or campus == "All Campuses":
+        return get_all_unique_departments()
+    
+    return CAMPUS_DEPARTMENTS.get(campus, [])
+
+
+def get_all_unique_departments():
+    """Get all unique department names across all campuses"""
+    all_departments = []
+    for campus_departments in CAMPUS_DEPARTMENTS.values():
+        all_departments.extend(campus_departments)
+    
+    # Return unique departments sorted alphabetically
+    return sorted(list(set(all_departments))) 
+
+
+def normalize_department_name(department):
+    """Remove trailing numbers from department names"""
+    if not department:
+        return department
+    
+    import re
+    normalized = re.sub(r'\d+$', '', department).strip()
+    return normalized if normalized else department
+
+
+def get_user_department_for_campus(user_department, user_campus):
+    """Get the correct department name for a user"""
+    if not user_department or not user_campus:
+        return user_department
+    
+    normalized_dept = normalize_department_name(user_department)
+    available_departments = get_departments(user_campus)
+    
+    # Try exact match first
+    if normalized_dept in available_departments:
+        return normalized_dept
+    
+    # Try normalized match
+    for dept in available_departments:
+        if normalize_department_name(dept) == normalize_department_name(user_department):
+            return dept
+    
+    return user_department
 
 
 @module.route("/", methods=["get", "post"])
@@ -31,7 +104,7 @@ def users_management():
         "/users-management/users-management.html",
         users=users,
         campuses=get_campuses(),
-        departments=get_departments(),
+        departments=get_all_unique_departments(),
     )
 
 
@@ -63,7 +136,7 @@ def load_edit_user_role():
                 "/users-management/form-edit-user-role.html",
                 user=user,
                 campuses=get_campuses(),
-                departments=get_departments(),
+                departments=get_all_unique_departments(),
                 roles=roles,
                 form=form,
                 error_msg=edit_result["error_msg"],
@@ -86,7 +159,7 @@ def load_edit_user_role():
                 page=page,
                 total_pages=(User.objects(**query).count() + 9) // 10,
                 campuses=get_campuses(),
-                departments=get_departments(),
+                departments=get_all_unique_departments(),
                 selected_campus=selected_campus,
                 selected_department=selected_department,
                 search_query=search_query,  # ส่ง search กลับไปด้วย
@@ -96,14 +169,21 @@ def load_edit_user_role():
 
     form.username.data = user.username
     form.campus.data = user.campus if user.campus else "none"
-    form.department.data = user.department if user.department else "none"
+    
+    # Set department with normalization
+    user_department = user.department if user.department else "none"
+    if user_department != "none" and user.campus:
+        form.department.data = get_user_department_for_campus(user_department, user.campus)
+    else:
+        form.department.data = user_department
+    
     form.roles.data = ",".join(user.roles) if user.roles and len(user.roles) > 0 else ""
 
     return render_template(
         "/users-management/form-edit-user-role.html",
         user=user,
         campuses=get_campuses(),
-        departments=get_departments(),
+        departments=get_all_unique_departments(),
         roles=roles,
         form=form,
         page=page,
@@ -142,7 +222,75 @@ def load_users_table():
         page=page,
         total_pages=total_pages,
         campuses=get_campuses(),
-        departments=get_departments(),
+        departments=get_all_unique_departments(),
         selected_campus=selected_campus,
         selected_department=selected_department,
+        search_query=search_query,
     )
+
+
+@module.route("/load-departments", methods=["GET", "POST"])
+@login_required
+@permissions_required_all(['view_users_management'])
+def load_departments():
+    """Load department dropdown based on selected campus"""
+    if request.method == "POST":
+        selected_campus = request.form.get("campus", "")
+        current_selected_department = request.form.get("department", "")
+    else:
+        selected_campus = request.args.get("campus", "")
+        current_selected_department = request.args.get("department", "")
+    
+    if not selected_campus or selected_campus == "All Campuses":
+        departments_list = get_all_unique_departments()
+    else:
+        departments_list = get_departments(selected_campus)
+    
+    return render_template(
+        "/users-management/partials/department_dropdown.html",
+        departments=departments_list,
+        selected_department=current_selected_department
+    )
+
+
+@module.route("/load-departments-edit", methods=["POST"])
+@login_required
+@permissions_required_all(['edit_users_management'])
+def load_departments_edit():
+    """Load department dropdown for edit form"""
+    selected_campus = request.form.get("campus", "")
+    current_selected_department = request.form.get("department", "")
+    is_change = request.form.get("is_change", "false") == "true"
+    
+    if not selected_campus or selected_campus == "none":
+        departments_list = get_all_unique_departments()
+    else:
+        departments_list = get_departments(selected_campus)
+    
+    if is_change:
+        current_selected_department = "none"
+    elif current_selected_department:
+        current_selected_department = get_user_department_for_campus(current_selected_department, selected_campus)
+    
+    return render_template(
+        "/users-management/partials/department_edit_dropdown.html",
+        departments=departments_list,
+        selected_department=current_selected_department
+    )
+
+
+@module.route("/load-campuses", methods=["GET"])
+@login_required
+@permissions_required_all(['view_users_management'])
+def load_campuses():
+    """Load campus dropdown"""
+    selected_campus = request.args.get("campus", "")
+    
+    return render_template(
+        "/users-management/partials/campus_dropdown.html",
+        campuses=get_campuses(),
+        selected_campus=selected_campus
+    )
+
+
+

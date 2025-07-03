@@ -6,34 +6,28 @@
     <script src="https://unpkg.com/feather-icons"></script>
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
       <div class="relative w-full md:w-1/3">
-        <i data-feather="search"class="absolute left-3 top-1/2 transform -translate-y-1/2 w-[18px] h-[18px]" style="color: #6b7280;"></i>
-          <input 
-            type="text" 
-            placeholder="{{ t.search_users }}" 
-            class="input input-bordered pl-10 w-full"
-            name="search" 
-            hx-get="{{ url_for('users_management.load_users_table') }}" 
-            hx-target="#users-table-container" 
-            hx-swap="innerHTML"
-            hx-include="[name=search],[name=campus],[name=department]" 
-          />
+        <i data-feather="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-[18px] h-[18px]"></i>
+        <input 
+          type="text" 
+          placeholder="Search users..." 
+          class="input input-bordered pl-10 w-full"
+          name="search" 
+          hx-get="{{ url_for('users_management.load_users_table') }}" 
+          hx-target="#users-table-container" 
+          hx-swap="innerHTML"
+          hx-trigger="keyup changed delay:300ms"
+          hx-include="[name=campus],[name=department]" 
+        />
       </div>
       <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
         <div class="relative">
           <select 
             class="select select-bordered pr-10 w-full md:w-auto appearance-none"
-            hx-get="{{ url_for('users_management.load_users_table') }}" 
-            hx-target="#users-table-container" 
-            hx-swap="innerHTML"
             hx-trigger="change"  
-            hx-include="[name=department]"  
-            name="campus">
-            <option {% if selected_campus == "All Campuses" or not selected_campus %}selected{% endif %}>All Campuses</option>
-            {% for campus in campuses %}
-              <option value="{{ campus }}" {% if selected_campus == campus %}selected{% endif %}>
-                {{ campus | capitalize }}
-              </option>
-            {% endfor %}
+            hx-include="[name=department],[name=search]"
+            name="campus"
+            id="campus-dropdown">
+            <!-- Campus options will be loaded via HTMX -->
           </select>
           <i data-feather="chevron-down" class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 w-4 h-4"></i>
         </div>
@@ -44,20 +38,16 @@
             hx-target="#users-table-container" 
             hx-swap="innerHTML"
             hx-trigger="change"  
-            hx-include="[name=campus]" 
-            name="department">
-            <option {% if selected_department == "All Faculties" or not selected_department %}selected{% endif %}>All Faculties</option>
-            {% for department in departments %}
-              <option value="{{ department }}" {% if selected_department == department %}selected{% endif %}>
-                {{ department }}
-              </option>
-            {% endfor %}
+            hx-include="[name=campus],[name=search]" 
+            name="department"
+            id="department-dropdown">
+            <option value="">All Faculties</option>
           </select>
           <i data-feather="chevron-down" class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 w-4 h-4"></i>
         </div>
         <button class="btn btn-primary gap-2">
           <i data-feather="plus" class="w-[18px] h-[18px]"></i>
-          {{ t.add_user }}
+          Add User
         </button>
       </div>
     </div>
@@ -69,10 +59,75 @@
      hx-include="[name=campus],[name=department],[name=search]">
     <!-- ตารางจะถูกโหลดที่นี่ -->
 </div>
+
 <script>
-  if (window.feather) feather.replace();
+// Initialize Feather icons when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    feather.replace();
+    
+    // Load initial data
+    loadCampuses();
+    
+    // Wait a bit for campus to load, then load departments
+    setTimeout(() => {
+        loadDepartments();
+    }, 100);
+});
+
+// Re-initialize Feather icons after HTMX content swap
+document.body.addEventListener('htmx:afterSwap', function(event) {
+    feather.replace();
+    
+    // If campus dropdown was updated, also update departments
+    if (event.detail.target.id === 'campus-dropdown') {
+        setTimeout(() => {
+            loadDepartments();
+        }, 50);
+    }
+});
+
+// Listen for campus change to reload departments and users table
+document.body.addEventListener('change', function(event) {
+    if (event.target.name === 'campus') {
+        loadDepartments();
+        setTimeout(() => {
+            loadUsersTable();
+        }, 100);
+    }
+    
+    if (event.target.name === 'department') {
+        loadUsersTable();
+    }
+});
+
+// Function to load campuses
+function loadCampuses() {
+    htmx.ajax('GET', '{{ url_for("users_management.load_campuses") }}', {
+        target: '#campus-dropdown',
+        swap: 'innerHTML'
+    });
+}
+
+// Function to load departments based on current campus selection
+function loadDepartments() {
+    const campusSelect = document.querySelector('select[name="campus"]');
+    
+    if (campusSelect) {
+        const selectedCampus = campusSelect.value;
+        
+        htmx.ajax('GET', '{{ url_for("users_management.load_departments") }}', {
+            values: { campus: selectedCampus },
+            target: '#department-dropdown',
+            swap: 'innerHTML'
+        });
+    } else {
+        htmx.ajax('GET', '{{ url_for("users_management.load_departments") }}', {
+            target: '#department-dropdown',
+            swap: 'innerHTML'
+        });
+    }
+}
 </script>
-    <!-- Feather Replace Script -->
 
 {% endblock content %}
 
