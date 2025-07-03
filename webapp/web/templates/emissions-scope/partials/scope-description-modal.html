@@ -24,8 +24,8 @@
 
 {% else %}
   <!-- Success State -->
-  <div class="modal-box max-w-4xl ">
-    <div class="flex items-center justify-between mb-6">
+  <div class="max-w-4xl ">
+    <div class="flex items-center justify-between mt-4 mb-6">
       <div class="flex items-center gap-3">
         <span class="w-10 h-10 flex items-center justify-center bg-primary text-white rounded-full font-bold">
           {{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}
@@ -42,13 +42,13 @@
     
     <!-- Description Content -->
     <div class="space-y-4">
-      <div class="flex items-center gap-2 text-gray-600">
+      <div class="flex items-center gap-2 text-gray-600 ">
         <i data-feather="file-text" class="w-5 h-5"></i>
-        <span class="font-semibold">รายละเอียด</span>
+        <span class="font-semibold">{{t.ghg_description}}</span>
       </div>
       
       {% if scope.ghg_desc %}
-        <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-500">
+        <div class="bg-gray-100 p-6 rounded-lg border-l-4 border-blue-500 "> 
           <div class="prose max-w-none">
             <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ scope.ghg_desc }}</p>
           </div>
@@ -66,22 +66,26 @@
     <!-- Additional Info -->
     <div class="divider my-6"></div>
     
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-      <div class="flex items-center gap-2">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 ">
+      <div class=" gap-2 bg-white rounded-[7px] border border-gray-300 shadow-md p-6">
         <i data-feather="layers" class="w-4 h-4"></i>
-        <span><strong>Scope:</strong> {{ scope.ghg_scope }}</span>
+        <span><strong>Scope:</strong></span>
+        <span class="flex items-center text-grey rounded-full mt-2 text-lg">{{ scope.ghg_scope }}</span>
       </div>
-      <div class="flex items-center gap-2">
+      <div class=" gap-2 bg-white rounded-[7px] border border-gray-300 shadow-md p-6">
         <i data-feather="hash" class="w-4 h-4"></i>
-        <span><strong>Sub-Scope:</strong> {{ scope.ghg_sup_scope }}</span>
+        <span><strong>Sub-Scope:</strong></span>
+        <span class="flex items-center text-grey rounded-full mt-2 text-lg">{{ scope.ghg_sup_scope }}</span>
       </div>
-      <div class="flex items-center gap-2">
+      <div class=" gap-2 bg-white rounded-[7px] border border-gray-300 shadow-md p-6">
         <i data-feather="map-pin" class="w-4 h-4"></i>
-        <span><strong>Campus:</strong> {{ scope.campus | capitalize }}</span>
+        <span><strong>{{t.campus}}</strong></span>
+        <span class="flex items-center text-grey rounded-full  mt-2 text-lg"> {{ scope.campus | capitalize }}</span>
       </div>
-      <div class="flex items-center gap-2">
+      <div class=" gap-2 bg-white rounded-[7px] border border-gray-300 shadow-md p-6">
         <i data-feather="building" class="w-4 h-4"></i>
-        <span><strong>Department:</strong> {{ scope.department }}</span>
+        <span><strong>{{t.department}}</strong></span>
+        <span class="flex items-center text-grey rounded-full mt-2 text-lg"> {{ scope.department }}</span>
       </div>
     </div>
     

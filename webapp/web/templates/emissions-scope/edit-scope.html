@@ -5,9 +5,8 @@
         hx-target="#modal-content" 
         hx-swap="innerHTML">
       
-      <h3 class="text-xl font-semibold mb-4">แก้ไข Scope {{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}</h3>
+      <h3 class="text-xl font-semibold mb-4">{{ t.edit_scope }} {{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}</h3>
     
-      <!-- แสดงข้อความข้อผิดพลาด -->
       {% if error %}
       <div class="alert alert-error shadow-lg mb-4">
           <div class="flex items-center">
@@ -17,48 +16,44 @@
       </div>
       {% endif %}
 
-      <!-- แสดงข้อมูล Scope ที่ไม่สามารถแก้ไขได้ -->
       <div class="grid grid-cols-2 gap-4 mb-6 p-4 bg-white rounded-lg border border-gray-300 shadow-md p-6">
           <div>
-              <label class="block text-sm font-medium text-gray-500">GHG Scope</label>
+              <label class="block text-sm font-medium text-gray-500">{{ t.ghg_scope }}</label>
               <div class="text-lg font-semibold">{{ scope.ghg_scope }}</div>
           </div>
           <div>
-              <label class="block text-sm font-medium text-gray-500">GHG Sub-Scope</label>
+              <label class="block text-sm font-medium text-gray-500">{{ t.ghg_sub_scope }}</label>
               <div class="text-lg font-semibold">{{ scope.ghg_sup_scope }}</div>
           </div>
       </div>
 
-      <!-- GHG Name -->
       <div class="mb-4">
           <label for="ghg_name" class="block text-sm font-medium text-gray-700 mb-2">
-              GHG Name <span class="text-red-500">*</span>
+              {{ t.ghg_name }} <span class="text-red-500">*</span>
           </label>
           <input type="text" id="ghg_name" name="ghg_name" 
                  value="{{ scope.ghg_name }}" 
                  class="input input-bordered w-full" 
-                 placeholder="ระบุชื่อแหล่งปล่อยก๊าซเรือนกระจก" 
+                 placeholder="{{ t.enter_ghg_name }}" 
                  required>
       </div>
 
-      <!-- GHG Description -->
       <div class="mb-4">
           <label for="ghg_desc" class="block text-sm font-medium text-gray-700 mb-2">
-              GHG Description <span class="text-red-500">*</span>
+              {{ t.ghg_description }} <span class="text-red-500">*</span>
           </label>
           <textarea id="ghg_desc" name="ghg_desc" 
                     class="textarea textarea-bordered w-full" 
                     rows="3"
-                    placeholder="อธิบายรายละเอียดเกี่ยวกับแหล่งปล่อยก๊าซเรือนกระจก" 
+                    placeholder="{{ t.enter_ghg_description }}" 
                     required>{{ scope.ghg_desc }}</textarea>
       </div>
 
-      <!-- Head Table -->
       <div class="mb-6">
           <label class="block text-sm font-medium text-gray-700 mb-2">
-              Head Table (Material Names)
+              {{ t.head_table }}
           </label>
-          <div class="text-xs text-gray-500 mb-3">เลือกวัสดุที่เกี่ยวข้องกับ Scope นี้</div>
+          <div class="text-xs text-gray-500 mb-3">{{ t.select_material_hint }}</div>
           
           {% if material_names %}
               <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
@@ -79,39 +74,35 @@
                   </div>
               </div>
               
-              <!-- Select All / Deselect All buttons -->
               <div class="mt-2 flex gap-2">
                   <button type="button" class="btn btn-xs btn-outline" onclick="selectAllMaterials()">
-                      เลือกทั้งหมด
+                      {{ t.select_all }}
                   </button>
                   <button type="button" class="btn btn-xs btn-outline" onclick="deselectAllMaterials()">
-                      ยกเลิกทั้งหมด
+                      {{ t.deselect_all }}
                   </button>
               </div>
           {% else %}
               <div class="text-center py-4 text-gray-500">
                   <i data-feather="inbox" class="w-8 h-8 mx-auto mb-2 text-gray-300"></i>
-                  <p class="text-sm">ไม่มี Material Names ในระบบ</p>
+                  <p class="text-sm">{{ t.no_material_names }}</p>
               </div>
           {% endif %}
       </div>
 
-      <!-- ปุ่ม -->
       <div class="flex justify-between pt-4 border-t">
-          <!-- ปุ่มลบ - เหมือน Sign Out -->
           <button type="button" class="btn btn-outline btn-error" 
                   onclick="confirmDeleteScope({{ scope.ghg_scope }}, {{ scope.ghg_sup_scope }}, '{{ scope.ghg_name }}')">
-              Delete Scope
+              {{ t.delete_scope }}
           </button>  
           
-          <!-- ปุ่มบันทึกและยกเลิก -->
           <div class="flex gap-3">
               <button type="button" class="btn btn-outline" 
                       onclick="document.getElementById('modal').classList.remove('modal-open')">
-                  Cancel
+                  {{ t.cancel }}
               </button>
               <button type="submit" name="action" value="save" class="btn btn-primary">
-                  Save Changes
+                  {{ t.save }}
               </button>
           </div>
       </div>
@@ -119,7 +110,6 @@
 </div>
 
 <script>
-  // ฟังก์ชันเลือกวัสดุทั้งหมด
   function selectAllMaterials() {
       const checkboxes = document.querySelectorAll('input[name="head_table"]');
       checkboxes.forEach(checkbox => {
@@ -127,7 +117,6 @@
       });
   }
 
-  // ฟังก์ชันยกเลิกการเลือกวัสดุทั้งหมด
   function deselectAllMaterials() {
       const checkboxes = document.querySelectorAll('input[name="head_table"]');
       checkboxes.forEach(checkbox => {
@@ -135,9 +124,8 @@
       });
   }
 
-  // ฟังก์ชันยืนยันการลบ Scope
   function confirmDeleteScope(ghgScope, ghgSupScope, ghgName) {
-      if (confirm(`คุณแน่ใจหรือไม่ที่จะลบ Scope ${ghgScope}.${ghgSupScope}: "${ghgName}"?\n\nการดำเนินการนี้ไม่สามารถย้อนกลับได้`)) {
+      if (confirm(`{{ t.confirm_delete_scope }} ${ghgScope}.${ghgSupScope}: "${ghgName}"?\n\n{{ t.action_cannot_undo }}`)) {
           fetch(`{{ url_for('emissions_scope.delete_scope', ghg_scope=0, ghg_sup_scope=0) }}`.replace('0/0', `${ghgScope}/${ghgSupScope}`), {
               method: 'DELETE',
               headers: {
@@ -147,7 +135,6 @@
           .then(response => response.json())
           .then(data => {
               if (data.success) {
-                  // ปิด modal และรีโหลดหน้า
                   document.getElementById('modal').classList.remove('modal-open');
                   setTimeout(() => {
                       location.reload();
@@ -158,10 +145,8 @@
           })
           .catch(error => {
               console.error('Error:', error);
-              alert('เกิดข้อผิดพลาดในการลบ Scope');
+              alert('{{ t.delete_scope_error }}');
           });
       }
   }
-
-
 </script>

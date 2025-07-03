@@ -3,7 +3,8 @@ from flask_login import login_required, logout_user, current_user
 from ..forms.user_form import LoginForm, RegisterForm, EditUserForm, EditprofileForm
 from ...services.user_service import UserService
 from ...models import User, Role, Permission
-from ..utils.acl import permissions_required_all 
+from ..utils.acl import permissions_required_all
+
 module = Blueprint("users_management", __name__, url_prefix="/users-management")
 
 
@@ -22,7 +23,7 @@ def get_departments():
 
 @module.route("/", methods=["get", "post"])
 @login_required
-@permissions_required_all(['view_users_management'])
+@permissions_required_all(["view_users_management"])
 # @permissions_required_all(['edit_management', 'view_management'])
 def users_management():
     users = User.objects()
@@ -36,7 +37,7 @@ def users_management():
 
 @module.route("/load-edit-user-role", methods=["GET", "POST"])
 @login_required
-@permissions_required_all(['edit_users_management'])
+# @permissions_required_all(['edit_users_management'])
 def load_edit_user_role():
     user_id = request.args.get("user_id")
     page = int(request.args.get("page", 1))
@@ -114,7 +115,7 @@ def load_edit_user_role():
 
 @module.route("/load-users-table", methods=["GET", "POST"])
 @login_required
-@permissions_required_all(['view_users_management'])
+@permissions_required_all(["view_users_management"])
 def load_users_table():
     page = int(request.args.get("page", 1))
     per_page = 10
