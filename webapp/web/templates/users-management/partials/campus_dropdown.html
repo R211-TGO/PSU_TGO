@@ -1,0 +1,6 @@
+<option {% if selected_campus == "All Campuses" or not selected_campus %}selected{% endif %}>All Campuses</option>
+{% for campus in campuses %}
+  <option value="{{ campus }}" {% if selected_campus == campus %}selected{% endif %}>
+    {{ campus | capitalize }}
+  </option>
+{% endfor %}
