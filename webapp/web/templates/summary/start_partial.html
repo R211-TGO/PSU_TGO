@@ -1,6 +1,36 @@
 <div id="stats-container">
   {% if data.materials_count > 0 %}
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+  
+  <!-- Top 3 Sub Scopes - Toggleable Section -->
+  <div class="bg-white rounded-lg shadow-sm mb-4">
+    <div class="flex items-center justify-between p-4 border-b border-gray-200">
+      <h3 class="text-sm font-medium text-gray-600">Top Sub Scopes</h3>
+      <button id="toggle-top-sub-scopes" class="text-sm text-gray-500 hover:text-gray-700 focus:outline-none">
+        <span id="toggle-text">Show</span>
+      </button>
+    </div>
+    <div id="top-sub-scopes-content" class="hidden p-4">
+      <div class="mb-4">
+        <select id="scope-selector" name="selected_scope" 
+                class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors"
+                hx-get="{{ url_for('summary.top_sub_scope_partial', selected_year=selected_year) }}"
+                hx-target="#top-sub-scope-content" 
+                hx-swap="innerHTML">
+          
+          {% for scope in scopes %}
+          <option value="{{ scope.ghg_scope }}">Scope {{ scope.ghg_scope }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div id="top-sub-scope-content">
+        <!-- HTMX will replace this content -->
+        <p class="text-gray-500 text-sm">Select a scope to view top sub scopes.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Other Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
     <!-- Total Emissions -->
     <div class="bg-white rounded-lg p-4 shadow-sm">
       <div class="flex items-center justify-between mb-2">
@@ -49,24 +79,15 @@
         {% endif %}
       </div>
     </div>
-
-    <!-- Categories Count -->
-    <div class="bg-white rounded-lg p-4 shadow-sm">
-      <div class="flex items-center justify-between mb-2">
-        <h3 class="text-sm font-medium text-gray-600">Active Scopes</h3>
-        <i data-feather="layers" class="w-4 h-4 text-gray-400"></i>
-      </div>
-      <div class="text-2xl font-bold text-base-content mb-1">{{ data.scope_data|length }}</div>
-      <div class="text-xs text-gray-500">Sub scopes tracking</div>
-    </div>
   </div>
-  
+
   <!-- Auto trigger charts update -->
   <div hx-post="/summary/charts" 
        hx-target="#charts-container"
        hx-include="[name='selected_sub_scopes']:checked, [name='time_period']:checked, [name='selected_scopes']:checked, [name='selected_year']:checked"
        hx-trigger="load">
   </div>
+
   {% else %}
   <div class="text-center text-gray-500 p-8">No data found for selected criteria</div>
   <script>
@@ -80,3 +101,41 @@
   </script>
   {% endif %}
 </div>
+
+<script>
+  // Function to initialize toggle functionality
+  function initializeToggle() {
+    const toggleButton = document.getElementById('toggle-top-sub-scopes');
+    const content = document.getElementById('top-sub-scopes-content');
+    const toggleText = document.getElementById('toggle-text');
+    const scopeSelector = document.getElementById('scope-selector');
+
+    if (toggleButton && content && toggleText) {
+      toggleButton.addEventListener('click', () => {
+        content.classList.toggle('hidden');
+        toggleText.textContent = content.classList.contains('hidden') ? 'Show' : 'Hide';
+
+        // If showing content, trigger loading of the first scope
+        if (!content.classList.contains('hidden') && scopeSelector) {
+          const firstOption = scopeSelector.options[0];
+          if (firstOption) {
+            const selectedValue = firstOption.value;
+            // Trigger HTMX request for the first scope
+            scopeSelector.value = selectedValue;
+            scopeSelector.dispatchEvent(new Event('change'));
+          }
+        }
+      });
+    }
+  }
+
+  // Initialize toggle functionality on page load
+  initializeToggle();
+
+  // Reinitialize toggle functionality after HTMX updates
+  document.body.addEventListener('htmx:afterSwap', (event) => {
+    if (event.target.id === 'top-sub-scope-content') {
+      initializeToggle();
+    }
+  });
+</script>

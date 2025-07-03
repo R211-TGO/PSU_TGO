@@ -218,8 +218,19 @@ def get_stats():
     data = calculate_emissions_data(
         user, valid_sub_scope_ids, time_period, selected_year
     )
+
+    # ดึง scope ทั้งหมดสำหรับ dropdown และกรอง scope ที่ซ้ำกัน
+    scopes = Scope.objects(campus=user.campus, department=user.department)
+    unique_scopes = {
+        scope.ghg_scope: scope for scope in scopes
+    }.values()  # กรอง scope ที่ซ้ำกัน
+
     return render_template(
-        "/summary/start_partial.html", data=data, time_period=time_period
+        "/summary/start_partial.html",
+        data=data,
+        time_period=time_period,
+        scopes=unique_scopes,
+        selected_year=int(selected_year),
     )
 
 
@@ -283,6 +294,7 @@ def get_charts():
         "/summary/charts_partial.html",
         data=current_year_data,
         previous_year_data=previous_year_data,
+        selected_year=selected_year,
     )
 
 
@@ -529,3 +541,63 @@ def get_years():
         years = [datetime.now().year]
 
     return render_template("/summary/partials/year_dropdown.html", years=years)
+
+
+@module.route("/partials/top_sub_scope", methods=["GET"])
+@login_required
+def top_sub_scope_partial():
+    """HTMX endpoint สำหรับ top sub scope"""
+    user = current_user
+    selected_scope = request.args.get("selected_scope", None)  # รับค่าจาก dropdown
+    selectes_year = request.args.get("selected_year", datetime.now().year)
+    # ดึง scope ทั้งหมดสำหรับ dropdown และกรอง scope ที่ซ้ำกัน
+    scopes = Scope.objects(campus=user.campus, department=user.department)
+    unique_scopes = {
+        scope.ghg_scope: scope for scope in scopes
+    }.values()  # กรอง scope ที่ซ้ำกัน
+
+    top_sub_scopes = []
+    if selected_scope:
+        # คิวรี่ sub-scope ตาม scope ที่เลือก
+        sub_scopes = Scope.objects(
+            campus=user.campus,
+            department=user.department,
+            ghg_scope=int(selected_scope),
+        )
+
+        # คำนวณ result รวมสำหรับแต่ละ sub-scope
+        sub_scope_results = []
+        total_emissions = 0
+        for sub_scope in sub_scopes:
+            total_result = Material.objects(
+                campus=user.campus,
+                department=user.department,
+                scope=sub_scope.ghg_scope,
+                sub_scope=sub_scope.ghg_sup_scope,
+                year=int(selectes_year),
+            ).sum(
+                "result"
+            )  # รวมค่า result
+            total_emissions += total_result
+            sub_scope_results.append(
+                {
+                    "ghg_name": sub_scope.ghg_name,
+                    "ghg_sup_scope": sub_scope.ghg_sup_scope,
+                    "total_result": total_result,
+                }
+            )
+
+        # เรียงตาม result จากมากไปน้อย
+        top_sub_scopes = sorted(
+            sub_scope_results, key=lambda x: x["total_result"], reverse=True
+        )[:3]
+        print(f"Top sub scopes for {selected_scope}: {top_sub_scopes}")
+        print(f">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    return render_template(
+        "/summary/partials/top_sub_scope.html",
+        scopes=unique_scopes,
+        top_sub_scopes=top_sub_scopes,
+        selected_scope=int(selected_scope),
+        selected_year=int(selectes_year),
+        total_emissions=total_emissions or 1,  # ป้องกันการหารด้วย 0
+    )
