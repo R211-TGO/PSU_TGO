@@ -89,18 +89,10 @@
       legendContainer.appendChild(fragment);
     }
 
-    function renderEmissionsOverTimeChart(labels, currentValues, previousValues) {
+    function renderEmissionsOverTimeChart(labels, currentValues, previousValues, currentYear, previousYear) {
       const ctx = document.getElementById('emissionsOverTimeChart')?.getContext('2d');
       if (!ctx) return;
       if (emissionsOverTimeChart) emissionsOverTimeChart.destroy();
-
-      const currentGradient = ctx.createLinearGradient(0, ctx.canvas.height, 0, 0);
-      currentGradient.addColorStop(0, '#3b82f6');
-      currentGradient.addColorStop(1, '#14b8a6');
-
-      const previousGradient = ctx.createLinearGradient(0, ctx.canvas.height, 0, 0);
-      previousGradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
-      previousGradient.addColorStop(1, 'rgba(20, 184, 166, 0.3)');
 
       emissionsOverTimeChart = new Chart(ctx, {
         type: 'bar',
@@ -108,20 +100,20 @@
           labels: labels,
           datasets: [
             {
-              label: 'Current Year',
-              data: currentValues,
-              backgroundColor: currentGradient,
-              hoverBackgroundColor: '#14b8a6',
+              label: `Previous Year (${previousYear})`,
+              data: previousValues,
+              backgroundColor: 'rgba(59, 130, 246, 0.3)',
+              hoverBackgroundColor: 'rgba(20, 184, 166, 0.3)',
               borderRadius: 6,
               borderSkipped: false,
               barPercentage: 0.6,
               categoryPercentage: 0.7,
             },
             {
-              label: 'Previous Year',
-              data: previousValues,
-              backgroundColor: previousGradient,
-              hoverBackgroundColor: 'rgba(20, 184, 166, 0.3)',
+              label: `Selected Year (${currentYear})`,
+              data: currentValues,
+              backgroundColor: '#3b82f6',
+              hoverBackgroundColor: '#14b8a6',
               borderRadius: 6,
               borderSkipped: false,
               barPercentage: 0.6,
@@ -139,7 +131,17 @@
           plugins: {
             legend: { display: true },
             tooltip: {
-              callbacks: { label: (context) => ` ${context.raw.toFixed(1)} kg CO2` },
+              callbacks: {
+                title: (context) => {
+                  const month = labels[context[0].dataIndex];
+                  const year = context[0].dataset.label.includes('Selected Year') ? currentYear : previousYear;
+                  return `${month} (${year})`;
+                },
+                label: (context) => {
+                  const value = context.raw.toFixed(1);
+                  return ` ${value} kg CO2`;
+                },
+              },
               displayColors: false,
               padding: 10,
               backgroundColor: '#1f2937',
@@ -231,31 +233,32 @@
     
     function initializeCharts() {
       try {
-          const rawDailyData = {{ data.daily_data | tojson }};
-          const previousYearData = {{ previous_year_data.daily_data | tojson }};
-          const categoryLabels = {{ data.category_data.keys() | list | tojson }};
-          const categoryValues = {{ data.category_data.values() | list | tojson }};
-          
-          if (!rawDailyData || !previousYearData || !categoryLabels || !categoryValues) {
-              throw new Error("Data from server is missing or empty.");
-          }
+        const selectedYear = {{ selected_year | tojson }};
+        const rawDailyData = {{ data.daily_data | tojson }};
+        const previousYearData = {{ previous_year_data.daily_data | tojson }};
+        const categoryLabels = {{ data.category_data.keys() | list | tojson }};
+        const categoryValues = {{ data.category_data.values() | list | tojson }};
+        
+        if (!rawDailyData || !previousYearData || !categoryLabels || !categoryValues) {
+          throw new Error("Data from server is missing or empty.");
+        }
 
-          const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-          const timeSeriesValues = monthOrder.map(month => rawDailyData[month] || 0);
-          const previousYearValues = monthOrder.map(month => previousYearData[month] || 0);
-          const timeSeriesLabels = monthOrder.map(month => month.substring(0, 3));
+        const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const timeSeriesValues = monthOrder.map(month => rawDailyData[month] || 0);
+        const previousYearValues = monthOrder.map(month => previousYearData[month] || 0);
+        const timeSeriesLabels = monthOrder.map(month => month.substring(0, 3));
 
-          const categoryColors = ['#4f46e5', '#10b981', '#f97316', '#3b82f6', '#ec4899', '#8b5cf6'];
-      
-          renderEmissionsOverTimeChart(timeSeriesLabels, timeSeriesValues, previousYearValues);
-          renderCategoryBreakdownChart(categoryLabels, categoryValues, categoryColors);
+        const categoryColors = ['#4f46e5', '#10b981', '#f97316', '#3b82f6', '#ec4899', '#8b5cf6'];
+
+        renderEmissionsOverTimeChart(timeSeriesLabels, timeSeriesValues, previousYearValues, selectedYear, selectedYear - 1);
+        renderCategoryBreakdownChart(categoryLabels, categoryValues, categoryColors);
 
       } catch (error) {
-          console.error("Chart initialization failed:", error);
-          const chartsContainer = document.getElementById('charts-container');
-          if (chartsContainer) {
-              chartsContainer.innerHTML = `<div class="text-center text-gray-500 p-8">${error.message} Please check data and try again.</div>`;
-          }
+        console.error("Chart initialization failed:", error);
+        const chartsContainer = document.getElementById('charts-container');
+        if (chartsContainer) {
+          chartsContainer.innerHTML = `<div class="text-center text-gray-500 p-8">${error.message} Please check data and try again.</div>`;
+        }
       }
     }
 

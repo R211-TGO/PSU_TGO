@@ -78,7 +78,7 @@
           </a>
         </li>
         <li>
-          <a href="/setting" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/settings' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
+          <a href="/settings" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/settings' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
             <i data-feather="settings"></i>
             <span class="text-md">Settings</span>
           </a>
@@ -132,7 +132,7 @@
           <h1 class="text-4xl md:text-6xl font-bold animate-fade-up">Understand Your Impact on the Planet</h1>
           <p class="mt-4 text-lg md:text-xl animate-fade-up delay-100 max-w-4xl">ถ้าเปลี่ยนมาใช้ชีวิตอย่างใส่ใจ ยั่งยืนต่อสิ่งแวดล้อม เรื่องที่สอนคือ Basic Python</p>
           <div class="mt-6 space-x-4 animate-fade-up delay-200">
-            <a href="#" class="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors">Calculate My Footprint ➜</a>
+            <a href="/summary" class="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors">Calculate My Footprint ➜</a>
             <a href="#" class="border border-white text-white px-6 py-3 rounded-full hover:bg-white hover:text-green-600 transition-colors">Learn More</a>
           </div>
         </div>
@@ -316,6 +316,20 @@
             </div>
           </div>
         </section>
+<!-- Summary Section -->
+<!-- <section class="py-20 bg-gray-50">
+  <div class="px-4 lg:px-8 max-w-6xl mx-auto">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-bold text-gray-800 mb-4">Summary</h2>
+      <p class="text-xl text-gray-600">Overview of your carbon footprint and emissions data</p>
+    </div>
+    
+    <div id="summary-container">
+      {% include "summary/summary.html" %}
+    </div>
+  </div>
+</section> -->
+
 
         {% block body %}
         <div class="px-3 lg:px-5 py-10 mx-auto">
