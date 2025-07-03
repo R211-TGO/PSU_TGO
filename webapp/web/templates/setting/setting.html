@@ -1,0 +1,88 @@
+{% extends "/base/default_page.html" %}
+
+{% block content %}
+<div class="space-y-6 p-6">
+
+  <!-- กล่องข้อมูลระบบ -->
+  <div class="bg-blue-50 rounded-lg p-6 shadow-md">
+    <h2 class="text-lg font-bold text-blue-800 mb-4 flex items-center gap-2">
+      <i data-feather="database"></i>
+      {{ t.system_info }}
+      <span class="text-blue-500 font-medium">Carbon Management</span>
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">{{ t.system_name }}</label>
+        <input type="text" class="mt-1 input input-bordered w-full" value="PSU-TGO Carbon Management System">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">{{ t.timezone }}</label>
+        <select class="mt-1 select select-bordered w-full">
+          <option selected>เอเชีย/กรุงเทพ (UTC+7)</option>
+        </select>
+      </div>
+      <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-gray-700">{{ t.description }}</label>
+        <textarea rows="2" class="mt-1 textarea textarea-bordered w-full">
+Prince of Songkla University - Greenhouse Gas Operations and Carbon Footprint Tracking
+        </textarea>
+      </div>
+      <div>
+        <form method="POST">
+          <label class="block text-sm font-medium text-gray-700">{{ t.language }}</label>
+          <select name="language" class="mt-1 select select-bordered w-full" onchange="this.form.submit()">
+            <option value="th" {% if lang == 'th' %}selected{% endif %}>ไทย</option>
+            <option value="en" {% if lang == 'en' %}selected{% endif %}>English</option>
+          </select>
+        </form>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">{{ t.date_format }}</label>
+        <select class="mt-1 select select-bordered w-full">
+          <option selected>DD/MM/YYYY</option>
+          <option>YYYY-MM-DD</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- กล่องการจัดการข้อมูล -->
+  <div class="bg-white rounded-lg p-6 shadow-md border border-base-300">
+    <h2 class="text-lg font-bold text-base-content mb-4 flex items-center gap-2">
+      <i data-feather="archive"></i>
+      {{ t.data_management }}
+    </h2>
+
+    <div class="flex items-center justify-between mb-4">
+      <span class="text-sm font-medium text-gray-700">{{ t.auto_backup }}</span>
+      <input type="checkbox" class="toggle toggle-primary" checked />
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">{{ t.frequency }}</label>
+        <select class="mt-1 select select-bordered w-full">
+          <option selected>ทุกวัน</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">{{ t.retention_days }}</label>
+        <input type="number" class="mt-1 input input-bordered w-full" value="365">
+      </div>
+    </div>
+  </div>
+
+  <!-- กล่องปุ่ม Save / Cancel -->
+  <div class="flex justify-end gap-4 pt-4">
+    <button class="btn btn-outline btn-secondary">{{ t.cancel }}</button>
+    <button class="btn btn-primary">{{ t.save }}</button>
+  </div>
+
+</div>
+
+<!-- Feather icon -->
+<script>
+  feather.replace();
+</script>
+{% endblock content %}

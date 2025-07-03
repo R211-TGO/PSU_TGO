@@ -12,7 +12,7 @@
         </div>
         <h2 class="text-xl font-semibold">{{ role.name }}</h2>
       </div>
-      <button class="btn btn-ghost" title="Edit"
+      <button class="btn btn-ghost" title="{{ t.edit_role }}"
         hx-get="{{ url_for('role_management.load_edit_role', role_id=role.id) }}"
         hx-target="#modal-content"
         hx-swap="innerHTML"
@@ -22,7 +22,7 @@
     </div>
     <p class="text-base mt-5">{{ role.description or "-" }}</p>
     <div class="mt-2">
-      <p class="font-medium text-sm mb-2">PERMISSIONS</p>
+      <p class="font-medium text-sm mb-2">{{ t.permissions }}</p>
       <div class="flex flex-wrap gap-2">
         {% for perm in role.permission %}
         <span class="badge bg-yellow-100 text-yellow-800 text-sm">{{ perm }}</span>
@@ -41,7 +41,7 @@
       hx-swap="innerHTML"
       hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
       <i data-feather="plus-circle" class="w-6 h-6"></i>
-      <span>Add New Role</span>
+      <span>{{ t.add_new_role }}</span>
     </button>
   </div>
 </div>

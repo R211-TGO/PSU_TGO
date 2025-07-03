@@ -7,9 +7,10 @@
     <div>
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center gap-3">
-          <h2 class="text-2xl font-bold">Sources of Greenhouse Gas Emissions and Removals ({{ mockup_data.selected_year }})</h2>
-          
-          <!-- Year Selector Dropdown - นอกวงเล็บ สีน้ำเงินเข้ม -->
+          <h2 class="text-2xl font-bold">
+            {{ t.emissions_scope_title.replace("{{ year }}", mockup_data.selected_year|string) }}
+          </h2>
+          <!-- Year Selector Dropdown -->
           <div class="dropdown dropdown-end">
             <div tabindex="0" role="button" class="btn btn-ghost btn-xs p-1 hover:bg-blue-100 rounded-full">
               <i data-feather="chevron-down" class="w-3 h-3 text-blue-900"></i>
@@ -31,20 +32,21 @@
       </div>
       
       <div class="flex items-center gap-4 mb-0">
-        <p class="text-sm text-gray-500">Prince of Songkla University ({{ current_user.campus | capitalize }})</p>
-        
+        <p class="text-sm text-gray-500">
+          {{ t.psu_campus.replace("{{ campus }}", current_user.campus|capitalize) }}
+        </p>
         {% if current_user.campus or current_user.department %}
         <div class="flex items-center gap-1 text-xs text-gray-400">
           {% if current_user.campus %}
             <span class="inline-flex items-center gap-1">
               <i data-feather="map-pin" class="w-3 h-3"></i>
-              Campus: {{ current_user.campus | capitalize }}
+              {{ t.campus }}: {{ current_user.campus | capitalize }}
             </span>
           {% endif %}
           {% if current_user.department %}
             <span class="inline-flex items-center gap-1">
               <i data-feather="building" class="w-3 h-3"></i>
-              Department: {{ current_user.department }}
+              {{ t.department }}: {{ current_user.department }}
             </span>
           {% endif %}
         </div>
@@ -65,17 +67,19 @@
       {% endif %}
       
       <div class="text-sm">
-        <strong>Overall Progress ({{ mockup_data.selected_year }}):</strong> 
+        <strong>
+          {{ t.overall_progress.replace("{{ year }}", mockup_data.selected_year|string) }}
+        </strong> 
         {% if mockup_data.overall_progress == 100 %}
           <span class="text-gray-800 font-bold text-base">{{ mockup_data.overall_progress|int }}%</span>
         {% else %}
           <span class="text-gray-800 font-bold text-base">{{ mockup_data.overall_progress }}%</span>
         {% endif %}
         <span class="ml-2 text-xs text-gray-500">
-          Total Sources: <span class="text-gray-800 font-bold text-base">{{ mockup_data.total_sources }}</span> |
-          In Progress: <span class="text-blue-600 font-bold text-base">{{ mockup_data.in_progress }}</span> |
-          Not Started: <span class="text-red-600 font-bold text-base">{{ mockup_data.not_started }}</span> |
-          Completed: <span class="text-green-600 font-bold text-base">{{ mockup_data.completed }}</span>
+          {{ t.total_sources }}: <span class="text-gray-800 font-bold text-base">{{ mockup_data.total_sources }}</span> |
+          {{ t.in_progress }}: <span class="text-blue-600 font-bold text-base">{{ mockup_data.in_progress }}</span> |
+          {{ t.not_started }}: <span class="text-red-600 font-bold text-base">{{ mockup_data.not_started }}</span> |
+          {{ t.completed }}: <span class="text-green-600 font-bold text-base">{{ mockup_data.completed }}</span>
         </span>
       </div>
     </div>
@@ -88,7 +92,7 @@
         hx-swap="innerHTML"
         hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
         <i data-feather="plus" class="w-5 h-5 mr-2"></i>
-        เพิ่ม Scope
+        {{ t.add_scope }}
       </button>
     </div>
   </div>
@@ -96,7 +100,6 @@
   {% for scope_name, scope_items in mockup_data.scopes.items() %}
   <div class="mt-12">
     <h3 class="text-xl font-semibold mb-6 flex items-center gap-4">
-      <!-- วงกลมที่มีตัวเลข -->
       <span class="w-10 h-10 flex items-center justify-center bg-primary text-white rounded-full">
         {{ scope_name[-1] }}
       </span>
@@ -114,20 +117,18 @@
             <span class="flex items-center gap-2">
               {{ scope.ghg_name }}
               {% if scope.ghg_desc %}
-                <!-- Info Icon สำหรับเปิด Modal -->
                 <button class="info-btn hover:bg-gray-200 p-1 rounded-full transition-colors"
                   hx-get="{{ url_for('emissions_scope.scope_description', ghg_scope=scope.ghg_scope, ghg_sup_scope=scope.ghg_sup_scope) }}"
                   hx-target="#modal-content"
                   hx-swap="innerHTML"
                   hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')"
-                  title="ดูรายละเอียด">
+                  title="{{ t.view_details }}">
                   <i data-feather="info" class="w-4 h-4 text-gray-500 hover:text-blue-600 cursor-pointer"></i>
                 </button>
               {% endif %}
             </span>
           </h4>
           
-          <!-- Badge with Dynamic Color based on Progress -->
           {% if scope.progress == 0 %}
             <span class="badge bg-red-500 text-white text-[10px] inline-flex items-center flex-shrink-0">{{ scope.status }}</span>
           {% elif scope.progress <= 50 %}
@@ -139,33 +140,22 @@
           {% endif %}
         </div>
         
-        <!-- Progress และ Icons -->
         <div class="flex justify-between items-center mt-4">
-          <!-- Progress Circle with Dynamic Colors -->
           <div class="relative w-12 h-12">
             <svg class="w-full h-full transform -rotate-90">
-              <!-- Background Circle -->
               <circle cx="50%" cy="50%" r="18" stroke="#e5e7eb" stroke-width="3" fill="none"></circle>
-              
-              <!-- Progress Circle with Dynamic Color -->
               {% if scope.progress == 0 %}
-                <!-- ไม่แสดงวงกลมสี เมื่อ progress = 0 -->
               {% elif scope.progress <= 50 %}
-                <!-- สีเหลือง สำหรับ 1-50% -->
                 <circle cx="50%" cy="50%" r="18" stroke="#fbbf24" stroke-width="3" fill="none"
                   stroke-dasharray="113" stroke-dashoffset="{{ 113 - (scope.progress / 100) * 113 }}"></circle>
               {% elif scope.progress < 100 %}
-                <!-- สีฟ้า สำหรับ 51-99% -->
                 <circle cx="50%" cy="50%" r="18" stroke="#3b82f6" stroke-width="3" fill="none"
                   stroke-dasharray="113" stroke-dashoffset="{{ 113 - (scope.progress / 100) * 113 }}"></circle>
               {% else %}
-                <!-- สีเขียว สำหรับ 100% -->
                 <circle cx="50%" cy="50%" r="18" stroke="#10b981" stroke-width="3" fill="none"
                   stroke-dasharray="113" stroke-dashoffset="{{ 113 - (scope.progress / 100) * 113 }}"></circle>
               {% endif %}
             </svg>
-            
-            <!-- Text with Dynamic Color และไม่แสดงทศนิยมเมื่อ 100% -->
             <div class="absolute inset-0 flex items-center justify-center">
               {% if scope.progress == 0 %}
                 <span class="text-xs font-bold text-gray-400 leading-none">{{ scope.progress|int }}%</span>
@@ -179,19 +169,15 @@
             </div>
           </div>
         
-          <!-- Icons -->
           <div class="flex items-center gap-4">
-            <!-- Settings Icon -->
             <button class="text-blue-500 hover:text-blue-700 p-1 rounded"
               hx-get="{{ url_for('emissions_scope.edit_scope', ghg_scope=scope.ghg_scope, ghg_sup_scope=scope.ghg_sup_scope) }}"
               hx-target="#modal-content"
               hx-swap="innerHTML"
               hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')"
-              title="แก้ไข Scope">
+              title="{{ t.edit_scope }}">
               <i data-feather="settings" class="w-5 h-5"></i>
             </button>
-            
-            <!-- Edit Icon -->
             <form action="{{ url_for('emissions.view_emissions') }}" method="POST" style="display: inline;">
               <input type="hidden" name="scope_id" value="{{ scope.ghg_scope }}">
               <input type="hidden" name="sub_scope_id" value="{{ scope.ghg_sup_scope }}">
@@ -208,15 +194,4 @@
   </div>
   {% endfor %}
 </div>
-
-<script>
-  // Function สำหรับเปลี่ยนปี
-  function changeYear(selectedYear) {
-    const currentUrl = new URL(window.location);
-    currentUrl.searchParams.set('year', selectedYear);
-    window.location.href = currentUrl.toString();
-  }
-
-</script>
-
 {% endblock content %}

@@ -2,17 +2,17 @@
       hx-target="#users-table-container"
       hx-swap="innerHTML">
     <div class="mb-2">
-        <label class="block text-sm font-medium">User Name</label>
+        <label class="block text-sm font-medium">{{ t.name }}</label>
         <input type="text" name="username" class="input input-bordered w-full" value="{{ form.username.data }}" readonly disabled>
     </div>
     <div class="mb-2">
-        <label class="block text-sm font-medium">Email</label>
+        <label class="block text-sm font-medium">{{ t.email }}</label>
         <input type="email" name="email" class="input input-bordered w-full" value="{{ user.email }}" readonly disabled>
     </div>
     <div class="mb-2">
-        <label class="block text-sm font-medium">Campus</label>
+        <label class="block text-sm font-medium">{{ t.campus }}</label>
         <select name="campus" class="select select-bordered w-full">
-            <option value="none" {% if not user.campus or user.campus not in campuses %}selected{% endif %}>None</option>
+            <option value="none" {% if not user.campus or user.campus not in campuses %}selected{% endif %}>{{ t.none }}</option>
             {% for campus in campuses %}
             <option value="{{ campus }}" {% if form.campus.data == campus %}selected{% endif %}>
                 {{ campus | capitalize }}
@@ -21,9 +21,9 @@
         </select>
     </div>
     <div class="mb-2">
-        <label class="block text-sm font-medium">Department</label>
+        <label class="block text-sm font-medium">{{ t.department }}</label>
         <select name="department" class="select select-bordered w-full">
-            <option value="none" {% if not user.department or user.department not in departments %}selected{% endif %}>None</option>
+            <option value="none" {% if not user.department or user.department not in departments %}selected{% endif %}>{{ t.none }}</option>
             {% for department in departments %}
             <option value="{{ department }}" {% if form.department.data == department %}selected{% endif %}>
                 {{ department }}
@@ -32,7 +32,7 @@
         </select>
     </div>
     <div class="mb-2">
-        <label class="block text-sm font-medium">Role</label>
+        <label class="block text-sm font-medium">{{ t.role }}</label>
         <select name="roles" class="select select-bordered w-full">
             {% for role in roles %}
             <option value="{{ role.name }}" {% if role in form.roles.data.split(',') %}selected{% endif %}>
@@ -44,10 +44,10 @@
     <div class="mt-4 flex justify-end space-x-2">
         <button type="button" class="btn btn-outline"
                 hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
-            Cancel
+            {{ t.cancel }}
         </button>
         <button type="submit" class="btn btn-primary" hx-on="click: document.getElementById('modal').classList.remove('modal-open')">
-            Update
+            {{ t.save }}
         </button>
     </div>
 </form>

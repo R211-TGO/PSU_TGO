@@ -13,7 +13,7 @@
         </div>
         <div class="flex gap-2">
           <!-- Edit Button -->
-          <button class="btn btn-ghost" title="Edit"
+          <button class="btn btn-ghost" title="{{ t.edit }}"
             hx-get="{{ url_for('form_management.load_edit_form_and_formula', form_id=form.id) }}"
             hx-target="#modal-content"
             hx-swap="innerHTML"
@@ -24,11 +24,11 @@
       </div>
       <p class="text-base mt-5">{{ form.desc_form or "-" }}</p>
       <div class="mt-2">
-        <p class="font-medium text-sm mb-2">MATERIAL NAME</p>
+        <p class="font-medium text-sm mb-2">{{ t.material_name }}</p>
         <span class="badge bg-blue-100 text-blue-800 text-sm">{{ form.material_name }}</span>
       </div>
       <div class="mt-2">
-        <p class="font-medium text-sm mb-2">VARIABLES</p>
+        <p class="font-medium text-sm mb-2">{{ t.variables }}</p>
         <div class="flex flex-wrap gap-2">
           {% for var in form.variables %}
           <span class="badge bg-yellow-100 text-yellow-800 text-sm">{{ var }}</span>
@@ -36,12 +36,12 @@
         </div>
       </div>
       <div class="mt-2">
-        <p class="font-medium text-sm mb-2">FORMULA</p>
-        <p class="text-sm bg-gray-100 p-2 rounded">{{ form.formula or "No formula provided" }}</p>
+        <p class="font-medium text-sm mb-2">{{ t.formula }}</p>
+        <p class="text-sm bg-gray-100 p-2 rounded">{{ form.formula or t.no_formula_provided }}</p>
       </div>
       {% if form.formula2 %}
       <div class="mt-2">
-        <p class="font-medium text-sm mb-2">FORMULA 2</p>
+        <p class="font-medium text-sm mb-2">{{ t.formula2 }}</p>
         <p class="text-sm bg-green-50 p-2 rounded border border-green-200">{{ form.formula2 }}</p>
       </div>
       {% endif %}
@@ -57,7 +57,7 @@
         hx-swap="innerHTML"
         onclick="document.getElementById('modal').classList.add('modal-open')">
         <i data-feather="plus-circle" class="w-6 h-6"></i>
-        <span>Add New Form</span>
+        <span>{{ t.add_new_form }}</span>
       </button>
     </div>
   </div>
