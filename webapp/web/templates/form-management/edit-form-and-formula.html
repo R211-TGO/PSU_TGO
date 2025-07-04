@@ -73,7 +73,7 @@
                 value="{{ form.formula if form else '' }}"
                 readonly 
                 required
-                onclick="toggleFormulaCalculator()"readonly disabled>
+                onclick="toggleFormulaCalculator()">
               
               <!-- Dropdown Button -->
               <button type="button" 
@@ -141,7 +141,7 @@
                 placeholder="e.g. result * 2.5 + result * carbon_factor" 
                 value="{{ form.formula2 if form else '' }}"
                 readonly
-                onclick="toggleFormula2Calculator()"readonly disabled>
+                onclick="toggleFormula2Calculator()">
 
               <!-- Dropdown Button -->
               <button type="button" 
@@ -225,8 +225,14 @@
           >{{ form.desc_formula2 if form else '' }}</textarea>
         </div>
 
+        <!-- เพิ่มส่วนนี้ที่ด้านบนของฟอร์ม -->
         {% if error_msg %}
-          <div class="mt-3 text-sm text-red-600">{{ error_msg }}</div>
+        <div class="alert alert-error mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{{ error_msg }}</span>
+        </div>
         {% endif %}
 
         <div class="mt-6 flex justify-between">
@@ -259,22 +265,142 @@ let inputFieldCount = 0;
 let currentFormula = '';
 let currentFormula2 = '';
 
-// Calculator Toggle Functions
+function initializeForm() {
+    inputFieldCount = 0;
+    currentFormula = '';
+    currentFormula2 = '';
+    
+    const container = document.getElementById("input-fields-container");
+    if (container) {
+        container.innerHTML = "";
+    }
+    
+    const formIdInput = document.querySelector("input[name='form_id']");
+    const formId = formIdInput ? formIdInput.value : null;
+    
+    if (formId) {
+        fetch(`/form-management/get-form-data/${formId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadFormData(data.form);
+                } else {
+                    addInputField();
+                    setTimeout(() => {
+                        updatePreview();
+                        updateFormulaButtons();
+                        updateFormula2Buttons();
+                        feather.replace();
+                    }, 100);
+                }
+            })
+            .catch(error => {
+                addInputField();
+                setTimeout(() => {
+                    updatePreview();
+                    updateFormulaButtons();
+                    updateFormula2Buttons();
+                    feather.replace();
+                }, 100);
+            });
+    } else {
+        addInputField();
+        setTimeout(() => {
+            updatePreview();
+            updateFormulaButtons();
+            updateFormula2Buttons();
+            feather.replace();
+        }, 100);
+    }
+}
+
+function loadFormData(formData) {
+    const container = document.getElementById("input-fields-container");
+    if (container) {
+        container.innerHTML = "";
+    }
+    
+    inputFieldCount = 0;
+    
+    if (formData.input_types && formData.input_types.length > 0) {
+        formData.input_types.forEach(inputField => {
+            addInputField({
+                field: inputField.field,
+                label: inputField.label,
+                input_type: inputField.input_type,
+                unit: inputField.unit
+            });
+        });
+    } else {
+        addInputField();
+    }
+    
+    setTimeout(() => {
+        if (formData.name) {
+            const nameInput = document.querySelector("input[name='name']");
+            if (nameInput) nameInput.value = formData.name;
+        }
+        if (formData.material_name) {
+            const materialInput = document.querySelector("input[name='material_name']");
+            if (materialInput) materialInput.value = formData.material_name;
+        }
+        if (formData.desc_form) {
+            const descFormTextarea = document.querySelector("textarea[name='desc_form']");
+            if (descFormTextarea) descFormTextarea.value = formData.desc_form;
+        }
+        if (formData.formula) {
+            const formulaInput = document.querySelector("input[name='formula']");
+            if (formulaInput) formulaInput.value = formData.formula;
+        }
+        if (formData.formula2) {
+            const formula2Input = document.querySelector("input[name='formula2']");
+            if (formula2Input) formula2Input.value = formData.formula2;
+        }
+        if (formData.desc_formula) {
+            const descFormulaTextarea = document.querySelector("textarea[name='desc_formula']");
+            if (descFormulaTextarea) descFormulaTextarea.value = formData.desc_formula;
+        }
+        if (formData.desc_formula2) {
+            const descFormula2Textarea = document.querySelector("textarea[name='desc_formula2']");
+            if (descFormula2Textarea) descFormula2Textarea.value = formData.desc_formula2;
+        }
+        
+        setTimeout(() => {
+            updatePreview();
+            updateFormulaButtons();
+            updateFormula2Buttons();
+            feather.replace();
+        }, 50);
+    }, 50);
+}
+
+document.addEventListener("htmx:afterSettle", function(event) {
+    if (event.detail.target.querySelector('input[name="form_id"]')) {
+        feather.replace();
+        setTimeout(() => {
+            initializeForm();
+        }, 100);
+    }
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    if (document.querySelector('input[name="form_id"]')) {
+        feather.replace();
+        initializeForm();
+    }
+});
+
 function toggleFormulaCalculator() {
     const calculator = document.getElementById('formula-calculator');
     const formula2Calculator = document.getElementById('formula2-calculator');
     
-    // ปิด calculator อื่นๆ
     formula2Calculator.classList.add('hidden');
-    
-    // Toggle calculator
     calculator.classList.toggle('hidden');
     
     if (!calculator.classList.contains('hidden')) {
         currentFormula = document.getElementById('formula').value;
         document.getElementById('formula').value = currentFormula;
         updateFormulaButtons();
-        // เรียก feather.replace() เพื่อแสดงไอคอน
         setTimeout(() => feather.replace(), 10);
     }
 }
@@ -283,17 +409,13 @@ function toggleFormula2Calculator() {
     const calculator = document.getElementById('formula2-calculator');
     const formulaCalculator = document.getElementById('formula-calculator');
     
-    // ปิด calculator อื่นๆ
     formulaCalculator.classList.add('hidden');
-    
-    // Toggle calculator
     calculator.classList.toggle('hidden');
     
     if (!calculator.classList.contains('hidden')) {
         currentFormula2 = document.getElementById('formula2').value;
         document.getElementById('formula2').value = currentFormula2;
         updateFormula2Buttons();
-        // เรียก feather.replace() เพื่อแสดงไอคอน
         setTimeout(() => feather.replace(), 10);
     }
 }
@@ -316,7 +438,6 @@ function applyFormula2() {
     closeFormula2Calculator();
 }
 
-// Close calculators when clicking outside
 document.addEventListener('click', function(event) {
     const formulaInput = document.getElementById('formula');
     const formula2Input = document.getElementById('formula2');
@@ -325,7 +446,6 @@ document.addEventListener('click', function(event) {
     const formulaButton = document.getElementById('formula-dropdown-btn');
     const formula2Button = document.getElementById('formula2-dropdown-btn');
     
-    // Check if click is outside formula calculator (but not on the input or button)
     if (formulaInput && formulaCalculator && formulaButton &&
         !formulaInput.contains(event.target) && 
         !formulaCalculator.contains(event.target) &&
@@ -333,7 +453,6 @@ document.addEventListener('click', function(event) {
         closeFormulaCalculator();
     }
     
-    // Check if click is outside formula2 calculator (but not on the input or button)
     if (formula2Input && formula2Calculator && formula2Button &&
         !formula2Input.contains(event.target) && 
         !formula2Calculator.contains(event.target) &&
@@ -342,39 +461,9 @@ document.addEventListener('click', function(event) {
     }
 });
 
-function initializeForm() {
-    console.log("Initializing edit form...");
-    
-    {% if form and form.input_types %}
-        console.log("Loading existing form data...");
-        // โหลดข้อมูลเดิมเมื่อแก้ไข
-        {% for input_field in form.input_types %}
-        addInputField({
-            field: "{{ input_field.field }}",
-            label: "{{ input_field.label }}",
-            input_type: "{{ input_field.input_type }}",
-            unit: "{{ input_field.unit }}"
-        });
-        {% endfor %}
-    {% else %}
-        console.log("No existing data found...");
-        // เพิ่มฟิลด์เริ่มต้น 1 อันหากไม่มีข้อมูล
-        addInputField();
-    {% endif %}
-    
-    // รอให้ DOM อัปเดตแล้วค่อย update
-    setTimeout(() => {
-        updatePreview();
-        updateFormulaButtons();
-        updateFormula2Buttons();
-        feather.replace();
-    }, 100);
-}
-
 function addInputField(fieldData = {}) {
     const container = document.getElementById("input-fields-container");
     if (!container) {
-        console.error("Container element with ID 'input-fields-container' not found.");
         return;
     }
 
@@ -441,12 +530,10 @@ function updateFormulaButtons() {
 
     if (!variablesButtons || !numbersButtons || !operatorsButtons) return;
 
-    // ล้างปุ่มเก่า
     variablesButtons.innerHTML = "";
     numbersButtons.innerHTML = "";
     operatorsButtons.innerHTML = "";
 
-    // เพิ่มปุ่มสำหรับตัวแปร
     fields.forEach((row) => {
         const field = row.querySelector("input[name='field']").value;
         if (field) {
@@ -459,7 +546,6 @@ function updateFormulaButtons() {
         }
     });
 
-    // เพิ่มปุ่มสำหรับตัวเลข
     for (let i = 0; i <= 9; i++) {
         const button = document.createElement("button");
         button.type = "button";
@@ -469,7 +555,6 @@ function updateFormulaButtons() {
         numbersButtons.appendChild(button);
     }
 
-    // เพิ่มปุ่มสำหรับการดำเนินการทางคณิตศาสตร์
     const operators = ["+", "-", "*", "/", "^", "(", ")", ".", "⌫", "C"];
     operators.forEach(op => {
         const button = document.createElement("button");
@@ -498,12 +583,10 @@ function updateFormula2Buttons() {
 
     if (!constantsButtons || !numbers2Buttons || !operators2Buttons) return;
 
-    // ล้างปุ่มเก่า
     constantsButtons.innerHTML = "";
     numbers2Buttons.innerHTML = "";
     operators2Buttons.innerHTML = "";
 
-    // เพิ่มปุ่มสำหรับค่าคงที่
     const constants = [
         { name: "CO2", label: "Carbon Dioxide", color: "bg-blue-100 text-blue-800" },
         { name: "Fossil_CH4", label: "Fossil Methane", color: "bg-orange-100 text-orange-800" },
@@ -523,7 +606,6 @@ function updateFormula2Buttons() {
         constantsButtons.appendChild(button);
     });
 
-    // เพิ่มปุ่มสำหรับตัวเลข
     for (let i = 0; i <= 9; i++) {
         const button = document.createElement("button");
         button.type = "button";
@@ -533,7 +615,6 @@ function updateFormula2Buttons() {
         numbers2Buttons.appendChild(button);
     }
 
-    // เพิ่มปุ่มสำหรับการดำเนินการทางคณิตศาสตร์
     const operators = ["+", "-", "*", "/", "^", "(", ")", ".", "⌫", "C"];
     operators.forEach(op => {
         const button = document.createElement("button");
@@ -596,7 +677,6 @@ function confirmDelete(formId, formName) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // ปิด modal และรีโหลดหน้า
                 document.getElementById('modal').classList.remove('modal-open');
                 setTimeout(() => {
                     location.reload();
@@ -606,7 +686,6 @@ function confirmDelete(formId, formName) {
             }
         })
         .catch(error => {
-            console.error('Error:', error);
             alert('An error occurred while deleting the form');
         });
     }
@@ -696,16 +775,12 @@ function updatePreview() {
 
 // เรียกใช้เมื่อ DOM โหลดเสร็จ
 document.addEventListener("DOMContentLoaded", function() {
-    console.log("DOM loaded, initializing edit form...");
-    // เรียก feather.replace() ทันทีเพื่อแสดงไอคอน
     feather.replace();
     initializeForm();
 });
 
 // เรียกใช้เมื่อ HTMX โหลดเนื้อหาเสร็จ
 document.addEventListener("htmx:afterSettle", function() {
-    console.log("HTMX settled, initializing edit form...");
-    // เรียก feather.replace() ทันทีเพื่อแสดงไอคอน
     feather.replace();
     initializeForm();
 });
