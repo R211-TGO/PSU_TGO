@@ -66,26 +66,26 @@
     <!-- Additional Info -->
     <div class="divider my-6"></div>
     
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 ">
-      <div class=" gap-2 bg-white rounded-[7px] border border-gray-300 shadow-md p-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+      <div class="flex items-center gap-2">
         <i data-feather="layers" class="w-4 h-4"></i>
         <span><strong>Scope:</strong></span>
-        <span class="flex items-center text-grey rounded-full mt-2 text-lg">{{ scope.ghg_scope }}</span>
+        <span>{{ scope.ghg_scope }}</span>
       </div>
-      <div class=" gap-2 bg-white rounded-[7px] border border-gray-300 shadow-md p-6">
+      <div class="flex items-center gap-2">
         <i data-feather="hash" class="w-4 h-4"></i>
         <span><strong>Sub-Scope:</strong></span>
-        <span class="flex items-center text-grey rounded-full mt-2 text-lg">{{ scope.ghg_sup_scope }}</span>
+        <span>{{ scope.ghg_sup_scope }}</span>
       </div>
-      <div class=" gap-2 bg-white rounded-[7px] border border-gray-300 shadow-md p-6">
+      <div class="flex items-center gap-2">
         <i data-feather="map-pin" class="w-4 h-4"></i>
-        <span><strong>{{t.campus}}</strong></span>
-        <span class="flex items-center text-grey rounded-full  mt-2 text-lg"> {{ scope.campus | capitalize }}</span>
+        <span><strong>{{t.campus}}:</strong></span>
+        <span>{{ scope.campus | capitalize }}</span>
       </div>
-      <div class=" gap-2 bg-white rounded-[7px] border border-gray-300 shadow-md p-6">
+      <div class="flex items-center gap-2">
         <i data-feather="building" class="w-4 h-4"></i>
-        <span><strong>{{t.department}}</strong></span>
-        <span class="flex items-center text-grey rounded-full mt-2 text-lg"> {{ scope.department }}</span>
+        <span><strong>{{t.department}}:</strong></span>
+        <span>{{ scope.department }}</span>
       </div>
     </div>
     
