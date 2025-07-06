@@ -2,6 +2,7 @@
 {% import "/components/forms/form_renderer.html" as form_renderer %}
 
 
+
 {% block content %}
 
 <div class="min-h-screen bg-gray-100 p-4">
@@ -13,7 +14,36 @@
                     <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                         <i data-feather="file-plus" class="text-blue-500 w-8 h-8"></i>
                     </div>
-                    <h1 class="text-3xl font-bold text-gray-900">{{scope_id}}.{{sub_scope_id}} {{ghg_name}}</h1>
+                    <div>
+                      <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-2">
+                        {{scope_id}}.{{sub_scope_id}} {{ghg_name}}
+                        <button class="info-btn hover:bg-gray-200 p-1 rounded-full transition-colors"
+                          hx-get="{{ url_for('emissions_scope.scope_description', ghg_scope=scope_id, ghg_sup_scope=sub_scope_id) }}"
+                          hx-target="#modal-content"
+                          hx-swap="innerHTML"
+                          hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')"
+                          title="{{ t.view_details }}">
+                          <i data-feather="info" class="w-5 h-5 text-gray-500 hover:text-blue-600 cursor-pointer"></i>
+                        </button>
+                      </h1>
+                      {% if ghg_desc %}
+                        <div id="desc-short" class="mt-2 text-gray-600 text-base">
+                          {{ ghg_desc[:120] }}{% if ghg_desc|length > 120 %}... 
+                            <button class="text-blue-600 underline text-sm"
+                              onclick="document.getElementById('desc-short').style.display='none';document.getElementById('desc-full').style.display='block';">
+                              {{ t.view_more or 'ดูเพิ่มเติม' }}
+                            </button>
+                          {% endif %}
+                        </div>
+                        <div id="desc-full" class="mt-2 text-gray-600 text-base" style="display:none;">
+                          {{ ghg_desc }}
+                          <button class="text-blue-600 underline text-sm"
+                            onclick="document.getElementById('desc-full').style.display='none';document.getElementById('desc-short').style.display='block';">
+                            {{ t.view_less or 'ย่อ' }}
+                          </button>
+                        </div>
+                      {% endif %}
+                    </div>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
                     <button class="btn btn-success gap-2">

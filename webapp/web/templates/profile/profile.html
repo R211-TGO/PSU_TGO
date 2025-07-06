@@ -6,24 +6,24 @@
   <div class="max-w-full mx-auto grid grid-cols-3 gap-10 h-full">
     <!-- Column 0: Profile Overview Section -->
     <div class="col-span-1 card bg-base-100 shadow-md p-6 flex flex-col items-center h-86">
-      <h2 class="text-lg font-bold text-base-content mb-4">Profile Overview</h2>
+      <h2 class="text-lg font-bold text-base-content mb-4">{{ t.profile_overview }}</h2>
       <div class="w-32 h-32 rounded-full bg-primary text-primary-content flex items-center justify-center mb-4">
         <span class="text-4xl font-bold">{{ user.username[0]|upper }}</span>
       </div>
       <h2 class="text-lg font-bold text-base-content mt-2">{{ user.username or "-" }}</h2>
       <p class="text-sm text-base-content/70">{{ user.roles | join(', ') if user.roles else "-" }}</p>
-      <button class="btn btn-outline btn-primary mt-4 w-full">Change Photo</button>
+      <button class="btn btn-outline btn-primary mt-4 w-full">{{ t.change_photo }}</button>
     </div>
 
     <!-- Column 1: Profile Details Section -->
     <div class="col-span-2 card bg-base-100 shadow-md p-6 h-full ">
-      <h2 class="text-lg font-bold text-base-content mb-4">Personal Information</h2>
+      <h2 class="text-lg font-bold text-base-content mb-4">{{ t.personal_information }}</h2>
       <div class="space-y-6">
         <!-- Username -->
         <div class="flex items-center space-x-4">
           <i data-feather="user" class="w-6 h-6 stroke-gray-500"></i>
           <div>
-            <h3 class="text-sm font-bold text-base-content">Username</h3>
+            <h3 class="text-sm font-bold text-base-content">{{ t.username }}</h3>
             <p class="text-base text-base-content">{{ user.username or "-" }}</p>
           </div>
         </div>
@@ -31,7 +31,7 @@
         <div class="flex items-center space-x-4">
           <i data-feather="mail" class="w-6 h-6 stroke-gray-500"></i>
           <div>
-            <h3 class="text-sm font-bold text-base-content">Email</h3>
+            <h3 class="text-sm font-bold text-base-content">{{ t.email }}</h3>
             <p class="text-base text-base-content">{{ user.email or "-" }}</p>
           </div>
         </div>
@@ -39,7 +39,7 @@
         <div class="flex items-center space-x-4">
           <i data-feather="home" class="w-6 h-6 stroke-gray-500"></i>
           <div>
-            <h3 class="text-sm font-bold text-base-content">Campus</h3>
+            <h3 class="text-sm font-bold text-base-content">{{ t.campus }}</h3>
             <p class="text-base text-base-content">{{ user.campus or "-" }}</p>
           </div>
         </div>
@@ -47,7 +47,7 @@
         <div class="flex items-center space-x-4">
           <i data-feather="home" class="w-6 h-6 stroke-gray-500"></i>
           <div>
-            <h3 class="text-sm font-bold text-base-content">Department</h3>
+            <h3 class="text-sm font-bold text-base-content">{{ t.department }}</h3>
             <p class="text-base text-base-content">{{ user.department or "-" }}</p>
           </div>
         </div>
@@ -55,7 +55,7 @@
         <div class="flex items-center space-x-4">
           <i data-feather="shield" class="w-6 h-6 stroke-gray-500"></i>
           <div>
-            <h3 class="text-sm font-bold text-base-content">Role</h3>
+            <h3 class="text-sm font-bold text-base-content">{{ t.role }}</h3>
             <p class="text-base text-base-content">{{ user.roles | join(', ') if user.roles else "-" }}</p>
           </div>
         </div>
@@ -63,7 +63,7 @@
         <div class="flex items-center space-x-4">
           <i data-feather="calendar" class="w-6 h-6 stroke-gray-500"></i>
           <div>
-            <h3 class="text-sm font-bold text-base-content">Member Since</h3>
+            <h3 class="text-sm font-bold text-base-content">{{ t.member_since }}</h3>
             <p class="text-base text-base-content">{{ user.created_date.strftime('%B %d, %Y') if user.created_date else "-" }}</p>
           </div>
         </div>
@@ -73,25 +73,25 @@
         hx-target="#modal-content" 
         hx-swap="innerHTML" 
         hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
-          Edit Profile
+          {{ t.edit_profile }}
       </button>
     </div>
 
     <!-- Row 2: Account Settings Section -->
     <div class="col-span-2 col-start-2 card bg-base-100 shadow-md p-6 h-full">
-      <h2 class="text-lg font-bold text-base-content mb-4">Account Settings</h2>
+      <h2 class="text-lg font-bold text-base-content mb-4">{{ t.account_settings }}</h2>
       <div class="space-y-4">
         <div class="flex justify-between items-center">
           <div>
-            <h3 class="text-base font-bold text-base-content">Email Notifications</h3>
-            <p class="text-sm text-base-content/70">Manage your email notification preferences</p>
+            <h3 class="text-base font-bold text-base-content">{{ t.email_notifications }}</h3>
+            <p class="text-sm text-base-content/70">{{ t.manage_email_notifications }}</p>
           </div>
-          <button class="btn btn-outline btn-primary">Configure</button>
+          <button class="btn btn-outline btn-primary">{{ t.configure }}</button>
         </div>
         <div class="flex justify-between items-center">
           <div>
-            <h3 class="text-base font-bold text-base-content">Change Password</h3>
-            <p class="text-sm text-base-content/70">Update your password regularly to keep your account secure</p>
+            <h3 class="text-base font-bold text-base-content">{{ t.change_password }}</h3>
+            <p class="text-sm text-base-content/70">{{ t.update_password_regularly }}</p>
           </div>
 
           <button class="btn btn-outline btn-primary"
@@ -99,17 +99,17 @@
             hx-target="#modal-content"
             hx-swap="innerHTML"
             hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
-            Update
+            {{ t.update_password }}
           </button>
         </div>
         <div class="flex justify-between items-center">
           <div>
-            <h3 class="text-base font-bold text-base-content">Sign Out</h3>
-            <p class="text-sm text-base-content/70">Sign out your profile</p>
+            <h3 class="text-base font-bold text-base-content">{{ t.sign_out }}</h3>
+            <p class="text-sm text-base-content/70">{{ t.sign_out_desc }}</p>
           </div>
           <button class="btn btn-outline btn-error">
             <a href="/users/logout">
-              Sign Out
+              {{ t.sign_out }}
             </a>
           </button>
         </div>
