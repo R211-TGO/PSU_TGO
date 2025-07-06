@@ -2,46 +2,45 @@
   <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
     <!-- Left: Create Form Field -->
     <div class="bg-white rounded-[7px] border border-gray-300 shadow-md p-6">
-      <h3 class="text-black-600 font-bold text-lg mb-4 border-b border-b-gray-200 pb-3">Create Form Field</h3>
-      <!-- เปลี่ยนฟอร์มเพื่อใช้ onsubmit -->
+      <h3 class="text-black-600 font-bold text-lg mb-4 border-b border-b-gray-200 pb-3">{{ t.create_form_field }}</h3>
       <form id="add-form" method="POST" action="{{ url_for('form_management.add_form_and_formula') }}" onsubmit="submitForm(event)">
 
         <!-- Form Metadata -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="text-font">Form Name</label>
+            <label class="text-font">{{ t.form_name }}</label>
             <input 
               type="text" 
               name="name" 
               class="input input-bordered w-full mt-1" 
-              placeholder="Enter form name" 
+              placeholder="{{ t.enter_form_name }}" 
               value="{{ form_data.name if form_data else '' }}"
               required>
           </div>
 
           <div>
-            <label class="text-font">Material Name</label>
+            <label class="text-font">{{ t.material_name }}</label>
             <input 
               type="text" 
               name="material_name" 
               class="input input-bordered w-full mt-1" 
-              placeholder="Enter material name" 
+              placeholder="{{ t.enter_material_name }}" 
               value="{{ form_data.material_name if form_data else '' }}"
               required>
           </div>
 
           <div class="sm:col-span-2">
-            <label class="text-font">Form Description</label>
+            <label class="text-font">{{ t.form_description }}</label>
             <textarea 
               name="desc_form" 
               class="textarea textarea-bordered w-full mt-1" 
-              placeholder="Enter form description">{{ form_data.desc_form if form_data else '' }}</textarea>
+              placeholder="{{ t.enter_form_description }}">{{ form_data.desc_form if form_data else '' }}</textarea>
           </div>
         </div>
 
         <!-- Define Input Fields -->
         <div class="mt-6">
-          <label class="text-font">Define Input Fields</label>
+          <label class="text-font">{{ t.define_input_fields }}</label>
           <div id="input-fields-container" class="space-y-4">
             <!-- ฟิลด์ที่เพิ่มจะถูกแทรกที่นี่ -->
           </div>
@@ -51,13 +50,13 @@
             class="btn btn-outline btn-lg mt-2 w-full border-dashed flex items-center justify-center gap-3 py-4 bg-gray-50 hover:bg-gray-100 text-gray-600 text-sm" 
             onclick="addInputField()">
             <i data-feather="plus" class="w-6 h-6"></i>
-            Add Input Field
+            {{ t.add_input_field }}
           </button>
         </div>
 
         <!-- Formula Section -->
         <div class="mt-6">
-          <label class="text-font">Formula</label>
+          <label class="text-font">{{ t.formula }}</label>
           <div class="relative mb-4">
             <div class="flex">
               <input 
@@ -75,7 +74,7 @@
                       id="formula-dropdown-btn"
                       class="btn btn-outline ml-2 px-3"
                       onclick="toggleFormulaCalculator()"
-                      title="Open Formula Calculator">
+                      title="{{ t.open_formula_calculator }}">
                 <i data-feather="grid" class="w-4 h-4 mr-1"></i>
                 <i data-feather="chevron-down" class="w-4 h-4"></i>
               </button>
@@ -84,7 +83,7 @@
             <!-- Formula Calculator Dropdown -->
             <div id="formula-calculator" class="absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-lg shadow-lg p-4 hidden mt-2">
               <div class="flex justify-between items-center mb-3">
-                <h4 class="text-lg font-semibold text-gray-700">Formula Builder</h4>
+                <h4 class="text-lg font-semibold text-gray-700">{{ t.formula_builder }}</h4>
                 <button type="button" class="btn btn-sm btn-ghost" onclick="closeFormulaCalculator()">
                   <i data-feather="x" class="w-4 h-4"></i>
                 </button>
@@ -92,7 +91,7 @@
 
               <!-- Variables Section -->
               <div class="mb-4">
-                <h5 class="text-sm font-medium text-gray-600 mb-2">Variables</h5>
+                <h5 class="text-sm font-medium text-gray-600 mb-2">{{ t.variables }}</h5>
                 <div class="grid grid-cols-4 gap-2" id="variables-buttons">
                   <!-- ปุ่มตัวแปรจะถูกเพิ่มที่นี่ -->
                 </div>
@@ -100,7 +99,7 @@
 
               <!-- Numbers Section -->
               <div class="mb-4">
-                <h5 class="text-sm font-medium text-gray-600 mb-2">Numbers</h5>
+                <h5 class="text-sm font-medium text-gray-600 mb-2">{{ t.numbers }}</h5>
                 <div class="grid grid-cols-5 gap-2" id="numbers-buttons">
                   <!-- ปุ่มตัวเลขจะถูกเพิ่มที่นี่ -->
                 </div>
@@ -108,7 +107,7 @@
 
               <!-- Operators Section -->
               <div class="mb-4">
-                <h5 class="text-sm font-medium text-gray-600 mb-2">Operators</h5>
+                <h5 class="text-sm font-medium text-gray-600 mb-2">{{ t.operators }}</h5>
                 <div class="grid grid-cols-5 gap-2" id="operators-buttons">
                   <!-- ปุ่มสัญลักษณ์ทางคณิตศาสตร์จะถูกเพิ่มที่นี่ -->
                 </div>
@@ -116,8 +115,8 @@
 
               <!-- Actions -->
               <div class="flex justify-between">
-                <button type="button" class="btn btn-sm btn-outline" onclick="closeFormulaCalculator()">Cancel</button>
-                <button type="button" class="btn btn-sm btn-primary" onclick="applyFormula()">Apply</button>
+                <button type="button" class="btn btn-sm btn-outline" onclick="closeFormulaCalculator()">{{ t.cancel }}</button>
+                <button type="button" class="btn btn-sm btn-primary" onclick="applyFormula()">{{ t.apply }}</button>
               </div>
             </div>
           </div>
@@ -125,7 +124,7 @@
 
         <!-- Formula 2 Section -->
         <div class="mt-6">
-          <label class="text-font">Formula 2 (Advanced Calculation)</label>
+          <label class="text-font">{{ t.formula_2 }} ({{ t.advanced_calculation }})</label>
           <div class="relative mb-4">
             <div class="flex">
               <input 
@@ -151,16 +150,16 @@
             <!-- Formula 2 Calculator Dropdown -->
             <div id="formula2-calculator" class="absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-lg shadow-lg p-4 hidden mt-2">
               <div class="flex justify-between items-center mb-3">
-                <h4 class="text-lg font-semibold text-gray-700">Formula 2 Builder</h4>
+                <h4 class="text-lg font-semibold text-gray-700">{{ t.formula_2_builder }}</h4>
                 <button type="button" class="btn btn-sm btn-ghost" onclick="closeFormula2Calculator()">
                   <i data-feather="x" class="w-4 h-4"></i>
                 </button>
               </div>
-              <p class="text-sm text-gray-500 mb-3">Use 'result' from Formula 1 and multiply with constants</p>
+              <p class="text-sm text-gray-500 mb-3">{{ t.use_result_from_formula_1 }}</p>
 
               <!-- Result Variable Section -->
               <div class="mb-4">
-                <h5 class="text-sm font-medium text-gray-600 mb-2">Result Variable</h5>
+                <h5 class="text-sm font-medium text-gray-600 mb-2">{{ t.result_variable }}</h5>
                 <div class="grid grid-cols-1 gap-2" id="result-buttons">
                   <button type="button" class="btn btn-sm btn-outline bg-green-100 text-green-800" onclick="addToFormula2('result')">result</button>
                 </div>
@@ -168,7 +167,7 @@
 
               <!-- Constants Section -->
               <div class="mb-4">
-                <h5 class="text-sm font-medium text-gray-600 mb-2">Constants</h5>
+                <h5 class="text-sm font-medium text-gray-600 mb-2">{{ t.constants }}</h5>
                 <div class="grid grid-cols-3 gap-2" id="constants-buttons">
                   <!-- ปุ่มค่าคงที่จะถูกเพิ่มที่นี่ -->
                 </div>
@@ -176,7 +175,7 @@
 
               <!-- Numbers Section -->
               <div class="mb-4">
-                <h5 class="text-sm font-medium text-gray-600 mb-2">Numbers</h5>
+                <h5 class="text-sm font-medium text-gray-600 mb-2">{{ t.numbers }}</h5>
                 <div class="grid grid-cols-5 gap-2" id="numbers2-buttons">
                   <!-- ปุ่มตัวเลขจะถูกเพิ่มที่นี่ -->
                 </div>
@@ -184,7 +183,7 @@
 
               <!-- Operators Section -->
               <div class="mb-4">
-                <h5 class="text-sm font-medium text-gray-600 mb-2">Operators</h5>
+                <h5 class="text-sm font-medium text-gray-600 mb-2">{{ t.operators }}</h5>
                 <div class="grid grid-cols-5 gap-2" id="operators2-buttons">
                   <!-- ปุ่มสัญลักษณ์ทางคณิตศาสตร์จะถูกเพิ่มที่นี่ -->
                 </div>
@@ -192,29 +191,29 @@
 
               <!-- Actions -->
               <div class="flex justify-between">
-                <button type="button" class="btn btn-sm btn-outline" onclick="closeFormula2Calculator()">Cancel</button>
-                <button type="button" class="btn btn-sm btn-primary" onclick="applyFormula2()">Apply</button>
+                <button type="button" class="btn btn-sm btn-outline" onclick="closeFormula2Calculator()">{{ t.cancel }}</button>
+                <button type="button" class="btn btn-sm btn-primary" onclick="applyFormula2()">{{ t.apply }}</button>
               </div>
             </div>
           </div>
         </div>
         
         <div class="sm:col-span-2 mt-4">
-          <label class="text-font">Formula Description</label>
+          <label class="text-font">{{ t.formula_description }}</label>
           <textarea 
             name="desc_formula" 
             class="textarea textarea-bordered w-full mt-1" 
-            placeholder="Enter formula description" 
+            placeholder="{{ t.enter_formula_description }}" 
             oninput="updatePreview()"
           ></textarea>
         </div>
 
         <div class="sm:col-span-2 mt-4">
-          <label class="text-font">Formula 2 Description</label>
+          <label class="text-font">{{ t.formula_2_description }}</label>
           <textarea 
             name="desc_formula2" 
             class="textarea textarea-bordered w-full mt-1" 
-            placeholder="Enter formula 2 description (optional)" 
+            placeholder="{{ t.enter_formula_2_description }}" 
             oninput="updatePreview()"
           ></textarea>
         </div>
@@ -230,17 +229,17 @@
         {% endif %}
 
         <div class="mt-6 flex justify-end gap-3">
-          <button type="button" class="btn btn-outline" onclick="document.getElementById('modal').classList.remove('modal-open')">Cancel</button>
-          <button type="submit" class="btn btn-primary">Add Form</button>
+          <button type="button" class="btn btn-outline" onclick="document.getElementById('modal').classList.remove('modal-open')">{{ t.cancel }}</button>
+          <button type="submit" class="btn btn-primary">{{ t.add_form }}</button>
         </div>
       </form>
     </div>
 
     <!-- Right: Form Preview -->
     <div class="bg-white rounded-[7px] border border-gray-300 shadow-md p-6">
-      <h3 class="text-black-600 font-bold text-lg mb-4">Form Preview</h3>
+      <h3 class="text-black-600 font-bold text-lg mb-4">{{ t.form_preview }}</h3>
       <div id="form-preview" class="bg-white rounded-[7px] border border-gray-300 shadow-md p-6">
-        <p class="italic text-sm text-gray-500">Input fields preview will appear here...</p>
+        <p class="italic text-sm text-gray-500">{{ t.input_fields_preview }}</p>
       </div>
     </div>
   </div>
@@ -571,21 +570,21 @@ function updatePreview() {
     let html = "";
 
     // แสดง Material Name เป็นหัวข้อใหญ่บนสุด
-    const materialName = (document.querySelector("input[name='material_name']").value || "NO MATERIAL NAME").toUpperCase();
+    const materialName = (document.querySelector("input[name='material_name']").value || "{{ t.no_material_name }}").toUpperCase();
 
     html += `
     <div class="mb-6">
-        <p class="text-sm text-gray-400"><strong>MATERIAL NAME:</strong> ${materialName}</p>
+        <p class="text-sm text-gray-400"><strong>{{ t.material_name|upper }}:</strong> ${materialName}</p>
     </div>`;
 
     // แสดงข้อมูลฟอร์มในตัวอย่าง
-    const formName = document.querySelector("input[name='name']").value || "Untitled Form";
-    const descForm = document.querySelector("textarea[name='desc_form']").value || "No Description";
+    const formName = document.querySelector("input[name='name']").value || "{{ t.untitled_form }}";
+    const descForm = document.querySelector("textarea[name='desc_form']").value || "{{ t.no_description }}";
 
     html += `
     <div class="mb-4">
-        <p class="text-sm text-gray-600">Form Name: ${formName}</p>
-        <p class="text-sm text-gray-600">Description: ${descForm}</p>
+        <p class="text-sm text-gray-600">{{ t.form_name }}: ${formName}</p>
+        <p class="text-sm text-gray-600">{{ t.form_description }}: ${descForm}</p>
     </div>`;
 
     // แสดงฟิลด์ในตัวอย่าง
@@ -598,7 +597,7 @@ function updatePreview() {
         html += `<div class='mb-6'>
             <label class='block text-sm text-gray-800 mb-1'><strong>${label || field} (${unit || '-'})</strong></label>
             <div class="relative">
-                <input type='${inputType}' class='input input-bordered w-full mb-2' placeholder='Enter ${label || field}'>
+                <input type='${inputType}' class='input input-bordered w-full mb-2' placeholder='{{ t.enter }} ${label || field}'>
                 <div class="flex gap-2 mt-2">
                     <div class="text-xs text-gray-700 bg-gray-200 rounded-full px-3 py-1 inline-block">
                         Field: ${field || "Unnamed Field"}
@@ -612,23 +611,23 @@ function updatePreview() {
     });
 
     // แสดง Formula และ Formula Description ด้านล่างฟิลด์
-    const formula = document.querySelector("input[name='formula']").value || "No Formula";
-    const descFormula = document.querySelector("textarea[name='desc_formula']").value || "No Formula Description";
+    const formula = document.querySelector("input[name='formula']").value || "{{ t.no_formula }}";
+    const descFormula = document.querySelector("textarea[name='desc_formula']").value || "{{ t.no_formula_description }}";
     const formula2 = document.querySelector("input[name='formula2']").value || "";
     const descFormula2 = document.querySelector("textarea[name='desc_formula2']").value || "";
 
     html += `
     <div class="mt-6">
-        <p class="text-sm text-gray-600">Formula: ${formula}</p>
-        <p class="text-sm text-gray-600">Formula Description: ${descFormula}</p>
+        <p class="text-sm text-gray-600">{{ t.formula }}: ${formula}</p>
+        <p class="text-sm text-gray-600">{{ t.formula_description }}: ${descFormula}</p>
     </div>`;
 
     // แสดง Formula 2 ถ้ามี
     if (formula2) {
         html += `
         <div class="mt-4">
-            <p class="text-sm text-gray-600">Formula 2: ${formula2}</p>
-            <p class="text-sm text-gray-600">Formula 2 Description: ${descFormula2}</p>
+            <p class="text-sm text-gray-600">{{ t.formula_2 }}: ${formula2}</p>
+            <p class="text-sm text-gray-600">{{ t.formula_2_description }}: ${descFormula2}</p>
         </div>`;
     }
 

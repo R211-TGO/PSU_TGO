@@ -24,8 +24,8 @@
 
 {% else %}
   <!-- Success State -->
-  <div class="max-w-4xl ">
-    <div class="flex items-center justify-between mt-4 mb-6">
+  <div class="max-w-4xl border border-gray-200 bg-white rounded-lg shadow-lg p-6">
+    <div class="flex items-center justify-between mt-2 mb-6 ">
       <div class="flex items-center gap-3">
         <span class="w-10 h-10 flex items-center justify-center bg-primary text-white rounded-full font-bold">
           {{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}
@@ -48,7 +48,7 @@
       </div>
       
       {% if scope.ghg_desc %}
-        <div class="bg-gray-100 p-6 rounded-lg border-l-4 border-blue-500 "> 
+        <div class="bg-gray-90 p-6 rounded-lg border-l-4 border-blue-500 "> 
           <div class="prose max-w-none">
             <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ scope.ghg_desc }}</p>
           </div>
@@ -67,25 +67,25 @@
     <div class="divider my-6"></div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 py-2">
         <i data-feather="layers" class="w-4 h-4"></i>
-        <span><strong>Scope:</strong></span>
-        <span>{{ scope.ghg_scope }}</span>
+        <span class="font-bold">{{ t.ghg_scope }}:</span>
+        <span class="ml-1 text-base text-sm text-gray-800">{{ scope.ghg_scope }}</span>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 py-2">
         <i data-feather="hash" class="w-4 h-4"></i>
-        <span><strong>Sub-Scope:</strong></span>
-        <span>{{ scope.ghg_sup_scope }}</span>
+        <span class="font-bold">{{ t.ghg_sub_scope }}:</span>
+        <span class="ml-1 text-base text-sm text-gray-800">{{ scope.ghg_sup_scope }}</span>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 py-2">
         <i data-feather="map-pin" class="w-4 h-4"></i>
-        <span><strong>{{t.campus}}:</strong></span>
-        <span>{{ scope.campus | capitalize }}</span>
+        <span class="font-bold">{{ t.campus }}:</span>
+        <span class="ml-1 text-base text-sm text-gray-800">{{ scope.campus | capitalize }}</span>
       </div>
-      <div class="flex items-center gap-2">
-        <i data-feather="building" class="w-4 h-4"></i>
-        <span><strong>{{t.department}}:</strong></span>
-        <span>{{ scope.department }}</span>
+      <div class="flex items-center gap-2 py-2">
+        <i data-feather="briefcase" class="w-4 h-4"></i>
+        <span class="font-bold">{{ t.department }}:</span>
+        <span class="ml-1 text-base text-sm text-gray-800">{{ scope.department }}</span>
       </div>
     </div>
     
@@ -95,7 +95,7 @@
     <div class="space-y-3">
       <div class="flex items-center gap-2 text-gray-600">
         <i data-feather="list" class="w-5 h-5"></i>
-        <span class="font-semibold">Head Table</span>
+        <span class="font-semibold">{{t.head_select}}</span>
       </div>
       
       <div class="bg-blue-50 p-4 rounded-lg">
@@ -114,14 +114,14 @@
     <div class="modal-action mt-8">
       <button class="btn btn-outline flex items-center justify-center gap-2" 
         onclick="document.getElementById('modal').classList.remove('modal-open')">
-        Close
+        {{t.close}}
       </button>
       
       <button class="btn btn-primary flex items-center justify-center gap-2"
         hx-get="{{ url_for('emissions_scope.edit_scope', ghg_scope=scope.ghg_scope, ghg_sup_scope=scope.ghg_sup_scope) }}"
         hx-target="#modal-content"
         hx-swap="innerHTML">
-        Edit
+        {{t.edit}}
       </button>
     </div>
   </div>

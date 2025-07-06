@@ -50,37 +50,37 @@
         <li>
           <a href="/users-management" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/users-management/' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
             <i data-feather="users"></i>
-            <span class="text-md">User Management</span>
+            <span class="text-md">{{ t.sidebar_user }}</span>
           </a>
         </li>
         <li>
           <a href="/role-management" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/role-management/' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
             <i data-feather="shield"></i>
-            <span class="text-md">Role Management</span>
+            <span class="text-md">{{ t.sidebar_role }}</span>
           </a>
         </li>
         <li>
           <a href="/form-management" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/form-management/' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
             <i data-feather="file-text"></i>
-            <span class="text-md">Form Management</span>
+            <span class="text-md">{{ t.sidebar_form }}</span>
           </a>
         </li>
         <li>
           <a href="/emissions-scope" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/emissions-scope' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
             <i data-feather="bar-chart-2"></i>
-            <span class="text-md">Emissions scope</span>
+            <span class="text-md">{{ t.sidebar_emissions }}</span>
           </a>
         </li>
         <li>
           <a href="/summary" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/summary' or request.path == '/summary/' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
             <i data-feather="pie-chart"></i>
-            <span class="text-md">Summary</span>
+            <span class="text-md">{{ t.sidebar_summary }}</span>
           </a>
         </li>
         <li>
-          <a href="/settings" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/settings' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
+          <a href="/setting" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/settings' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
             <i data-feather="settings"></i>
-            <span class="text-md">Settings</span>
+            <span class="text-md">{{ t.sidebar_settings }}</span>
           </a>
         </li>
       </ul>
@@ -91,7 +91,7 @@
       <div class="p-2">
         <a href="/users/logout" class="flex items-center gap-3 rounded-lg p-3 font-bold hover:bg-primary/90 hover:text-primary-content/90">
           <i data-feather="log-out"></i>
-          <span class="text-lg">Log out</span>
+          <span class="text-lg">{{ t.sidebar_logout }}</span>
         </a>
       </div>
     </div>
@@ -107,7 +107,7 @@
       <!-- Page Title -->
       <div class="flex-1 flex flex-col pl-4">
         <span class="text-lg font-bold text-white">PSU-TGO</span>
-        <span class="text-sm text-white/80">Welcome to PSU-TGO</span>
+        <span class="text-sm text-white/80">{{ t.subtitle_default }}</span>
       </div>
       <!-- User Profile -->
       <div class="flex items-center gap-2">
@@ -132,7 +132,7 @@
           <h1 class="text-4xl md:text-6xl font-bold animate-fade-up">Understand Your Impact on the Planet</h1>
           <p class="mt-4 text-lg md:text-xl animate-fade-up delay-100 max-w-4xl">ถ้าเปลี่ยนมาใช้ชีวิตอย่างใส่ใจ ยั่งยืนต่อสิ่งแวดล้อม เรื่องที่สอนคือ Basic Python</p>
           <div class="mt-6 space-x-4 animate-fade-up delay-200">
-            <a href="/summary" class="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors">Calculate My Footprint ➜</a>
+            <a href="#" class="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors">Calculate My Footprint ➜</a>
             <a href="#" class="border border-white text-white px-6 py-3 rounded-full hover:bg-white hover:text-green-600 transition-colors">Learn More</a>
           </div>
         </div>
@@ -144,8 +144,8 @@
         <!-- About Section -->
         <section class="py-20 px-4 lg:px-8 max-w-6xl mx-auto">
           <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold text-gray-800 mb-4">About PSU-TGO</h2>
-            <p class="text-xl text-gray-600">Prince of Songkla University Greenhouse Gas Organization</p>
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">{{ t.about_title or 'About PSU-TGO' }}</h2>
+            <p class="text-xl text-gray-600">{{ t.about_subtitle or 'Prince of Songkla University Greenhouse Gas Organization' }}</p>
           </div>
           
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -179,21 +179,21 @@
         <section class="py-20 bg-gray-50">
           <div class="px-4 lg:px-8 max-w-6xl mx-auto">
             <div class="text-center mb-16">
-              <h2 class="text-4xl font-bold text-gray-800 mb-4">Key Features</h2>
-              <p class="text-xl text-gray-600">Comprehensive tools for environmental management</p>
+              <h2 class="text-4xl font-bold text-gray-800 mb-4">{{ t.key_features or 'Key Features' }}</h2>
+              <p class="text-xl text-gray-600">{{ t.key_features_subtitle or 'Comprehensive tools for environmental management' }}</p>
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
-                <h3 class="text-2xl font-bold text-gray-800 mb-6">Emissions Tracking</h3>
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">{{ t.emissions_tracking or 'Emissions Tracking' }}</h3>
                 <div class="space-y-4">
                   <div class="flex items-start gap-4">
                     <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                       <i data-feather="check" class="w-4 h-4 text-white"></i>
                     </div>
                     <div>
-                      <h4 class="font-semibold text-gray-800">Scope 1, 2, 3 Emissions</h4>
-                      <p class="text-gray-600">Track direct and indirect emissions across all university operations.</p>
+                      <h4 class="font-semibold text-gray-800">{{ t.scope_123 or 'Scope 1, 2, 3 Emissions' }}</h4>
+                      <p class="text-gray-600">{{ t.scope_123_desc or 'Track direct and indirect emissions across all university operations.' }}</p>
                     </div>
                   </div>
                   
@@ -202,8 +202,8 @@
                       <i data-feather="check" class="w-4 h-4 text-white"></i>
                     </div>
                     <div>
-                      <h4 class="font-semibold text-gray-800">Real-time Monitoring</h4>
-                      <p class="text-gray-600">Live data collection and analysis for immediate insights.</p>
+                      <h4 class="font-semibold text-gray-800">{{ t.realtime_monitoring or 'Real-time Monitoring' }}</h4>
+                      <p class="text-gray-600">{{ t.realtime_monitoring_desc or 'Live data collection and analysis for immediate insights.' }}</p>
                     </div>
                   </div>
                   
@@ -212,8 +212,8 @@
                       <i data-feather="check" class="w-4 h-4 text-white"></i>
                     </div>
                     <div>
-                      <h4 class="font-semibold text-gray-800">Automated Reporting</h4>
-                      <p class="text-gray-600">Generate comprehensive reports with just a few clicks.</p>
+                      <h4 class="font-semibold text-gray-800">{{ t.automated_reporting or 'Automated Reporting' }}</h4>
+                      <p class="text-gray-600">{{ t.automated_reporting_desc or 'Generate comprehensive reports with just a few clicks.' }}</p>
                     </div>
                   </div>
                 </div>
@@ -232,29 +232,29 @@
         <section class="py-20">
           <div class="px-4 lg:px-8 max-w-6xl mx-auto">
             <div class="text-center mb-16">
-              <h2 class="text-4xl font-bold text-gray-800 mb-4">Our Impact</h2>
-              <p class="text-xl text-gray-600">Making a difference through data-driven decisions</p>
+              <h2 class="text-4xl font-bold text-gray-800 mb-4">{{ t.our_impact or 'Our Impact' }}</h2>
+              <p class="text-xl text-gray-600">{{ t.our_impact_subtitle or 'Making a difference through data-driven decisions' }}</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div class="text-center">
                 <div class="text-4xl font-bold text-green-600 mb-2">25%</div>
-                <div class="text-gray-600">CO2 Reduction</div>
+                <div class="text-gray-600">{{ t.co2_reduction or 'CO2 Reduction' }}</div>
               </div>
               
               <div class="text-center">
                 <div class="text-4xl font-bold text-blue-600 mb-2">150+</div>
-                <div class="text-gray-600">Data Points</div>
+                <div class="text-gray-600">{{ t.data_points or 'Data Points' }}</div>
               </div>
               
               <div class="text-center">
                 <div class="text-4xl font-bold text-purple-600 mb-2">500+</div>
-                <div class="text-gray-600">Active Users</div>
+                <div class="text-gray-600">{{ t.active_users or 'Active Users' }}</div>
               </div>
               
               <div class="text-center">
                 <div class="text-4xl font-bold text-orange-600 mb-2">99.9%</div>
-                <div class="text-gray-600">Uptime</div>
+                <div class="text-gray-600">{{ t.uptime or 'Uptime' }}</div>
               </div>
             </div>
           </div>
@@ -263,12 +263,12 @@
         <!-- Contact Section -->
         <section class="py-20 bg-gray-800 text-white">
           <div class="px-4 lg:px-8 max-w-6xl mx-auto text-center">
-            <h2 class="text-4xl font-bold mb-4">Get Started Today</h2>
-            <p class="text-xl text-gray-300 mb-8">Join us in creating a more sustainable future for our university and community.</p>
+            <h2 class="text-4xl font-bold mb-4">{{ t.get_started or 'Get Started Today' }}</h2>
+            <p class="text-xl text-gray-300 mb-8">{{ t.get_started_subtitle or 'Join us in creating a more sustainable future for our university and community.' }}</p>
             
             <div class="space-x-4">
-              <a href="#" class="bg-green-600 text-white px-8 py-3 rounded-full hover:bg-green-700 transition-colors inline-block">Start Tracking</a>
-              <a href="#" class="border border-white text-white px-8 py-3 rounded-full hover:bg-white hover:text-gray-800 transition-colors inline-block">Learn More</a>
+              <a href="#" class="bg-green-600 text-white px-8 py-3 rounded-full hover:bg-green-700 transition-colors inline-block">{{ t.start_tracking or 'Start Tracking' }}</a>
+              <a href="#" class="border border-white text-white px-8 py-3 rounded-full hover:bg-white hover:text-gray-800 transition-colors inline-block">{{ t.learn_more or 'Learn More' }}</a>
             </div>
           </div>
         </section>
@@ -278,37 +278,37 @@
           <div class="px-4 lg:px-8 max-w-6xl mx-auto">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
               <div>
-                <h3 class="text-3xl font-bold text-gray-800 mb-6">Sustainable Campus Initiative</h3>
-                <p class="text-gray-600 mb-6">Our comprehensive approach to campus sustainability includes energy management, waste reduction, transportation planning, and green building practices.</p>
+                <h3 class="text-3xl font-bold text-gray-800 mb-6">{{ t.sustainable_campus or 'Sustainable Campus Initiative' }}</h3>
+                <p class="text-gray-600 mb-6">{{ t.sustainable_campus_desc or 'Our comprehensive approach to campus sustainability includes energy management, waste reduction, transportation planning, and green building practices.' }}</p>
                 <ul class="space-y-3">
                   <li class="flex items-center gap-3">
                     <i data-feather="check-circle" class="w-5 h-5 text-green-500"></i>
-                    <span>Carbon neutral campus by 2030</span>
+                    <span>{{ t.carbon_neutral or 'Carbon neutral campus by 2030' }}</span>
                   </li>
                   <li class="flex items-center gap-3">
                     <i data-feather="check-circle" class="w-5 h-5 text-green-500"></i>
-                    <span>100% renewable energy sources</span>
+                    <span>{{ t.renewable_energy or '100% renewable energy sources' }}</span>
                   </li>
                   <li class="flex items-center gap-3">
                     <i data-feather="check-circle" class="w-5 h-5 text-green-500"></i>
-                    <span>Zero waste to landfill program</span>
+                    <span>{{ t.zero_waste or 'Zero waste to landfill program' }}</span>
                   </li>
                 </ul>
               </div>
               
               <div class="bg-gradient-to-br from-green-400 to-blue-500 p-8 rounded-xl text-white">
-                <h4 class="text-2xl font-bold mb-4">Environmental Dashboard</h4>
+                <h4 class="text-2xl font-bold mb-4">{{ t.environmental_dashboard or 'Environmental Dashboard' }}</h4>
                 <div class="space-y-4">
                   <div class="flex justify-between items-center">
-                    <span>Energy Efficiency</span>
+                    <span>{{ t.energy_efficiency or 'Energy Efficiency' }}</span>
                     <span class="font-bold">87%</span>
                   </div>
                   <div class="flex justify-between items-center">
-                    <span>Waste Reduction</span>
+                    <span>{{ t.waste_reduction or 'Waste Reduction' }}</span>
                     <span class="font-bold">72%</span>
                   </div>
                   <div class="flex justify-between items-center">
-                    <span>Water Conservation</span>
+                    <span>{{ t.water_conservation or 'Water Conservation' }}</span>
                     <span class="font-bold">64%</span>
                   </div>
                 </div>
@@ -316,20 +316,6 @@
             </div>
           </div>
         </section>
-<!-- Summary Section -->
-<!-- <section class="py-20 bg-gray-50">
-  <div class="px-4 lg:px-8 max-w-6xl mx-auto">
-    <div class="text-center mb-16">
-      <h2 class="text-4xl font-bold text-gray-800 mb-4">Summary</h2>
-      <p class="text-xl text-gray-600">Overview of your carbon footprint and emissions data</p>
-    </div>
-    
-    <div id="summary-container">
-      {% include "summary/summary.html" %}
-    </div>
-  </div>
-</section> -->
-
 
         {% block body %}
         <div class="px-3 lg:px-5 py-10 mx-auto">
