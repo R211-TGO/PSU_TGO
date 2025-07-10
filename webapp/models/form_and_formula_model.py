@@ -25,7 +25,7 @@ class FormAndFormula(me.Document):
     desc_form = me.StringField(required=True)
     desc_formula = me.StringField(required=True)
     desc_formula2 = me.StringField(required=False, default="")  # ตรวจสอบว่ามี field นี้
-    material_name = me.StringField(required=True,material_name=True)
+    material_name = me.StringField(required=True, material_name=True)
     input_types = me.EmbeddedDocumentListField(InputType)
     variables = me.ListField(me.StringField(), required=True)
     formula = me.StringField(required=True)

@@ -1,0 +1,167 @@
+{% extends "/base/default_page.html" %}
+{% block content %}
+
+<div class="p-6">
+  <div class="mb-8">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="bg-purple-100 p-3 rounded-full">
+        <i data-feather="layers" class="w-6 h-6 text-purple-600"></i>
+      </div>
+      <h2 class="text-2xl font-bold text-purple-800">Scope 1 - Direct Emissions</h2>
+      <span class="badge bg-purple-100 text-purple-800 text-sm">
+        {{ scopes_by_type[1]|length }} {{ t.items }}
+      </span>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {% for scope in scopes_by_type[1] %}
+        <div class="card shadow-lg border border-purple-200 bg-base-100 p-6">
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-3">
+              <div class="bg-purple-500 text-white p-2 rounded-full">
+                <i data-feather="file-text" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold">{{ scope.ghg_name }}</h3>
+                <p class="text-sm text-gray-600">Scope {{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}</p>
+              </div>
+            </div>
+            
+            <div class="flex-shrink-0">
+              <button 
+                class="btn btn-ghost btn-sm btn-circle"
+                title="Edit Scope"
+                hx-get="{{ url_for('scope_management.load_edit_scope_form', scope_id=scope.id) }}"
+                hx-target="#modal-content"
+                hx-swap="innerHTML"
+                onclick="document.getElementById('modal').classList.add('modal-open')">
+                <i data-feather="edit-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+            </div>
+          <p class="text-sm text-gray-700">{{ scope.ghg_desc or "-" }}</p>
+        </div>
+      {% endfor %}
+      
+      <div class="card shadow-lg border border-dashed border-purple-300 bg-purple-50 p-6 flex items-center justify-center">
+        <button 
+          class="btn btn-outline btn-purple flex items-center gap-2"
+          hx-get="{{ url_for('scope_management.load_add_scope_form') }}?default_scope=1"
+          hx-target="#modal-content" 
+          hx-swap="innerHTML"
+          onclick="document.getElementById('modal').classList.add('modal-open')">
+          <i data-feather="plus-circle" class="w-5 h-5"></i>
+          <span>สร้าง Scope 1</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-8">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="bg-green-100 p-3 rounded-full">
+        <i data-feather="zap" class="w-6 h-6 text-green-600"></i>
+      </div>
+      <h2 class="text-2xl font-bold text-green-800">Scope 2 - Indirect Emissions (Energy)</h2>
+       <span class="badge bg-green-100 text-green-800 text-sm">
+        {{ scopes_by_type[2]|length }} {{ t.items }}
+      </span>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {% for scope in scopes_by_type[2] %}
+        <div class="card shadow-lg border border-green-200 bg-base-100 p-6">
+           <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-3">
+              <div class="bg-green-500 text-white p-2 rounded-full">
+                <i data-feather="file-text" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold">{{ scope.ghg_name }}</h3>
+                <p class="text-sm text-gray-600">Scope {{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}</p>
+              </div>
+            </div>
+            
+            <div class="flex-shrink-0">
+              <button 
+                class="btn btn-ghost btn-sm btn-circle"
+                title="Edit Scope"
+                hx-get="{{ url_for('scope_management.load_edit_scope_form', scope_id=scope.id) }}"
+                hx-target="#modal-content"
+                hx-swap="innerHTML"
+                onclick="document.getElementById('modal').classList.add('modal-open')">
+                <i data-feather="edit-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+            </div>
+          <p class="text-sm text-gray-700">{{ scope.ghg_desc or "-" }}</p>
+        </div>
+      {% endfor %}
+      <div class="card shadow-lg border border-dashed border-green-300 bg-green-50 p-6 flex items-center justify-center">
+        <button 
+          class="btn btn-outline btn-success flex items-center gap-2"
+          hx-get="{{ url_for('scope_management.load_add_scope_form') }}?default_scope=2" 
+          hx-target="#modal-content" 
+          hx-swap="innerHTML"
+          onclick="document.getElementById('modal').classList.add('modal-open')">
+          <i data-feather="plus-circle" class="w-5 h-5"></i>
+          <span>สร้าง Scope 2</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-8">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="bg-blue-100 p-3 rounded-full">
+        <i data-feather="globe" class="w-6 h-6 text-blue-600"></i>
+      </div>
+      <h2 class="text-2xl font-bold text-blue-800">Scope 3 - Indirect Emissions (Other)</h2>
+       <span class="badge bg-blue-100 text-blue-800 text-sm">
+        {{ scopes_by_type[3]|length }} {{ t.items }}
+      </span>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+       {% for scope in scopes_by_type[3] %}
+        <div class="card shadow-lg border border-blue-200 bg-base-100 p-6">
+           <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-3">
+              <div class="bg-blue-500 text-white p-2 rounded-full">
+                <i data-feather="file-text" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold">{{ scope.ghg_name }}</h3>
+                <p class="text-sm text-gray-600">Scope {{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}</p>
+              </div>
+            </div>
+
+            <div class="flex-shrink-0">
+              <button 
+                class="btn btn-ghost btn-sm btn-circle"
+                title="Edit Scope"
+                hx-get="{{ url_for('scope_management.load_edit_scope_form', scope_id=scope.id) }}"
+                hx-target="#modal-content"
+                hx-swap="innerHTML"
+                onclick="document.getElementById('modal').classList.add('modal-open')">
+                <i data-feather="edit-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+            </div>
+          <p class="text-sm text-gray-700">{{ scope.ghg_desc or "-" }}</p>
+        </div>
+      {% endfor %}
+      <div class="card shadow-lg border border-dashed border-blue-300 bg-blue-50 p-6 flex items-center justify-center">
+        <button 
+          class="btn btn-outline btn-info flex items-center gap-2"
+          hx-get="{{ url_for('scope_management.load_add_scope_form') }}?default_scope=3" 
+          hx-target="#modal-content" 
+          hx-swap="innerHTML"
+          onclick="document.getElementById('modal').classList.add('modal-open')">
+          <i data-feather="plus-circle" class="w-5 h-5"></i>
+          <span>สร้าง Scope 3</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
