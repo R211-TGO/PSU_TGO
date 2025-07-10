@@ -1,0 +1,20 @@
+{# This partial only renders the checkboxes for materials #}
+{% if materials %}
+    {% for material in materials %}
+        <div class="form-control">
+            <label class="label cursor-pointer justify-start gap-4">
+                <input 
+                    type="checkbox" 
+                    name="head_table"
+                    value="{{ material.name }}"
+                    class="checkbox checkbox-primary"
+                    {# ตรวจสอบว่า material นี้เคยถูกเลือกไว้หรือไม่ #}
+                    {% if material.name in selected_materials %}checked{% endif %}
+                />
+                <span class="label-text">{{ material.name }}</span> 
+            </label>
+        </div>
+    {% endfor %}
+{% else %}
+    <p class="text-gray-500 text-center p-4">No materials found for this Scope/Sub-Scope.</p>
+{% endif %}

@@ -108,7 +108,10 @@ def load_emissions_table():
     page = int(request.args.get("page", 1))
 
     scope = Scope.objects(
-        ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
+        ghg_scope=int(scope_id),
+        ghg_sup_scope=int(sub_scope_id),
+        campus=current_user.campus,
+        department=current_user.department,
     ).first()
     if not scope:
         return jsonify({"error": "Scope not found"}), 404
