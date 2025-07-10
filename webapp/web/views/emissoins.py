@@ -1,4 +1,12 @@
-from flask import Blueprint, render_template, redirect, url_for, request, jsonify
+from flask import (
+    Blueprint,
+    render_template,
+    redirect,
+    url_for,
+    request,
+    jsonify,
+    make_response,
+)
 from flask_login import login_required, logout_user, current_user
 from ..forms.user_form import LoginForm, RegisterForm, EditUserForm, EditprofileForm
 from ...services.user_service import UserService
@@ -6,6 +14,9 @@ from ...models import User, Role, Permission, Scope, FormAndFormula
 from ...models.materail_model import Material, QuantityType  # เพิ่ม import QuantityType
 from ..forms.material_form import MaterialForm
 import datetime
+import re
+from ...models.file_model import ReferenceDocument, UploadedFile
+
 
 module = Blueprint("emissions", __name__, url_prefix="/emissions")
 
@@ -218,9 +229,7 @@ def load_materials_form():
     )
 
 
-import re
-
-# สมมติว่าคลาสเหล่านี้มีการ định nghĩa ไว้แล้ว (จากโค้ดเดิมของคุณ)
+# สมมติว่าคลาสเหล่านี้มีการ địnhหมาย ไว้แล้ว (จากโค้ดเดิมของคุณ)
 # class FormAndFormula:
 #     ...
 #
@@ -659,3 +668,170 @@ def delete_all_materials():
                 year=year,
             )
         )
+
+
+@module.route("/load-upload-modal", methods=["GET"])
+@login_required
+def load_upload_modal(
+    month_id=None, year=None, scope_id=None, sub_scope_id=None, month=None
+):
+    # หากค่าพารามิเตอร์ไม่ได้ถูกส่งมา ให้ดึงค่าจาก request.args
+    month_id = month_id or request.args.get("month_id")
+    year = year or request.args.get("year")
+    scope_id = scope_id or request.args.get("scope_id")
+    sub_scope_id = sub_scope_id or request.args.get("sub_scope_id")
+    month = month or request.args.get("month")
+
+    # ตรวจสอบค่าที่ได้รับ
+    print(
+        f"month_id: {month_id}, year: {year}, scope_id: {scope_id}, sub_scope_id: {sub_scope_id}, month: {month}"
+    )
+
+    # ตรวจสอบว่าค่าพารามิเตอร์ไม่เป็น None
+    if not all([month_id, year, scope_id, sub_scope_id]):
+        return jsonify({"error": "Missing required parameters"}), 400
+
+    documents = ReferenceDocument.objects(
+        scope_id=int(scope_id),
+        sub_scope_id=int(sub_scope_id),
+        year=int(year),
+        month=int(month_id),
+        campus=current_user.campus,
+        department=current_user.department,
+    ).first()
+
+    if not documents:
+        documents = ReferenceDocument(
+            scope_id=int(scope_id),
+            sub_scope_id=int(sub_scope_id),
+            year=int(year),
+            month=int(month_id),
+            campus=current_user.campus,
+            department=current_user.department,
+            files=[],
+        )
+        documents.save()
+
+    return render_template(
+        "emissions-scope/partials/upload-modal.html",
+        documents=documents,
+        month_id=month_id,
+        year=year,
+        scope_id=scope_id,
+        sub_scope_id=sub_scope_id,
+        month=month,
+    )
+
+
+@module.route("/upload-file", methods=["POST"])
+@login_required
+def upload_file():
+    file = request.files.get("file")
+    if not file:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    scope_id = request.form.get("scope_id")
+    sub_scope_id = request.form.get("sub_scope_id")
+    year = request.form.get("year")
+    month_id = request.form.get("month_id")
+    month = request.form.get("month")  # เพิ่มการดึงค่า month
+
+    # ตรวจสอบว่าค่าพารามิเตอร์ไม่เป็น None
+    if not all([scope_id, sub_scope_id, year, month_id]):
+        return jsonify({"error": "Missing required parameters"}), 400
+
+    document = ReferenceDocument.objects(
+        scope_id=int(scope_id),
+        sub_scope_id=int(sub_scope_id),
+        year=int(year),
+        month=int(month_id),
+        campus=current_user.campus,
+        department=current_user.department,
+    ).first()
+
+    if not document:
+        document = ReferenceDocument(
+            scope_id=int(scope_id),
+            sub_scope_id=int(sub_scope_id),
+            year=int(year),
+            month=int(month_id),
+            campus=current_user.campus,
+            department=current_user.department,
+            files=[],
+        )
+
+    document.files.append(
+        UploadedFile(
+            filename=file.filename,
+            content_type=file.content_type,
+            data=file.read(),
+        )
+    )
+    document.save()
+
+    # ส่งค่าพารามิเตอร์ไปยัง load_upload_modal
+    return load_upload_modal(
+        month_id=month_id,
+        year=year,
+        scope_id=scope_id,
+        sub_scope_id=sub_scope_id,
+        month=month,
+    )
+
+
+from urllib.parse import quote
+
+
+@module.route("/download-file/<file_id>", methods=["GET"])
+@login_required
+def download_file(file_id):
+    document = ReferenceDocument.objects(files__id=file_id).first()
+    print(f"Downloading file with ID: {file_id}")
+    if not document:
+        return jsonify({"error": "File not found"}), 404
+
+    file = next((f for f in document.files if str(f.id) == file_id), None)
+    if not file:
+        return jsonify({"error": "File not found"}), 404
+
+    # เข้ารหัสชื่อไฟล์เป็น UTF-8
+    encoded_filename = quote(file.filename)
+
+    response = make_response(file.data)
+    response.headers["Content-Type"] = file.content_type
+    response.headers["Content-Disposition"] = (
+        f"attachment; filename*=UTF-8''{encoded_filename}"
+    )
+    return response
+
+
+@module.route("/delete-file/<file_id>", methods=["POST"])
+@login_required
+def delete_file(file_id):
+    print(f"Deleting file with ID: {file_id}")
+    scope_id = request.form.get("scope_id")
+    sub_scope_id = request.form.get("sub_scope_id")
+    year = request.form.get("year")
+    month_id = request.form.get("month_id")
+    month = request.form.get("month")  # เพิ่มการดึงค่า month
+
+    if not file_id:
+        print("Missing file_id")
+        return jsonify({"error": "Missing file_id"}), 400
+
+    document = ReferenceDocument.objects(files__id=file_id).first()
+    if not document:
+        print(f"Document not found for file_id: {file_id}")
+        return jsonify({"error": "File not found"}), 404
+
+    document.files = [f for f in document.files if str(f.id) != file_id]
+    document.save()
+
+    # ส่งค่าพารามิเตอร์ไปยัง load_upload_modal
+    return load_upload_modal(
+        month_id=month_id,
+        year=year,
+        scope_id=scope_id,
+        sub_scope_id=sub_scope_id,
+        month=month,
+    )

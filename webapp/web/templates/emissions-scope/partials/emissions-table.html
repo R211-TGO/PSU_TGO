@@ -59,6 +59,13 @@
                                         hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
                                     <i data-feather="edit" class="w-[18px] h-[18px]"></i>
                                 </button>
+                                <button class="text-green-500 hover:text-green-700 transition-colors"
+                                        hx-get="{{ url_for('emissions.load_upload_modal', month_id=month.id, year=year, scope_id=scope_id, sub_scope_id=sub_scope_id, month=month.name) }}"
+                                        hx-target="#modal-content"
+                                        hx-swap="innerHTML"
+                                        hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
+                                    <i data-feather="upload" class="w-[18px] h-[18px]"></i>
+                                </button>
                             </div>
                         </td>
 
