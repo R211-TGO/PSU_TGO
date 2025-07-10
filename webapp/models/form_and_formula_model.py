@@ -20,6 +20,8 @@ class InputType(me.EmbeddedDocument):
 
 class FormAndFormula(me.Document):
     name = me.StringField(required=True, unique=True)
+    ghg_scope = me.IntField(required=True, choices=[1, 2, 3])
+    ghg_sup_scope = me.IntField(required=True)
     desc_form = me.StringField(required=True)
     desc_formula = me.StringField(required=True)
     desc_formula2 = me.StringField(required=False, default="")  # ตรวจสอบว่ามี field นี้

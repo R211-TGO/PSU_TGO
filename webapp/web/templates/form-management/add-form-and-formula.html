@@ -15,6 +15,7 @@
               class="input input-bordered w-full mt-1" 
               placeholder="{{ t.enter_form_name }}" 
               value="{{ form_data.name if form_data else '' }}"
+              oninput="updatePreview()"
               required>
           </div>
 
@@ -26,7 +27,55 @@
               class="input input-bordered w-full mt-1" 
               placeholder="{{ t.enter_material_name }}" 
               value="{{ form_data.material_name if form_data else '' }}"
+              oninput="updatePreview()"
               required>
+          </div>
+
+          <!-- แก้ไขส่วน Main Scope -->
+          <div>
+            <label class="text-font">{{ t.main_scope }}</label>
+            <select 
+              name="scope" 
+              id="main-scope"
+              class="select select-bordered w-full mt-1" 
+              hx-get="/form-management/get-sub-scopes/"
+              hx-target="#sub-scope-container"
+              hx-trigger="change, load delay:100ms"
+              hx-include="[name='scope']"
+              onchange="updatePreview()"
+              required>
+              <option value="">เลือก Main Scope</option>
+              <option value="1" {{ 'selected' if default_scope == '1' else '' }}>Scope 1</option>
+              <option value="2" {{ 'selected' if default_scope == '2' else '' }}>Scope 2</option>
+              <option value="3" {{ 'selected' if default_scope == '3' else '' }}>Scope 3</option>
+            </select>
+          </div>
+
+          <!-- แก้ไขส่วน Sub Scope -->
+          <div>
+            <label class="text-font">{{ t.sub_scope }}</label>
+            <div id="sub-scope-container">
+              {% if default_scope %}
+                <!-- ถ้ามี default scope ให้โหลด sub-scopes ทันที -->
+                <div hx-get="/form-management/get-sub-scopes/{{ default_scope }}"
+                     hx-trigger="load"
+                     hx-target="this"
+                     hx-swap="outerHTML">
+                  <select name="sup_scope" class="select select-bordered w-full mt-1" required>
+                    <option value="">กำลังโหลด Sub Scopes...</option>
+                  </select>
+                </div>
+              {% else %}
+                <select 
+                  name="sup_scope" 
+                  id="sub-scope"
+                  class="select select-bordered w-full mt-1"
+                  onchange="updatePreview()"
+                  required>
+                  <option value="">เลือก Main Scope ก่อน</option>
+                </select>
+              {% endif %}
+            </div>
           </div>
 
           <div class="sm:col-span-2">
@@ -34,7 +83,9 @@
             <textarea 
               name="desc_form" 
               class="textarea textarea-bordered w-full mt-1" 
-              placeholder="{{ t.enter_form_description }}">{{ form_data.desc_form if form_data else '' }}</textarea>
+              placeholder="{{ t.enter_form_description }}"
+              oninput="updatePreview()"
+            >{{ form_data.desc_form if form_data else '' }}</textarea>
           </div>
         </div>
 
@@ -248,99 +299,33 @@
 <!-- เพิ่ม SweetAlert2 CDN -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<!-- เพิ่ม shared JavaScript -->
+<script src="{{ url_for('static', filename='js/form-calculator.js') }}"></script>
+
 <script>
-let inputFieldCount = 0;
-let currentFormula = '';
-let currentFormula2 = '';
-
-// Calculator Toggle Functions
-function toggleFormulaCalculator() {
-    const calculator = document.getElementById('formula-calculator');
-    const formula2Calculator = document.getElementById('formula2-calculator');
-    
-    // ปิด calculator อื่นๆ
-    formula2Calculator.classList.add('hidden');
-    
-    // Toggle calculator
-    calculator.classList.toggle('hidden');
-    
-    if (!calculator.classList.contains('hidden')) {
-        currentFormula = document.getElementById('formula').value;
-        updateFormulaButtons();
-        // เรียก feather.replace() เพื่อแสดงไอคอน
-        setTimeout(() => feather.replace(), 10);
-    }
-}
-
-function toggleFormula2Calculator() {
-    const calculator = document.getElementById('formula2-calculator');
-    const formulaCalculator = document.getElementById('formula-calculator');
-    
-    // ปิด calculator อื่นๆ
-    formulaCalculator.classList.add('hidden');
-    
-    // Toggle calculator
-    calculator.classList.toggle('hidden');
-    
-    if (!calculator.classList.contains('hidden')) {
-        currentFormula2 = document.getElementById('formula2').value;
-        updateFormula2Buttons();
-        // เรียก feather.replace() เพื่อแสดงไอคอน
-        setTimeout(() => feather.replace(), 10);
-    }
-}
-
-function closeFormulaCalculator() {
-    document.getElementById('formula-calculator').classList.add('hidden');
-}
-
-function closeFormula2Calculator() {
-    document.getElementById('formula2-calculator').classList.add('hidden');
-}
-
-function applyFormula() {
-    updatePreview();
-    closeFormulaCalculator();
-}
-
-function applyFormula2() {
-    updatePreview();
-    closeFormula2Calculator();
-}
-
-// Close calculators when clicking outside
-document.addEventListener('click', function(event) {
-    const formulaInput = document.getElementById('formula');
-    const formula2Input = document.getElementById('formula2');
-    const formulaCalculator = document.getElementById('formula-calculator');
-    const formula2Calculator = document.getElementById('formula2-calculator');
-    const formulaButton = document.getElementById('formula-dropdown-btn');
-    const formula2Button = document.getElementById('formula2-dropdown-btn');
-    
-    // Check if click is outside formula calculator (but not on the input or button)
-    if (formulaInput && formulaCalculator && formulaButton &&
-        !formulaInput.contains(event.target) && 
-        !formulaCalculator.contains(event.target) &&
-        !formulaButton.contains(event.target)) {
-        closeFormulaCalculator();
-    }
-    
-    // Check if click is outside formula2 calculator (but not on the input or button)
-    if (formula2Input && formula2Calculator && formula2Button &&
-        !formula2Input.contains(event.target) && 
-        !formula2Calculator.contains(event.target) &&
-        !formula2Button.contains(event.target)) {
-        closeFormula2Calculator();
-    }
-});
-
 function initializeForm() {
     console.log("Initializing add form...");
     
-    // เพิ่มฟิลด์เริ่มต้น 1 อันเมื่อสร้างใหม่
-    addInputField();
+    if (isFormInitialized) {
+        console.log("Form already initialized, skipping...");
+        return;
+    }
     
-    // รอให้ DOM อัปเดตแล้วค่อย update
+    inputFieldCount = 0;
+    currentFormula = '';
+    currentFormula2 = '';
+    
+    const container = document.getElementById("input-fields-container");
+    if (!container) {
+        console.error("Container not found, retrying...");
+        setTimeout(initializeForm, 100);
+        return;
+    }
+    
+    container.innerHTML = "";
+    addInputField();
+    isFormInitialized = true;
+    
     setTimeout(() => {
         updatePreview();
         updateFormulaButtons();
@@ -349,250 +334,49 @@ function initializeForm() {
     }, 100);
 }
 
-function addInputField(fieldData = {}) {
-    const container = document.getElementById("input-fields-container");
-    if (!container) {
-        console.error("Container element with ID 'input-fields-container' not found.");
-        return;
-    }
-
-    const fieldId = `input-${inputFieldCount++}`;
-    const fieldNumber = container.children.length + 1;
-
-    const html = `
-    <div class="border border-gray-300 rounded-xl p-4 bg-gray-50 shadow-sm" data-index="${fieldId}">
-        <div class="flex justify-between items-center mb-3">
-            <h4 class="text-md font-semibold text-gray-600">Field #${fieldNumber}</h4>
-            <button type="button" class="btn btn-sm btn-error" onclick="removeField(this)">✕</button>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input 
-                name="field" 
-                class="input input-bordered w-full" 
-                placeholder="Field" 
-                value="${fieldData.field || ''}" 
-                onchange="updatePreview(); updateFormulaButtons(); updateFormula2Buttons();" 
-                required
-            >
-            <input 
-                name="label" 
-                class="input input-bordered w-full" 
-                placeholder="Label" 
-                value="${fieldData.label || ''}" 
-                onchange="updatePreview(); updateFormulaButtons(); updateFormula2Buttons();"
-            >
-            <select 
-                name="input_type" 
-                class="select select-bordered w-full" 
-                onchange="updatePreview(); updateFormulaButtons(); updateFormula2Buttons();"
-            >
-                <option value="number" ${fieldData.input_type === 'number' ? 'selected' : ''}>Number</option>
-                <option value="text" ${fieldData.input_type === 'text' ? 'selected' : ''}>Text</option>
-                <option value="select" ${fieldData.input_type === 'select' ? 'selected' : ''}>Select</option>
-            </select>
-            <input 
-                name="unit" 
-                class="input input-bordered w-full" 
-                placeholder="Unit" 
-                value="${fieldData.unit || ''}" 
-                onchange="updatePreview(); updateFormulaButtons(); updateFormula2Buttons();"
-            >
-        </div>
-    </div>`;
-
-    container.insertAdjacentHTML("beforeend", html);
-}
-
-function removeField(button) {
-    button.closest("[data-index]").remove();
-    updatePreview();
-    updateFormulaButtons();
-    updateFormula2Buttons();
-}
-
-function updateFormulaButtons() {
-    const container = document.getElementById("input-fields-container");
-    const fields = container.querySelectorAll("[data-index]");
-    const variablesButtons = document.getElementById("variables-buttons");
-    const numbersButtons = document.getElementById("numbers-buttons");
-    const operatorsButtons = document.getElementById("operators-buttons");
-
-    if (!variablesButtons || !numbersButtons || !operatorsButtons) return;
-
-    // ล้างปุ่มเก่า
-    variablesButtons.innerHTML = "";
-    numbersButtons.innerHTML = "";
-    operatorsButtons.innerHTML = "";
-
-    // เพิ่มปุ่มสำหรับตัวแปร
-    fields.forEach((row) => {
-        const field = row.querySelector("input[name='field']").value;
-        if (field) {
-            const button = document.createElement("button");
-            button.type = "button";
-            button.className = "btn btn-xs btn-outline bg-pink-100 text-pink-800";
-            button.textContent = field;
-            button.onclick = () => addToFormula(field);
-            variablesButtons.appendChild(button);
-        }
-    });
-
-    // เพิ่มปุ่มสำหรับตัวเลข
-    for (let i = 0; i <= 9; i++) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "btn btn-xs btn-outline";
-        button.textContent = i;
-        button.onclick = () => addToFormula(i);
-        numbersButtons.appendChild(button);
-    }
-
-    // เพิ่มปุ่มสำหรับการดำเนินการทางคณิตศาสตร์
-    const operators = ["+", "-", "*", "/", "^", "(", ")", ".", "⌫", "C"];
-    operators.forEach(op => {
-        const button = document.createElement("button");
-        button.type = "button";
-        
-        if (op === "⌫") {
-            button.className = "btn btn-xs btn-error";
-            button.onclick = () => removeLastCharacter();
-        } else if (op === "C") {
-            button.className = "btn btn-xs btn-warning";
-            button.onclick = () => clearFormula();
-        } else {
-            button.className = "btn btn-xs btn-outline";
-            button.onclick = () => addToFormula(op);
-        }
-        
-        button.textContent = op;
-        operatorsButtons.appendChild(button);
-    });
-}
-
-function updateFormula2Buttons() {
-    const constantsButtons = document.getElementById("constants-buttons");
-    const numbers2Buttons = document.getElementById("numbers2-buttons");
-    const operators2Buttons = document.getElementById("operators2-buttons");
-
-    if (!constantsButtons || !numbers2Buttons || !operators2Buttons) return;
-
-    // ล้างปุ่มเก่า
-    constantsButtons.innerHTML = "";
-    numbers2Buttons.innerHTML = "";
-    operators2Buttons.innerHTML = "";
-
-    // เพิ่มปุ่มสำหรับค่าคงที่
-    const constants = [
-        { name: "CO2", label: "Carbon Dioxide", color: "bg-blue-100 text-blue-800" },
-        { name: "Fossil_CH4", label: "Fossil Methane", color: "bg-orange-100 text-orange-800" },
-        { name: "CH4", label: "Methane", color: "bg-green-100 text-green-800" },
-        { name: "N2O", label: "Nitrous Oxide", color: "bg-red-100 text-red-800" },
-        { name: "SF6", label: "Sulfur Hexafluoride", color: "bg-purple-100 text-purple-800" },
-        { name: "NF3", label: "Nitrogen Trifluoride", color: "bg-teal-100 text-teal-800" }
-    ];
-
-    constants.forEach(constant => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = `btn btn-xs btn-outline ${constant.color}`;
-        button.textContent = constant.name;
-        button.title = constant.label;
-        button.onclick = () => addToFormula2(constant.name);
-        constantsButtons.appendChild(button);
-    });
-
-    // เพิ่มปุ่มสำหรับตัวเลข
-    for (let i = 0; i <= 9; i++) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "btn btn-xs btn-outline";
-        button.textContent = i;
-        button.onclick = () => addToFormula2(i);
-        numbers2Buttons.appendChild(button);
-    }
-
-    // เพิ่มปุ่มสำหรับการดำเนินการทางคณิตศาสตร์
-    const operators = ["+", "-", "*", "/", "^", "(", ")", ".", "⌫", "C"];
-    operators.forEach(op => {
-        const button = document.createElement("button");
-        button.type = "button";
-        
-        if (op === "⌫") {
-            button.className = "btn btn-xs btn-error";
-            button.onclick = () => removeLastCharacter2();
-        } else if (op === "C") {
-            button.className = "btn btn-xs btn-warning";
-            button.onclick = () => clearFormula2();
-        } else {
-            button.className = "btn btn-xs btn-outline";
-            button.onclick = () => addToFormula2(op);
-        }
-        
-        button.textContent = op;
-        operators2Buttons.appendChild(button);
-    });
-}
-
-function addToFormula(value) {
-    const formulaInput = document.getElementById("formula");
-    formulaInput.value += value;
-}
-
-function addToFormula2(value) {
-    const formula2Input = document.getElementById("formula2");
-    formula2Input.value += value;
-}
-
-function removeLastCharacter() {
-    const formulaInput = document.getElementById("formula");
-    formulaInput.value = formulaInput.value.slice(0, -1);
-}
-
-function removeLastCharacter2() {
-    const formula2Input = document.getElementById("formula2");
-    formula2Input.value = formula2Input.value.slice(0, -1);
-}
-
-function clearFormula() {
-    const formulaInput = document.getElementById("formula");
-    formulaInput.value = "";
-}
-
-function clearFormula2() {
-    const formula2Input = document.getElementById("formula2");  
-    formula2Input.value = "";
-}
-
 function updatePreview() {
     const container = document.getElementById("input-fields-container");
     const preview = document.getElementById("form-preview");
+    
+    if (!container || !preview) {
+        return;
+    }
+    
     const fields = container.querySelectorAll("[data-index]");
     let html = "";
 
-    // แสดง Material Name เป็นหัวข้อใหญ่บนสุด
-    const materialName = (document.querySelector("input[name='material_name']").value || "{{ t.no_material_name }}").toUpperCase();
+    const materialName = (document.querySelector("input[name='material_name']")?.value || "{{ t.no_material_name }}").toUpperCase();
 
     html += `
     <div class="mb-6">
         <p class="text-sm text-gray-400"><strong>{{ t.material_name|upper }}:</strong> ${materialName}</p>
     </div>`;
 
-    // แสดงข้อมูลฟอร์มในตัวอย่าง
-    const formName = document.querySelector("input[name='name']").value || "{{ t.untitled_form }}";
-    const descForm = document.querySelector("textarea[name='desc_form']").value || "{{ t.no_description }}";
+    const formName = document.querySelector("input[name='name']")?.value || "{{ t.untitled_form }}";
+    const descForm = document.querySelector("textarea[name='desc_form']")?.value || "{{ t.no_description }}";
+    
+    const mainScope = document.querySelector("select[name='scope']")?.value || "-";
+    const subScope = document.querySelector("select[name='sup_scope']")?.value || "-";
 
     html += `
     <div class="mb-4">
         <p class="text-sm text-gray-600">{{ t.form_name }}: ${formName}</p>
         <p class="text-sm text-gray-600">{{ t.form_description }}: ${descForm}</p>
+        <div class="flex gap-4 mt-2">
+            <div class="text-xs text-gray-700 bg-purple-100 rounded-full px-3 py-1 inline-block">
+                Main Scope: ${mainScope}
+            </div>
+            <div class="text-xs text-gray-700 bg-indigo-100 rounded-full px-3 py-1 inline-block">
+                Sub Scope: ${subScope}
+            </div>
+        </div>
     </div>`;
 
-    // แสดงฟิลด์ในตัวอย่าง
     fields.forEach(row => {
-        const field = row.querySelector("input[name='field']").value;
-        const label = row.querySelector("input[name='label']").value;
-        const inputType = row.querySelector("select[name='input_type']").value;
-        const unit = row.querySelector("input[name='unit']").value;
+        const field = row.querySelector("input[name='field']")?.value;
+        const label = row.querySelector("input[name='label']")?.value;
+        const inputType = row.querySelector("select[name='input_type']")?.value;
+        const unit = row.querySelector("input[name='unit']")?.value;
 
         html += `<div class='mb-6'>
             <label class='block text-sm text-gray-800 mb-1'><strong>${label || field} (${unit || '-'})</strong></label>
@@ -610,11 +394,10 @@ function updatePreview() {
         </div>`;
     });
 
-    // แสดง Formula และ Formula Description ด้านล่างฟิลด์
-    const formula = document.querySelector("input[name='formula']").value || "{{ t.no_formula }}";
-    const descFormula = document.querySelector("textarea[name='desc_formula']").value || "{{ t.no_formula_description }}";
-    const formula2 = document.querySelector("input[name='formula2']").value || "";
-    const descFormula2 = document.querySelector("textarea[name='desc_formula2']").value || "";
+    const formula = document.querySelector("input[name='formula']")?.value || "{{ t.no_formula }}";
+    const descFormula = document.querySelector("textarea[name='desc_formula']")?.value || "{{ t.no_formula_description }}";
+    const formula2 = document.querySelector("input[name='formula2']")?.value || "";
+    const descFormula2 = document.querySelector("textarea[name='desc_formula2']")?.value || "";
 
     html += `
     <div class="mt-6">
@@ -622,7 +405,6 @@ function updatePreview() {
         <p class="text-sm text-gray-600">{{ t.formula_description }}: ${descFormula}</p>
     </div>`;
 
-    // แสดง Formula 2 ถ้ามี
     if (formula2) {
         html += `
         <div class="mt-4">
@@ -631,7 +413,6 @@ function updatePreview() {
         </div>`;
     }
 
-    // เพิ่มส่วนล่างสุดสำหรับผู้สร้างและเวลา
     const currentUser = "{{ current_user.username if current_user else 'Unknown User' }}";
     const currentTime = new Date().toLocaleString();
 
@@ -651,28 +432,9 @@ function updatePreview() {
     feather.replace();
 }
 
-// เรียกใช้เมื่อ DOM โหลดเสร็จ
-document.addEventListener("DOMContentLoaded", function() {
-    console.log("DOM loaded, initializing add form...");
-    // เรียก feather.replace() ทันทีเพื่อแสดงไอคอน
-    feather.replace();
-    initializeForm();
-    initializeFormSubmission(); // เพิ่มบรรทัดนี้
-});
-
-// เรียกใช้เมื่อ HTMX โหลดเนื้อหาเสร็จ
-document.addEventListener("htmx:afterSettle", function() {
-    console.log("HTMX settled, initializing add form...");
-    feather.replace();
-    initializeForm();
-    initializeFormSubmission(); // เพิ่มบรรทัดนี้
-});
-
-// แก้ไขฟังก์ชัน submitForm
 function submitForm(event) {
     event.preventDefault();
     
-    // ตรวจสอบว่า SweetAlert2 โหลดหรือยัง
     if (typeof Swal === 'undefined') {
         alert('SweetAlert2 ยังไม่โหลด กรุณาลองใหม่อีกครั้ง');
         return false;
@@ -681,7 +443,6 @@ function submitForm(event) {
     const form = event.target;
     const formData = new FormData(form);
     
-    // แสดง loading
     const submitButton = form.querySelector('button[type="submit"]');
     const originalText = submitButton.textContent;
     submitButton.textContent = 'กำลังบันทึก...';
@@ -701,18 +462,15 @@ function submitForm(event) {
     .then(data => {
         console.log('Response data:', data);
         if (data.success) {
-            // แสดงป๊อปอัพสำเร็จ
             Swal.fire({
                 icon: 'success',
                 title: 'สำเร็จ!',
                 text: data.message,
                 confirmButtonText: 'ตกลง'
             }).then(() => {
-                // redirect ไปหน้า form management
                 window.location.href = data.redirect_url;
             });
         } else {
-            // แสดงป๊อปอัพ error
             Swal.fire({
                 icon: 'error',
                 title: 'เกิดข้อผิดพลาด!',
@@ -731,11 +489,20 @@ function submitForm(event) {
         });
     })
     .finally(() => {
-        // คืน loading state
         submitButton.textContent = originalText;
         submitButton.disabled = false;
     });
     
-    return false; // ป้องกันการ submit แบบปกติ
+    return false;
 }
+
+// Initialize when DOM loads or when modal content loads
+document.addEventListener("DOMContentLoaded", function() {
+    console.log("DOM loaded (initial)");
+    
+    if (document.getElementById('add-form')) {
+        initializeForm();
+        setTimeout(triggerSubScopeLoad, 200);
+    }
+});
 </script>

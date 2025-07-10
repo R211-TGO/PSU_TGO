@@ -1,0 +1,20 @@
+<select 
+  name="sup_scope" 
+  id="sub-scope"
+  class="select select-bordered w-full mt-1"
+  onchange="updatePreview()"
+  required>
+  <option value="">เลือก Sub Scope</option>
+  {% for sub_scope in sub_scopes %}
+    <option value="{{ sub_scope.ghg_sup_scope }}" 
+            {{ 'selected' if selected_value and selected_value == sub_scope.ghg_sup_scope else '' }}>
+      {{ sub_scope.ghg_sup_scope }}{% if sub_scope.ghg_name %} - {{ sub_scope.ghg_name }}{% endif %}
+    </option>
+  {% endfor %}
+  {% if not sub_scopes %}
+    <option value="">ไม่พบ Sub Scope</option>
+  {% endif %}
+  {% if error %}
+    <option value="">{{ error }}</option>
+  {% endif %}
+</select>
