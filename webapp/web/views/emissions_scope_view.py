@@ -13,6 +13,7 @@ module = Blueprint("emissions_scope", __name__, url_prefix="/emissions-scope")
 def emissions_scope():
     # รับปีที่เลือกจาก query parameter หรือใช้ปีปัจจุบันเป็นค่าเริ่มต้น
     selected_year = request.args.get("year", default=datetime.now().year, type=int)
+    
     # ดึงข้อมูล Scope ที่ตรงกับ campus และ department ของ current_user
     scopes = Scope.objects(
         campus=current_user.campus, department=current_user.department
@@ -128,18 +129,14 @@ def calculate_scope_progress(scope, selected_year):
 @permissions_required_all(["edit_scope"])
 def add_scope():
     if request.method == "POST":
-        action = request.form.get(
-            "action"
-        )  # ตรวจสอบการกระทำ (fetch_sub_scope หรือ save)
+        action = request.form.get("action")
         ghg_scope = request.form.get("ghg_scope")
         ghg_sup_scope = request.form.get("ghg_sup_scope")
         ghg_name = request.form.get("ghg_name")
         ghg_desc = request.form.get("ghg_desc")
-        head_table = request.form.getlist("head_table")  # รับค่าของ Head Table
+        head_table = request.form.getlist("head_table")
 
-        # หากผู้ใช้กดปุ่ม "บันทึก"
         if action == "save":
-            # ตรวจสอบว่าทุกช่องถูกกรอก
             if (
                 not ghg_scope
                 or not ghg_sup_scope
@@ -147,15 +144,21 @@ def add_scope():
                 or not ghg_desc
                 or not head_table
             ):
-                # ดึงข้อมูลที่ตรงกับ campus และ department ของ current_user
                 scopes = Scope.objects(
                     campus=current_user.campus, department=current_user.department
                 ).distinct("ghg_scope")
                 latest_sub_scope = None
-                # ดึง material_names ที่ตรงกับ campus และ department ของ current_user
-                material_names = FormAndFormula.objects(
-                    campus=current_user.campus, department=current_user.department
-                ).distinct("material_name")
+                
+                # ดึง material_names จาก base scope
+                material_names = []
+                if ghg_scope and ghg_sup_scope:
+                    base_scope = Scope.objects(
+                        ghg_scope=int(ghg_scope),
+                        ghg_sup_scope=int(ghg_sup_scope),
+                        campus="base"
+                    ).first()
+                    material_names = base_scope.head_table if base_scope else []
+                
                 return render_template(
                     "/emissions-scope/add-scope.html",
                     error="กรุณากรอกข้อมูลให้ครบทุกช่อง",
@@ -164,7 +167,7 @@ def add_scope():
                     material_names=material_names,
                 )
 
-            # ตรวจสอบว่ามี Scope ซ้ำหรือไม่ (ภายใน campus และ department เดียวกัน)
+            # ตรวจสอบว่ามี Scope ซ้ำหรือไม่
             existing_scope = Scope.objects(
                 ghg_scope=int(ghg_scope),
                 ghg_sup_scope=int(ghg_sup_scope),
@@ -172,15 +175,19 @@ def add_scope():
                 department=current_user.department,
             ).first()
             if existing_scope:
-                # ดึงข้อมูลที่ตรงกับ campus และ department ของ current_user
                 scopes = Scope.objects(
                     campus=current_user.campus, department=current_user.department
                 ).distinct("ghg_scope")
                 latest_sub_scope = None
-                # ดึง material_names ที่ตรงกับ campus และ department ของ current_user
-                material_names = FormAndFormula.objects(
-                    campus=current_user.campus, department=current_user.department
-                ).distinct("material_name")
+                
+                # ดึง material_names จาก base scope
+                base_scope = Scope.objects(
+                    ghg_scope=int(ghg_scope),
+                    ghg_sup_scope=int(ghg_sup_scope),
+                    campus="base"
+                ).first()
+                material_names = base_scope.head_table if base_scope else []
+                
                 return render_template(
                     "/emissions-scope/add-scope.html",
                     error="Scope และ Sub-Scope นี้มีอยู่แล้วในแผนกและวิทยาเขตของคุณ",
@@ -189,33 +196,38 @@ def add_scope():
                     material_names=material_names,
                 )
 
-            # สร้าง Scope ใหม่พร้อมกับ campus และ department ของ current_user
+            # สร้าง Scope ใหม่
             scope = Scope(
                 ghg_scope=int(ghg_scope),
                 ghg_sup_scope=int(ghg_sup_scope),
                 ghg_name=ghg_name,
                 ghg_desc=ghg_desc,
-                campus=current_user.campus,  # เพิ่ม campus ของ current_user
-                department=current_user.department,  # เพิ่ม department ของ current_user
-                head_table=head_table,  # บันทึกค่า Head Table ตามที่หน้าเว็บส่งมา
+                campus=current_user.campus,
+                department=current_user.department,
+                head_table=head_table,
             )
             scope.save()
 
-            # เรนเดอร์ HTML ของ add-scope-success.html
             return render_template(
                 "/emissions-scope/add-scope-success.html",
                 success="Scope added successfully!",
             )
 
-    # กรณี GET: ดึง Scope หลักและ material_name ที่ตรงกับ campus และ department ของ current_user
+    # กรณี GET
     scopes = Scope.objects(
         campus=current_user.campus, department=current_user.department
     ).distinct("ghg_scope")
     latest_sub_scope = None
 
-    # ดึง material_names ที่ตรงกับ campus และ department ของ current_user
-    material_names_objects = FormAndFormula.objects()
-    material_names = [x.material_name for x in material_names_objects]  # ดึงชื่อวัสดุทั้งหมด
+    # ดึง material_names จาก base scope ทั้งหมด
+    all_base_scopes = Scope.objects(campus="base")
+    material_names = []
+    for base_scope in all_base_scopes:
+        if base_scope.head_table:
+            material_names.extend(base_scope.head_table)
+    
+    # ลบ duplicate
+    material_names = list(set(material_names))
 
     return render_template(
         "/emissions-scope/add-scope.html",
@@ -252,7 +264,6 @@ def get_latest_sub_scope():
 
 @module.route("/edit/<int:ghg_scope>/<int:ghg_sup_scope>", methods=["GET", "POST"])
 @login_required
-@permissions_required_all(["edit_scope"])
 def edit_scope(ghg_scope, ghg_sup_scope):
     # ค้นหา Scope ที่ต้องการแก้ไขตาม campus และ department ของ current_user
     scope = Scope.objects(
@@ -275,9 +286,14 @@ def edit_scope(ghg_scope, ghg_sup_scope):
 
         # ตรวจสอบข้อมูลที่จำเป็น
         if not ghg_name or not ghg_desc:
-            # ดึง material_names สำหรับแสดงในฟอร์ม
-            material_names_objects = FormAndFormula.objects()
-            material_names = [x.material_name for x in material_names_objects]
+            # ดึง material_names จาก base scope ที่ตรงกับ scope และ sub_scope
+            base_scope = Scope.objects(
+                ghg_scope=ghg_scope,
+                ghg_sup_scope=ghg_sup_scope,
+                campus="base"
+            ).first()
+            
+            material_names = base_scope.head_table if base_scope else []
 
             return render_template(
                 "/emissions-scope/edit-scope.html",
@@ -295,9 +311,14 @@ def edit_scope(ghg_scope, ghg_sup_scope):
         return render_template("/success/success.html", success="แก้ไข Scope สำเร็จ!")
 
     # กรณี GET: แสดงฟอร์มแก้ไข
-    # ดึง material_names สำหรับแสดงใน checkbox
-    material_names_objects = FormAndFormula.objects()
-    material_names = [x.material_name for x in material_names_objects]
+    # ดึง material_names จาก base scope ที่ตรงกับ scope และ sub_scope
+    base_scope = Scope.objects(
+        ghg_scope=ghg_scope,
+        ghg_sup_scope=ghg_sup_scope,
+        campus="base"
+    ).first()
+    
+    material_names = base_scope.head_table if base_scope else []
 
     return render_template(
         "/emissions-scope/edit-scope.html", scope=scope, material_names=material_names

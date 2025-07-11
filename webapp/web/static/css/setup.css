@@ -101,6 +101,10 @@
     --noise: 1; /* ระดับของ noise */
   }
   
+  html {
+  font-size: 18px; /* เพิ่มจาก 16px เป็น 18px */
+  }
+
   .fade-bright {
     transition: opacity 0.5s ease, background-color 0.5s ease;
     background-color: rgba(255, 255, 255, 0.6);

@@ -9,7 +9,7 @@
       </div>
       <h2 class="text-2xl font-bold text-purple-800">Scope 1 - Direct Emissions</h2>
       <span class="badge bg-purple-100 text-purple-800 text-sm">
-        {{ scopes_by_type[1]|length }} {{ t.items }}
+        {{ scopes_by_type[1]|length }}
       </span>
     </div>
     
@@ -17,12 +17,12 @@
       {% for scope in scopes_by_type[1] %}
         <div class="card shadow-lg border border-purple-200 bg-base-100 p-6">
           <div class="flex justify-between items-start mb-4">
-            <div class="flex items-center gap-3">
-              <div class="bg-purple-500 text-white p-2 rounded-full">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div class="bg-purple-500 text-white p-2 rounded-full flex-shrink-0">
                 <i data-feather="file-text" class="w-5 h-5"></i>
               </div>
-              <div>
-                <h3 class="text-lg font-semibold">{{ scope.ghg_name }}</h3>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-lg font-semibold break-words break-all leading-snug">{{ scope.ghg_name }}</h3>
                 <p class="text-sm text-gray-600">Scope {{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}</p>
               </div>
             </div>
@@ -38,8 +38,8 @@
                 <i data-feather="edit-2" class="w-4 h-4"></i>
               </button>
             </div>
-            </div>
-          <p class="text-sm text-gray-700">{{ scope.ghg_desc or "-" }}</p>
+          </div>
+          <p class="text-sm text-gray-700 break-words">{{ scope.ghg_desc or "-" }}</p>
         </div>
       {% endfor %}
       
@@ -64,19 +64,19 @@
       </div>
       <h2 class="text-2xl font-bold text-green-800">Scope 2 - Indirect Emissions (Energy)</h2>
        <span class="badge bg-green-100 text-green-800 text-sm">
-        {{ scopes_by_type[2]|length }} {{ t.items }}
+        {{ scopes_by_type[2]|length }} 
       </span>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       {% for scope in scopes_by_type[2] %}
         <div class="card shadow-lg border border-green-200 bg-base-100 p-6">
-           <div class="flex justify-between items-start mb-4">
-            <div class="flex items-center gap-3">
-              <div class="bg-green-500 text-white p-2 rounded-full">
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div class="bg-green-500 text-white p-2 rounded-full flex-shrink-0">
                 <i data-feather="file-text" class="w-5 h-5"></i>
               </div>
-              <div>
-                <h3 class="text-lg font-semibold">{{ scope.ghg_name }}</h3>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-lg font-semibold break-words break-all leading-snug">{{ scope.ghg_name }}</h3>
                 <p class="text-sm text-gray-600">Scope {{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}</p>
               </div>
             </div>
@@ -92,8 +92,8 @@
                 <i data-feather="edit-2" class="w-4 h-4"></i>
               </button>
             </div>
-            </div>
-          <p class="text-sm text-gray-700">{{ scope.ghg_desc or "-" }}</p>
+          </div>
+          <p class="text-sm text-gray-700 break-words">{{ scope.ghg_desc or "-" }}</p>
         </div>
       {% endfor %}
       <div class="card shadow-lg border border-dashed border-green-300 bg-green-50 p-6 flex items-center justify-center">
@@ -117,19 +117,19 @@
       </div>
       <h2 class="text-2xl font-bold text-blue-800">Scope 3 - Indirect Emissions (Other)</h2>
        <span class="badge bg-blue-100 text-blue-800 text-sm">
-        {{ scopes_by_type[3]|length }} {{ t.items }}
+        {{ scopes_by_type[3]|length }}
       </span>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
        {% for scope in scopes_by_type[3] %}
         <div class="card shadow-lg border border-blue-200 bg-base-100 p-6">
-           <div class="flex justify-between items-start mb-4">
-            <div class="flex items-center gap-3">
-              <div class="bg-blue-500 text-white p-2 rounded-full">
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div class="bg-blue-500 text-white p-2 rounded-full flex-shrink-0">
                 <i data-feather="file-text" class="w-5 h-5"></i>
               </div>
-              <div>
-                <h3 class="text-lg font-semibold">{{ scope.ghg_name }}</h3>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-lg font-semibold break-words break-all leading-snug">{{ scope.ghg_name }}</h3>
                 <p class="text-sm text-gray-600">Scope {{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}</p>
               </div>
             </div>
@@ -145,8 +145,8 @@
                 <i data-feather="edit-2" class="w-4 h-4"></i>
               </button>
             </div>
-            </div>
-          <p class="text-sm text-gray-700">{{ scope.ghg_desc or "-" }}</p>
+          </div>
+          <p class="text-sm text-gray-700 break-words">{{ scope.ghg_desc or "-" }}</p>
         </div>
       {% endfor %}
       <div class="card shadow-lg border border-dashed border-blue-300 bg-blue-50 p-6 flex items-center justify-center">

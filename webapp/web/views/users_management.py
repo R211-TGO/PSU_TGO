@@ -110,7 +110,7 @@ def users_management():
 
 @module.route("/load-edit-user-role", methods=["GET", "POST"])
 @login_required
-# @permissions_required_all(['edit_users_management'])
+@permissions_required_all(['edit_users_management'])
 def load_edit_user_role():
     user_id = request.args.get("user_id")
     page = int(request.args.get("page", 1))
