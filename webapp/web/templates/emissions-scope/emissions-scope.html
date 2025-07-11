@@ -84,17 +84,7 @@
       </div>
     </div>
     
-    <!-- ปุ่มเพิ่ม Scope -->
-    <div class="mt-4">
-      <button class="btn btn-outline btn-primary"
-        hx-get="{{ url_for('emissions_scope.add_scope') }}"
-        hx-target="#modal-content"
-        hx-swap="innerHTML"
-        hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
-        <i data-feather="plus" class="w-5 h-5 mr-2"></i>
-        {{ t.add_scope }}
-      </button>
-    </div>
+
   </div>
 
   {% for scope_name, scope_items in mockup_data.scopes.items() %}
@@ -109,34 +99,36 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       {% for scope in scope_items %}
       <div class="card-style p-5 rounded-lg shadow bg-gray-50 relative">
-        <div class="flex justify-between items-center">
-          <h4 class="font-semibold text-base flex items-center gap-2">
-            <span class="w-8 h-8 flex items-center justify-center bg-blue-100 text-gray-800 rounded-full">
+        <div class="flex justify-between items-start">
+          <h4 class="font-semibold text-base flex items-start gap-2 flex-1">
+            <span class="w-8 h-8 flex items-center justify-center bg-blue-100 text-gray-800 rounded-full flex-shrink-0 mt-0.5">
               {{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}
             </span>
-            <span class="flex items-center gap-2">
-              {{ scope.ghg_name }}
-              {% if scope.ghg_desc %}
-                <button class="info-btn hover:bg-gray-200 p-1 rounded-full transition-colors"
-                  hx-get="{{ url_for('emissions_scope.scope_description', ghg_scope=scope.ghg_scope, ghg_sup_scope=scope.ghg_sup_scope) }}"
-                  hx-target="#modal-content"
+            <div class="flex flex-col gap-1 flex-1">
+              <span class="break-words break-all word-wrap overflow-wrap-anywhere leading-snug max-w-full">
+                {{ scope.ghg_name }}
+                {% if scope.ghg_desc %}
+                <button class="info-btn hover:bg-gray-200 p-1 rounded-full transition-colors self-start"
+                hx-get="{{ url_for('emissions_scope.scope_description', ghg_scope=scope.ghg_scope, ghg_sup_scope=scope.ghg_sup_scope) }}"
+                hx-target="#modal-content"
                   hx-swap="innerHTML"
                   hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')"
                   title="{{ t.view_details }}">
                   <i data-feather="info" class="w-4 h-4 text-gray-500 hover:text-blue-600 cursor-pointer"></i>
                 </button>
-              {% endif %}
-            </span>
+                {% endif %}
+              </span>
+            </div>
           </h4>
           
           {% if scope.progress == 0 %}
-            <span class="badge bg-red-500 text-white text-[10px] inline-flex items-center flex-shrink-0">{{ scope.status }}</span>
+            <span class="badge bg-red-500 text-white text-[10px] inline-flex items-center flex-shrink-0 ml-2">{{ scope.status }}</span>
           {% elif scope.progress <= 50 %}
-            <span class="badge badge-warning text-[10px] inline-flex items-center flex-shrink-0">{{ scope.status }}</span>
+            <span class="badge badge-warning text-[10px] inline-flex items-center flex-shrink-0 ml-2">{{ scope.status }}</span>
           {% elif scope.progress < 100 %}
-            <span class="badge bg-blue-500 text-white text-[10px] inline-flex items-center flex-shrink-0">{{ scope.status }}</span>
+            <span class="badge bg-blue-500 text-white text-[10px] inline-flex items-center flex-shrink-0 ml-2">{{ scope.status }}</span>
           {% else %}
-            <span class="badge badge-success text-[10px] inline-flex items-center flex-shrink-0">{{ scope.status }}</span>
+            <span class="badge badge-success text-[10px] inline-flex items-center flex-shrink-0 ml-2">{{ scope.status }}</span>
           {% endif %}
         </div>
         

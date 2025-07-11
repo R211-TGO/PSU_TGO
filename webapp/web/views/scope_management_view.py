@@ -144,15 +144,22 @@ def update_scope(scope_id):
         if not base_scope:
             flash("ไม่พบ Scope ที่ต้องการแก้ไข", "error")
             return redirect(url_for("scope_management.scope_page"))
+        
+        new_head_table =  [x for x in selected_materials if x not in base_scope.head_table]
 
-        # อัปเดตเอกสารทั้งหมดที่มี ghg_scope และ ghg_sup_scope เดียวกัน
-        Scope.objects(
+        # ลูปอัปเดตแต่ละ scope แยกกัน
+        all_scopes = Scope.objects(
             ghg_scope=base_scope.ghg_scope, ghg_sup_scope=base_scope.ghg_sup_scope
-        ).update(
-            set__ghg_name=new_ghg_name,
-            set__ghg_desc=new_ghg_desc,
-            set__head_table=selected_materials,  # อัปเดต field head_table
         )
+        
+
+        for scope in all_scopes:
+            # รวมข้อมูลเก่ากับใหม่สำหรับแต่ละ scope
+            scope.ghg_name = new_ghg_name
+            scope.ghg_desc = new_ghg_desc
+            scope.head_table.extend(new_head_table)  # อัปเดต material
+            print(scope.head_table,5555555555555555)
+            scope.save()
 
         flash(
             f"อัปเดตข้อมูล Scope {base_scope.ghg_scope}.{base_scope.ghg_sup_scope} สำเร็จแล้ว",

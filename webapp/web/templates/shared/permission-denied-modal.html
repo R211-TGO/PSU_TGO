@@ -81,9 +81,9 @@
           <i data-feather="key" class="w-4 h-4"></i>
           สิทธิ์ปัจจุบัน
         </h5>
-        <div class="flex flex-wrap gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {% for permission in user_permissions %}
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 text-center justify-center">
               {{ permission }}
             </span>
           {% endfor %}
