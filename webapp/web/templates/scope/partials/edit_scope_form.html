@@ -55,7 +55,7 @@
 
         <div class="pt-4 mt-4 border-t">
             <label class="block text-sm font-medium text-gray-700 mb-2">
-                {{ t.materials | default('Select Materials') }}
+                {{ t.materials | default(t.select_materials) }}
             </label>
             
             {# นี่คือ Container ที่จะเรียกใช้ฟังก์ชันเสมอเมื่อโหลด #}
