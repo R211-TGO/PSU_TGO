@@ -66,6 +66,12 @@
           </a>
         </li>
         <li>
+          <a href="/scope" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path.startswith('/scope') %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
+            <i data-feather="layers"></i>
+            <span class="text-md">{{t.scope_management}}</span>
+          </a>
+        </li>
+        <li>
           <a href="/emissions-scope" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/emissions-scope' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
             <i data-feather="bar-chart-2"></i>
             <span class="text-md">{{ t.sidebar_emissions }}</span>
@@ -81,12 +87,6 @@
           <a href="/setting" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/settings' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
             <i data-feather="settings"></i>
             <span class="text-md">{{ t.sidebar_settings }}</span>
-          </a>
-        </li>
-        <li>
-          <a href="/scope" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path.startswith('/scope') %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
-            <i data-feather="layers"></i>
-            <span class="text-md">Scope</span>
           </a>
         </li>
       </ul>
