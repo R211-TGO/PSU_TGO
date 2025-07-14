@@ -40,8 +40,11 @@
               class="select select-bordered w-full mt-1" 
               hx-get="/form-management/get-sub-scopes/"
               hx-target="#sub-scope-container"
-              hx-trigger="change, load delay:100ms"
+              hx-trigger="change"
               hx-include="[name='scope']"
+              {% if default_sub_scope %}
+              hx-vals='{"selected": "{{ default_sub_scope }}"}'
+              {% endif %}
               onchange="updatePreview()"
               required>
               <option value="">เลือก Main Scope</option>
@@ -56,8 +59,8 @@
             <label class="text-font">{{ t.sub_scope }}</label>
             <div id="sub-scope-container">
               {% if default_scope %}
-                <!-- ถ้ามี default scope ให้โหลด sub-scopes ทันที -->
-                <div hx-get="/form-management/get-sub-scopes/{{ default_scope }}"
+                <!-- ถ้ามี default scope ให้โหลด sub-scopes ทันที พร้อมส่ง selected -->
+                <div hx-get="/form-management/get-sub-scopes/{{ default_scope }}{% if default_sub_scope %}?selected={{ default_sub_scope }}{% endif %}"
                      hx-trigger="load"
                      hx-target="this"
                      hx-swap="outerHTML">

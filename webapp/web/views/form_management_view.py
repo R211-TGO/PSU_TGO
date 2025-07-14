@@ -99,13 +99,18 @@ def get_sub_scopes(main_scope):
 @login_required
 def load_add_form_and_formula():
     """
-    โหลดหน้าเพิ่มฟอร์มใหม่ พร้อมรองรับ default scope
+    โหลดหน้าเพิ่มฟอร์มใหม่ พร้อมรองรับ default scope และ sub scope
     """
     default_scope = request.args.get('default_scope', None)
+    default_sub_scope = request.args.get('default_sub_scope', None)
+    
+    print(f"Received default_scope: {default_scope}, default_sub_scope: {default_sub_scope}")
+    print(default_scope,55555555555555555555)
     
     return render_template(
         "/form-management/add-form-and-formula.html",
-        default_scope=default_scope
+        default_scope=default_scope,
+        default_sub_scope=default_sub_scope
     )
 
 

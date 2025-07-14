@@ -42,6 +42,7 @@ CAMPUS_DEPARTMENTS = {
 def scope_page():
     """
     แสดงหน้าหลักสำหรับจัดการ Scope โดยดึงข้อมูลเฉพาะ campus='base'
+    และส่งจำนวน FormAndFormula ของแต่ละ scope ไปด้วย
     """
     try:
         base_scopes = Scope.objects(campus="base").order_by(
@@ -51,6 +52,14 @@ def scope_page():
         scopes_by_type = {1: [], 2: [], 3: []}
         for s in base_scopes:
             if s.ghg_scope in scopes_by_type:
+                # นับจำนวน FormAndFormula ที่ตรงกับ scope นี้
+                formula_count = FormAndFormula.objects(
+                    ghg_scope=s.ghg_scope,
+                    ghg_sup_scope=s.ghg_sup_scope
+                ).count()
+                
+                # เพิ่ม attribute formula_count ให้กับ scope object
+                s.formula_count = formula_count
                 scopes_by_type[s.ghg_scope].append(s)
 
         return render_template(
@@ -234,7 +243,6 @@ def scope_description(ghg_scope, ghg_sup_scope):
             department="base",
         ).first()
 
-        print(scope.campus, scope.department)
 
         if not scope:
             return render_template(
@@ -247,7 +255,6 @@ def scope_description(ghg_scope, ghg_sup_scope):
         )
 
     except Exception as e:
-        print(555555555555555)
         return render_template(
             "/emissions-scope/partials/scope-description-modal.html",
             error=f"เกิดข้อผิดพลาด: {str(e)}",

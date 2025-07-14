@@ -18,3 +18,8 @@
     <option value="">{{ error }}</option>
   {% endif %}
 </select>
+
+{% if selected_value %}
+  <!-- Hidden input เพื่อส่งค่าเมื่อ select ถูก disabled -->
+  <input type="hidden" name="sup_scope" value="{{ selected_value }}">
+{% endif %}
