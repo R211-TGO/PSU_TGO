@@ -13,8 +13,22 @@ module = Blueprint("form_management", __name__, url_prefix="/form-management")
 @module.route("/", methods=["GET"])
 @login_required
 def form_management():
-    forms = FormAndFormula.objects()
-    return render_template("/form-management/form-management.html", forms=forms)
+    forms = FormAndFormula.objects().order_by("ghg_scope", "ghg_sup_scope", "material_name")
+    
+    # ดึงข้อมูล scope names จาก Scope model
+    scopes = Scope.objects().order_by("ghg_scope", "ghg_sup_scope")
+    scope_names = {}
+    
+    for scope in scopes:
+        key = f"{scope.ghg_scope}.{scope.ghg_sup_scope}"
+        scope_names[key] = scope.ghg_name
+    
+    
+    return render_template(
+        "/form-management/form-management.html", 
+        forms=forms,
+        scope_names=scope_names
+    )
 
 # เพิ่ม route ใหม่
 @module.route("/get-sub-scopes/<int:main_scope>", methods=["GET"])
@@ -28,8 +42,8 @@ def get_sub_scopes(main_scope):
         print(f"Request args: {request.args}")
         print(f"Request values: {request.values}")
         
-        # Query sub scopes จาก Scope model โดยใช้ ghg_scope
-        sub_scopes_query = Scope.objects(ghg_scope=main_scope)
+        # Query sub scopes จาก Scope model โดยใช้ ghg_scope และเรียงตาม ghg_sup_scope
+        sub_scopes_query = Scope.objects(ghg_scope=main_scope).order_by("ghg_sup_scope")
         print(f"Found {len(sub_scopes_query)} sub scopes for scope {main_scope}")
         
         # ใช้ set เพื่อเก็บ ghg_sup_scope ที่ไม่ซ้ำ

@@ -2,6 +2,7 @@
 {% block content %}
 
 <div class="p-6">
+  <!-- Scope 1 Section -->
   <div class="mb-8">
     <div class="flex items-center gap-3 mb-4">
       <div class="bg-purple-100 p-3 rounded-full">
@@ -13,33 +14,46 @@
       </span>
     </div>
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       {% for scope in scopes_by_type[1] %}
         <div class="card shadow-lg border border-purple-200 bg-base-100 p-6">
           <div class="flex justify-between items-start mb-4">
             <div class="flex items-center gap-3 min-w-0 flex-1">
-              <div class="bg-purple-500 text-white p-2 rounded-full flex-shrink-0">
-                <i data-feather="file-text" class="w-5 h-5"></i>
+              <div class="bg-purple-100 text-purple-600 p-2 rounded-full flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                <span class="text-xs font-bold">{{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}</span>
               </div>
               <div class="min-w-0 flex-1">
-                <h3 class="text-lg font-semibold break-words break-all leading-snug">{{ scope.ghg_name }}</h3>
-                <p class="text-sm text-gray-600">Scope {{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}</p>
+                <div class="flex items-center gap-2 mb-1">
+                  <h3 class="text-lg font-semibold break-words break-all leading-snug">{{ scope.ghg_name }}</h3>
+                  {% if scope.ghg_desc %}
+                  <button class="info-btn hover:bg-gray-200 p-1 rounded-full transition-colors flex-shrink-0"
+                    hx-get="{{ url_for('scope_management.scope_description', ghg_scope=scope.ghg_scope, ghg_sup_scope=scope.ghg_sup_scope) }}"
+                    hx-target="#modal-content"
+                    hx-swap="innerHTML"
+                    hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')"
+                    title="{{ t.view_details }}">
+                    <i data-feather="info" class="w-5 h-5 text-gray-500 hover:text-purple-600 cursor-pointer"></i>
+                  </button>
+                  {% endif %}
+                </div>
+                <p class="text-xs text-gray-500">
+                  Materials in this ghg scope : {{ scope.head_table|length if scope.head_table else 0 }}
+                </p>
               </div>
             </div>
             
             <div class="flex-shrink-0">
               <button 
-                class="btn btn-ghost btn-sm btn-circle"
+                class="text-blue-500 hover:text-blue-700 btn btn-ghost btn-sm btn-circle"
                 title="Edit Scope"
                 hx-get="{{ url_for('scope_management.load_edit_scope_form', scope_id=scope.id) }}"
                 hx-target="#modal-content"
                 hx-swap="innerHTML"
                 onclick="document.getElementById('modal').classList.add('modal-open')">
-                <i data-feather="edit-2" class="w-4 h-4"></i>
+                <i data-feather="edit" class="w-5 h-5"></i>
               </button>
             </div>
           </div>
-          <p class="text-sm text-gray-700 break-words">{{ scope.ghg_desc or "-" }}</p>
         </div>
       {% endfor %}
       
@@ -57,45 +71,61 @@
     </div>
   </div>
 
+  <!-- Scope 2 Section -->
   <div class="mb-8">
     <div class="flex items-center gap-3 mb-4">
       <div class="bg-green-100 p-3 rounded-full">
         <i data-feather="zap" class="w-6 h-6 text-green-600"></i>
       </div>
       <h2 class="text-2xl font-bold text-green-800">Scope 2 - {{t.indirect_emission}}</h2>
-       <span class="badge bg-green-100 text-green-800 text-sm">
+      <span class="badge bg-green-100 text-green-800 text-sm">
         {{ scopes_by_type[2]|length }} 
       </span>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       {% for scope in scopes_by_type[2] %}
         <div class="card shadow-lg border border-green-200 bg-base-100 p-6">
           <div class="flex justify-between items-start mb-4">
             <div class="flex items-center gap-3 min-w-0 flex-1">
-              <div class="bg-green-500 text-white p-2 rounded-full flex-shrink-0">
-                <i data-feather="file-text" class="w-5 h-5"></i>
+              <div class="bg-green-100 text-green-600 p-2 rounded-full flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                <span class="text-xs font-bold">{{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}</span>
               </div>
               <div class="min-w-0 flex-1">
-                <h3 class="text-lg font-semibold break-words break-all leading-snug">{{ scope.ghg_name }}</h3>
-                <p class="text-sm text-gray-600">Scope {{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}</p>
+                <div class="flex items-center gap-2 mb-1">
+                  <h3 class="text-lg font-semibold break-words break-all leading-snug">{{ scope.ghg_name }}</h3>
+                  {% if scope.ghg_desc %}
+                  <button class="info-btn hover:bg-gray-200 p-1 rounded-full transition-colors flex-shrink-0"
+                    hx-get="{{ url_for('scope_management.scope_description', ghg_scope=scope.ghg_scope, ghg_sup_scope=scope.ghg_sup_scope) }}"
+                    hx-target="#modal-content"
+                    hx-swap="innerHTML"
+                    hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')"
+                    title="{{ t.view_details }}">
+                    <i data-feather="info" class="w-5 h-5 text-gray-500 hover:text-green-600 cursor-pointer"></i>
+                  </button>
+                  {% endif %}
+                </div>
+                <p class="text-xs text-gray-500">
+                  Materials in this ghg scope : {{ scope.head_table|length if scope.head_table else 0 }}
+                </p>
               </div>
             </div>
             
             <div class="flex-shrink-0">
               <button 
-                class="btn btn-ghost btn-sm btn-circle"
+                class="text-blue-500 hover:text-blue-700 btn btn-ghost btn-sm btn-circle"
                 title="Edit Scope"
                 hx-get="{{ url_for('scope_management.load_edit_scope_form', scope_id=scope.id) }}"
                 hx-target="#modal-content"
                 hx-swap="innerHTML"
                 onclick="document.getElementById('modal').classList.add('modal-open')">
-                <i data-feather="edit-2" class="w-4 h-4"></i>
+                <i data-feather="edit" class="w-5 h-5"></i>
               </button>
             </div>
           </div>
-          <p class="text-sm text-gray-700 break-words">{{ scope.ghg_desc or "-" }}</p>
         </div>
       {% endfor %}
+      
       <div class="card shadow-lg border border-dashed border-green-300 bg-green-50 p-6 flex items-center justify-center">
         <button 
           class="btn btn-outline btn-success flex items-center gap-2"
@@ -110,45 +140,61 @@
     </div>
   </div>
 
+  <!-- Scope 3 Section -->
   <div class="mb-8">
     <div class="flex items-center gap-3 mb-4">
       <div class="bg-blue-100 p-3 rounded-full">
         <i data-feather="globe" class="w-6 h-6 text-blue-600"></i>
       </div>
       <h2 class="text-2xl font-bold text-blue-800">Scope 3 - {{t.indirect_emission_other}}</h2>
-       <span class="badge bg-blue-100 text-blue-800 text-sm">
+      <span class="badge bg-blue-100 text-blue-800 text-sm">
         {{ scopes_by_type[3]|length }}
       </span>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-       {% for scope in scopes_by_type[3] %}
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {% for scope in scopes_by_type[3] %}
         <div class="card shadow-lg border border-blue-200 bg-base-100 p-6">
           <div class="flex justify-between items-start mb-4">
             <div class="flex items-center gap-3 min-w-0 flex-1">
-              <div class="bg-blue-500 text-white p-2 rounded-full flex-shrink-0">
-                <i data-feather="file-text" class="w-5 h-5"></i>
+              <div class="bg-blue-100 text-blue-600 p-2 rounded-full flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                <span class="text-xs font-bold">{{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}</span>
               </div>
               <div class="min-w-0 flex-1">
-                <h3 class="text-lg font-semibold break-words break-all leading-snug">{{ scope.ghg_name }}</h3>
-                <p class="text-sm text-gray-600">Scope {{ scope.ghg_scope }}.{{ scope.ghg_sup_scope }}</p>
+                <div class="flex items-center gap-2 mb-1">
+                  <h3 class="text-lg font-semibold break-words break-all leading-snug">{{ scope.ghg_name }}</h3>
+                  {% if scope.ghg_desc %}
+                  <button class="info-btn hover:bg-gray-200 p-1 rounded-full transition-colors flex-shrink-0"
+                    hx-get="{{ url_for('scope_management.scope_description', ghg_scope=scope.ghg_scope, ghg_sup_scope=scope.ghg_sup_scope) }}"
+                    hx-target="#modal-content"
+                    hx-swap="innerHTML"
+                    hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')"
+                    title="{{ t.view_details }}">
+                    <i data-feather="info" class="w-5 h-5 text-gray-500 hover:text-blue-600 cursor-pointer"></i>
+                  </button>
+                  {% endif %}
+                </div>
+                <p class="text-xs text-gray-500">
+                  Materials in this ghg scope : {{ scope.head_table|length if scope.head_table else 0 }}
+                </p>
               </div>
             </div>
 
             <div class="flex-shrink-0">
               <button 
-                class="btn btn-ghost btn-sm btn-circle"
+                class="text-blue-500 hover:text-blue-700 btn btn-ghost btn-sm btn-circle"
                 title="Edit Scope"
                 hx-get="{{ url_for('scope_management.load_edit_scope_form', scope_id=scope.id) }}"
                 hx-target="#modal-content"
                 hx-swap="innerHTML"
                 onclick="document.getElementById('modal').classList.add('modal-open')">
-                <i data-feather="edit-2" class="w-4 h-4"></i>
+                <i data-feather="edit" class="w-5 h-5"></i>
               </button>
             </div>
           </div>
-          <p class="text-sm text-gray-700 break-words">{{ scope.ghg_desc or "-" }}</p>
         </div>
       {% endfor %}
+      
       <div class="card shadow-lg border border-dashed border-blue-300 bg-blue-50 p-6 flex items-center justify-center">
         <button 
           class="btn btn-outline btn-info flex items-center gap-2"

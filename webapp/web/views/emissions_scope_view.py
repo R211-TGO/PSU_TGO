@@ -124,117 +124,6 @@ def calculate_scope_progress(scope, selected_year):
     return min(progress, 100)
 
 
-@module.route("/add", methods=["GET", "POST"])
-@login_required
-@permissions_required_all(["edit_scope"])
-def add_scope():
-    if request.method == "POST":
-        action = request.form.get("action")
-        ghg_scope = request.form.get("ghg_scope")
-        ghg_sup_scope = request.form.get("ghg_sup_scope")
-        ghg_name = request.form.get("ghg_name")
-        ghg_desc = request.form.get("ghg_desc")
-        head_table = request.form.getlist("head_table")
-
-        if action == "save":
-            if (
-                not ghg_scope
-                or not ghg_sup_scope
-                or not ghg_name
-                or not ghg_desc
-                or not head_table
-            ):
-                scopes = Scope.objects(
-                    campus=current_user.campus, department=current_user.department
-                ).distinct("ghg_scope")
-                latest_sub_scope = None
-                
-                # ดึง material_names จาก base scope
-                material_names = []
-                if ghg_scope and ghg_sup_scope:
-                    base_scope = Scope.objects(
-                        ghg_scope=int(ghg_scope),
-                        ghg_sup_scope=int(ghg_sup_scope),
-                        campus="base"
-                    ).first()
-                    material_names = base_scope.head_table if base_scope else []
-                
-                return render_template(
-                    "/emissions-scope/add-scope.html",
-                    error="กรุณากรอกข้อมูลให้ครบทุกช่อง",
-                    scopes=scopes,
-                    latest_sub_scope=latest_sub_scope,
-                    material_names=material_names,
-                )
-
-            # ตรวจสอบว่ามี Scope ซ้ำหรือไม่
-            existing_scope = Scope.objects(
-                ghg_scope=int(ghg_scope),
-                ghg_sup_scope=int(ghg_sup_scope),
-                campus=current_user.campus,
-                department=current_user.department,
-            ).first()
-            if existing_scope:
-                scopes = Scope.objects(
-                    campus=current_user.campus, department=current_user.department
-                ).distinct("ghg_scope")
-                latest_sub_scope = None
-                
-                # ดึง material_names จาก base scope
-                base_scope = Scope.objects(
-                    ghg_scope=int(ghg_scope),
-                    ghg_sup_scope=int(ghg_sup_scope),
-                    campus="base"
-                ).first()
-                material_names = base_scope.head_table if base_scope else []
-                
-                return render_template(
-                    "/emissions-scope/add-scope.html",
-                    error="Scope และ Sub-Scope นี้มีอยู่แล้วในแผนกและวิทยาเขตของคุณ",
-                    scopes=scopes,
-                    latest_sub_scope=latest_sub_scope,
-                    material_names=material_names,
-                )
-
-            # สร้าง Scope ใหม่
-            scope = Scope(
-                ghg_scope=int(ghg_scope),
-                ghg_sup_scope=int(ghg_sup_scope),
-                ghg_name=ghg_name,
-                ghg_desc=ghg_desc,
-                campus=current_user.campus,
-                department=current_user.department,
-                head_table=head_table,
-            )
-            scope.save()
-
-            return render_template(
-                "/emissions-scope/add-scope-success.html",
-                success="Scope added successfully!",
-            )
-
-    # กรณี GET
-    scopes = Scope.objects(
-        campus=current_user.campus, department=current_user.department
-    ).distinct("ghg_scope")
-    latest_sub_scope = None
-
-    # ดึง material_names จาก base scope ทั้งหมด
-    all_base_scopes = Scope.objects(campus="base")
-    material_names = []
-    for base_scope in all_base_scopes:
-        if base_scope.head_table:
-            material_names.extend(base_scope.head_table)
-    
-    # ลบ duplicate
-    material_names = list(set(material_names))
-
-    return render_template(
-        "/emissions-scope/add-scope.html",
-        scopes=scopes,
-        latest_sub_scope=latest_sub_scope,
-        material_names=material_names,
-    )
 
 
 @module.route("/get-latest-sub-scope", methods=["POST"])
@@ -280,110 +169,32 @@ def edit_scope(ghg_scope, ghg_sup_scope):
         )
 
     if request.method == "POST":
-        ghg_name = request.form.get("ghg_name")
-        ghg_desc = request.form.get("ghg_desc")
+        ghg_name = request.form.get("ghg_name")  # รับจาก hidden input
+        ghg_desc = request.form.get("ghg_desc")  # รับจาก hidden input
         head_table = request.form.getlist("head_table")
 
-        # ตรวจสอบข้อมูลที่จำเป็น
-        if not ghg_name or not ghg_desc:
-            # ดึง material_names จาก base scope ที่ตรงกับ scope และ sub_scope
-            base_scope = Scope.objects(
-                ghg_scope=ghg_scope,
-                ghg_sup_scope=ghg_sup_scope,
-                campus="base"
-            ).first()
-            
-            material_names = base_scope.head_table if base_scope else []
-
-            return render_template(
-                "/emissions-scope/edit-scope.html",
-                scope=scope,
-                material_names=material_names,
-                error="กรุณากรอกข้อมูลให้ครบทุกช่อง",
-            )
-
-        # อัปเดตข้อมูล
-        scope.ghg_name = ghg_name
-        scope.ghg_desc = ghg_desc
+        # อัปเดตข้อมูล (ไม่ต้องตรวจสอบ name และ desc เพราะเป็น hidden input)
         scope.head_table = head_table if head_table else []
         scope.save()
 
         return render_template("/success/success.html", success="แก้ไข Scope สำเร็จ!")
 
     # กรณี GET: แสดงฟอร์มแก้ไข
-    # ดึง material_names จาก base scope ที่ตรงกับ scope และ sub_scope
-    base_scope = Scope.objects(
+    # ดึง material_names จาก FormAndFormula ที่ตรงกับ scope และ sub_scope
+    materials = FormAndFormula.objects(
         ghg_scope=ghg_scope,
-        ghg_sup_scope=ghg_sup_scope,
-        campus="base"
-    ).first()
+        ghg_sup_scope=ghg_sup_scope  # แก้จาก ghg_sub_scope เป็น ghg_sup_scope
+    ).distinct("material_name")
     
-    material_names = base_scope.head_table if base_scope else []
+    print(materials)
+    
+    material_names = sorted([name for name in materials if name])
 
     return render_template(
         "/emissions-scope/edit-scope.html", scope=scope, material_names=material_names
     )
 
 
-@module.route("/delete/<int:ghg_scope>/<int:ghg_sup_scope>", methods=["DELETE"])
-@login_required
-@permissions_required_all(["delete_scope"])
-def delete_scope(ghg_scope, ghg_sup_scope):
-    """ลบ Scope"""
-    try:
-        # ค้นหา Scope ที่ต้องการลบตาม campus และ department ของ current_user
-        scope = Scope.objects(
-            ghg_scope=ghg_scope,
-            ghg_sup_scope=ghg_sup_scope,
-            campus=current_user.campus,
-            department=current_user.department,
-        ).first()
-
-        if not scope:
-            return (
-                jsonify(
-                    {
-                        "success": False,
-                        "message": "ไม่พบ Scope ที่ต้องการลบ หรือคุณไม่มีสิทธิ์เข้าถึง",
-                    }
-                ),
-                404,
-            )
-
-        # ตรวจสอบว่ามี Material ที่เชื่อมโยงกับ Scope นี้หรือไม่
-        related_materials = Material.objects(
-            scope=ghg_scope,
-            sub_scope=ghg_sup_scope,
-            campus=current_user.campus,
-            department=current_user.department,
-        )
-
-        if related_materials.count() > 0:
-            return (
-                jsonify(
-                    {
-                        "success": False,
-                        "message": f"ไม่สามารถลบ Scope ได้ เนื่องจากมีข้อมูล Material {related_materials.count()} รายการที่เชื่อมโยงอยู่",
-                    }
-                ),
-                400,
-            )
-
-        # ลบ Scope
-        scope.delete()
-
-        return (
-            jsonify(
-                {
-                    "success": True,
-                    "message": f"ลบ Scope {ghg_scope}.{ghg_sup_scope} สำเร็จ",
-                }
-            ),
-            200,
-        )
-
-    except Exception as e:
-        return jsonify({"success": False, "message": f"เกิดข้อผิดพลาด: {str(e)}"}), 500
 
 
 @module.route("/scope-description/<int:ghg_scope>/<int:ghg_sup_scope>", methods=["GET"])
