@@ -53,26 +53,6 @@
                       required>{{ scope.ghg_desc }}</textarea>
         </div>
 
-        <div class="pt-4 mt-4 border-t">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-                {{ t.materials | default(t.select_materials) }}
-            </label>
-            
-            {# นี่คือ Container ที่จะเรียกใช้ฟังก์ชันเสมอเมื่อโหลด #}
-            <div id="material-list-container" 
-                 class="max-h-60 overflow-y-auto bg-base-200 p-4 rounded-md space-y-2"
-                 hx-post="{{ url_for('scope_management.load_materials_for_scope') }}"
-                 hx-trigger="load"
-                 hx-include="closest form"
-                 hx-target="this"
-                 hx-swap="innerHTML"
-                 >
-                
-                {# ไม่ต้องมี include ที่นี่แล้ว แต่ใส่ spinner เพื่อให้ดูสวยงามตอนโหลดได้ #}
-                <span class="loading loading-spinner text-primary"></span>
-
-            </div>
-        </div>
     </div>
 
     <div class="flex justify-end gap-4 pt-6 mt-6 border-t">

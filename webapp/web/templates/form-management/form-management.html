@@ -14,79 +14,105 @@
       </span>
     </div>
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {% for form in forms %}
-        {% if form.ghg_scope == 1 %}
-        <div class="card shadow-lg border border-purple-200 bg-base-100 p-6">
-          <div class="flex justify-between items-start mb-4">
-            <div class="flex items-center gap-3 min-w-0 flex-1">
-              <div class="bg-purple-500 text-white p-2 rounded-full flex-shrink-0">
-                <i data-feather="file-text" class="w-5 h-5"></i>
+    {% set scope1_forms = forms|selectattr('ghg_scope', 'equalto', 1)|list %}
+    {% set scope1_sub_scopes = scope1_forms|map(attribute='ghg_sup_scope')|unique|sort %}
+    
+    {% for sub_scope in scope1_sub_scopes %}
+      <div class="mb-6">
+        <!-- Scope 1 Sub Scope Header -->
+        {% set scope_key = "1." + sub_scope|string %}
+        <h3 class="text-lg font-semibold text-purple-700 mb-3">
+          1.{{ sub_scope }}{% if scope_names.get(scope_key) %} - {{ scope_names.get(scope_key) }}{% endif %}
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {% for form in scope1_forms %}
+            {% if form.ghg_sup_scope == sub_scope %}
+            <div class="card shadow-lg border border-purple-200 bg-base-100 p-6">
+              <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                  <div class="bg-purple-100 text-purple-600 p-2 rounded-full flex-shrink-0">
+                    <i data-feather="file-text" class="w-5 h-5"></i>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <h4 class="text-lg font-semibold break-words break-all leading-snug">{{ form.name }}</h4>
+                    <p class="text-sm text-gray-600 break-words">{{ form.material_name }}</p>
+                  </div>
+                </div>
+                <div class="flex gap-2 flex-shrink-0">
+                  <!-- Edit Button -->
+                  <button class="text-blue-500 hover:text-blue-700 btn btn-ghost btn-sm" title="{{ t.edit }}"
+                    hx-get="{{ url_for('form_management.load_edit_form_and_formula') }}?form_id={{ form.id }}"
+                    hx-target="#modal-content"
+                    hx-swap="innerHTML"
+                    onclick="document.getElementById('modal').classList.add('modal-open')">
+                    <i data-feather="edit" class="w-5 h-5"></i>
+                  </button>
+                </div>
               </div>
-              <div class="min-w-0 flex-1">
-                <h3 class="text-lg font-semibold break-words break-all leading-snug">{{ form.name }}</h3>
-                <p class="text-sm text-gray-600 break-words">{{ form.material_name }}</p>
+              
+              <p class="text-sm text-gray-700 mb-3 break-words">{{ form.desc_form or "-" }}</p>
+              
+              <!-- Sub Scope -->
+              <div class="mb-3">
+                <span class="badge bg-purple-100 text-purple-800 text-xs">
+                  Ghg scope {{ form.ghg_scope }}.{{ form.ghg_sup_scope }}
+                </span>
               </div>
+              
+              <!-- Variables -->
+              <div class="mb-3">
+                <p class="font-medium text-xs mb-1">{{ t.variables }}</p>
+                <div class="flex flex-wrap gap-1">
+                  {% for var in form.variables %}
+                  <span class="badge bg-yellow-100 text-yellow-800 text-xs break-words">{{ var }}</span>
+                  {% endfor %}
+                </div>
+              </div>
+              
+              <!-- Formula -->
+              <div class="mb-2">
+                <p class="font-medium text-xs mb-1">{{ t.formula }}</p>
+                <p class="text-xs bg-gray-100 p-2 rounded break-words">{{ form.formula or t.no_formula_provided }}</p>
+              </div>
+              
+              {% if form.formula2 %}
+              <div>
+                <p class="font-medium text-xs mb-1">{{ t.formula2 }}</p>
+                <p class="text-xs bg-green-50 p-2 rounded border border-green-200 break-words">{{ form.formula2 }}</p>
+              </div>
+              {% endif %}
             </div>
-            <div class="flex gap-2 flex-shrink-0">
-              <!-- Edit Button -->
-              <button class="btn btn-ghost btn-sm" title="{{ t.edit }}"
-                hx-get="{{ url_for('form_management.load_edit_form_and_formula') }}?form_id={{ form.id }}"
-                hx-target="#modal-content"
-                hx-swap="innerHTML"
-                onclick="document.getElementById('modal').classList.add('modal-open')">
-                <i data-feather="edit" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </div>
+            {% endif %}
+          {% endfor %}
           
-          <p class="text-sm text-gray-700 mb-3 break-words">{{ form.desc_form or "-" }}</p>
-          
-          <!-- Sub Scope -->
-          <div class="mb-3">
-            <span class="badge bg-purple-100 text-purple-800 text-xs">
-              Sub Scope: {{ form.ghg_sup_scope }}
-            </span>
+          <!-- Add New Form Card for this Sub Scope -->
+          <div class="card shadow-lg border border-dashed border-purple-300 bg-purple-50 p-6 flex items-center justify-center">
+            <button 
+              class="btn btn-outline btn-purple flex items-center gap-2"
+              hx-get="{{ url_for('form_management.load_add_form_and_formula') }}?default_scope=1&default_sub_scope={{ sub_scope }}" 
+              hx-target="#modal-content" 
+              hx-swap="innerHTML"
+              onclick="document.getElementById('modal').classList.add('modal-open')">
+              <i data-feather="plus-circle" class="w-5 h-5"></i>
+              <span>{{t.add_form}} Sub Scope {{ sub_scope }}</span>
+            </button>
           </div>
-          
-          <!-- Variables -->
-          <div class="mb-3">
-            <p class="font-medium text-xs mb-1">{{ t.variables }}</p>
-            <div class="flex flex-wrap gap-1">
-              {% for var in form.variables %}
-              <span class="badge bg-yellow-100 text-yellow-800 text-xs break-words">{{ var }}</span>
-              {% endfor %}
-            </div>
-          </div>
-          
-          <!-- Formula -->
-          <div class="mb-2">
-            <p class="font-medium text-xs mb-1">{{ t.formula }}</p>
-            <p class="text-xs bg-gray-100 p-2 rounded break-words">{{ form.formula or t.no_formula_provided }}</p>
-          </div>
-          
-          {% if form.formula2 %}
-          <div>
-            <p class="font-medium text-xs mb-1">{{ t.formula2 }}</p>
-            <p class="text-xs bg-green-50 p-2 rounded border border-green-200 break-words">{{ form.formula2 }}</p>
-          </div>
-          {% endif %}
         </div>
-        {% endif %}
-      {% endfor %}
-      
-      <!-- Add New Form Card for Scope 1 -->
-      <div class="card shadow-lg border border-dashed border-purple-300 bg-purple-50 p-6 flex items-center justify-center">
-        <button 
-          class="btn btn-outline btn-purple flex items-center gap-2"
-          hx-get="{{ url_for('form_management.load_add_form_and_formula') }}?default_scope=1" 
-          hx-target="#modal-content" 
-          hx-swap="innerHTML"
-          onclick="document.getElementById('modal').classList.add('modal-open')">
-          <i data-feather="plus-circle" class="w-5 h-5"></i>
-          <span>{{t.add_form}} Scope 1</span>
-        </button>
       </div>
+    {% endfor %}
+    
+    <!-- Add New Sub Scope -->
+    <div class="card shadow-lg border border-dashed border-purple-400 bg-purple-100 p-6 flex items-center justify-center">
+      <button 
+        class="btn btn-outline btn-purple flex items-center gap-2"
+        hx-get="{{ url_for('form_management.load_add_form_and_formula') }}?default_scope=1" 
+        hx-target="#modal-content" 
+        hx-swap="innerHTML"
+        onclick="document.getElementById('modal').classList.add('modal-open')">
+        <i data-feather="plus-circle" class="w-5 h-5"></i>
+        <span>{{t.add_form}} Scope 1 (New Sub Scope)</span>
+      </button>
     </div>
   </div>
 
@@ -102,79 +128,101 @@
       </span>
     </div>
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {% for form in forms %}
-        {% if form.ghg_scope == 2 %}
-        <div class="card shadow-lg border border-green-200 bg-base-100 p-6">
-          <div class="flex justify-between items-start mb-4">
-            <div class="flex items-center gap-3 min-w-0 flex-1">
-              <div class="bg-green-500 text-white p-2 rounded-full flex-shrink-0">
-                <i data-feather="file-text" class="w-5 h-5"></i>
+    {% set scope2_forms = forms|selectattr('ghg_scope', 'equalto', 2)|list %}
+    {% set scope2_sub_scopes = scope2_forms|map(attribute='ghg_sup_scope')|unique|sort %}
+    
+    {% for sub_scope in scope2_sub_scopes %}
+      <div class="mb-6">
+        <!-- Scope 2 Sub Scope Header -->
+        {% set scope_key = "2." + sub_scope|string %}
+        <h3 class="text-lg font-semibold text-green-700 mb-3">
+          2.{{ sub_scope }}{% if scope_names.get(scope_key) %} - {{ scope_names.get(scope_key) }}{% endif %}
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {% for form in scope2_forms %}
+            {% if form.ghg_sup_scope == sub_scope %}
+            <div class="card shadow-lg border border-green-200 bg-base-100 p-6">
+              <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                  <div class="bg-green-100 text-green-600 p-2 rounded-full flex-shrink-0">
+                    <i data-feather="file-text" class="w-5 h-5"></i>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <h4 class="text-lg font-semibold break-words break-all leading-snug">{{ form.name }}</h4>
+                    <p class="text-sm text-gray-600 break-words">{{ form.material_name }}</p>
+                  </div>
+                </div>
+                <div class="flex gap-2 flex-shrink-0">
+                  <button class="btn btn-ghost btn-sm" title="{{ t.edit }}"
+                    hx-get="{{ url_for('form_management.load_edit_form_and_formula') }}?form_id={{ form.id }}"
+                    hx-target="#modal-content"
+                    hx-swap="innerHTML"
+                    onclick="document.getElementById('modal').classList.add('modal-open')">
+                    <i data-feather="edit" class="w-5 h-5"></i>
+                  </button>
+                </div>
               </div>
-              <div class="min-w-0 flex-1">
-                <h3 class="text-lg font-semibold break-words break-all leading-snug">{{ form.name }}</h3>
-                <p class="text-sm text-gray-600 break-words">{{ form.material_name }}</p>
+              
+              <p class="text-sm text-gray-700 mb-3 break-words">{{ form.desc_form or "-" }}</p>
+              
+              <div class="mb-3">
+                <span class="badge bg-green-100 text-green-800 text-xs">
+                  {{ form.ghg_scope }}.{{ form.ghg_sup_scope }}
+                </span>
               </div>
+              
+              <div class="mb-3">
+                <p class="font-medium text-xs mb-1">{{ t.variables }}</p>
+                <div class="flex flex-wrap gap-1">
+                  {% for var in form.variables %}
+                  <span class="badge bg-yellow-100 text-yellow-800 text-xs break-words">{{ var }}</span>
+                  {% endfor %}
+                </div>
+              </div>
+              
+              <div class="mb-2">
+                <p class="font-medium text-xs mb-1">{{ t.formula }}</p>
+                <p class="text-xs bg-gray-100 p-2 rounded break-words">{{ form.formula or t.no_formula_provided }}</p>
+              </div>
+              
+              {% if form.formula2 %}
+              <div>
+                <p class="font-medium text-xs mb-1">{{ t.formula2 }}</p>
+                <p class="text-xs bg-green-50 p-2 rounded border border-green-200 break-words">{{ form.formula2 }}</p>
+              </div>
+              {% endif %}
             </div>
-            <div class="flex gap-2 flex-shrink-0">
-              <!-- Edit Button -->
-              <button class="btn btn-ghost btn-sm" title="{{ t.edit }}"
-                hx-get="{{ url_for('form_management.load_edit_form_and_formula') }}?form_id={{ form.id }}"
-                hx-target="#modal-content"
-                hx-swap="innerHTML"
-                onclick="document.getElementById('modal').classList.add('modal-open')">
-                <i data-feather="edit" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </div>
+            {% endif %}
+          {% endfor %}
           
-          <p class="text-sm text-gray-700 mb-3 break-words">{{ form.desc_form or "-" }}</p>
-          
-          <!-- Sub Scope -->
-          <div class="mb-3">
-            <span class="badge bg-green-100 text-green-800 text-xs">
-              Sub Scope: {{ form.ghg_sup_scope }}
-            </span>
+          <!-- Add New Form Card for this Sub Scope -->
+          <div class="card shadow-lg border border-dashed border-green-300 bg-green-50 p-6 flex items-center justify-center">
+            <button 
+              class="btn btn-outline btn-success flex items-center gap-2"
+              hx-get="{{ url_for('form_management.load_add_form_and_formula') }}?default_scope=2&default_sub_scope={{ sub_scope }}" 
+              hx-target="#modal-content" 
+              hx-swap="innerHTML"
+              onclick="document.getElementById('modal').classList.add('modal-open')">
+              <i data-feather="plus-circle" class="w-5 h-5"></i>
+              <span>{{t.add_form}} Sub Scope {{ sub_scope }}</span>
+            </button>
           </div>
-          
-          <!-- Variables -->
-          <div class="mb-3">
-            <p class="font-medium text-xs mb-1">{{ t.variables }}</p>
-            <div class="flex flex-wrap gap-1">
-              {% for var in form.variables %}
-              <span class="badge bg-yellow-100 text-yellow-800 text-xs break-words">{{ var }}</span>
-              {% endfor %}
-            </div>
-          </div>
-          
-          <!-- Formula -->
-          <div class="mb-2">
-            <p class="font-medium text-xs mb-1">{{ t.formula }}</p>
-            <p class="text-xs bg-gray-100 p-2 rounded break-words">{{ form.formula or t.no_formula_provided }}</p>
-          </div>
-          
-          {% if form.formula2 %}
-          <div>
-            <p class="font-medium text-xs mb-1">{{ t.formula2 }}</p>
-            <p class="text-xs bg-green-50 p-2 rounded border border-green-200 break-words">{{ form.formula2 }}</p>
-          </div>
-          {% endif %}
         </div>
-        {% endif %}
-      {% endfor %}
-      
-      <!-- Add New Form Card for Scope 2 -->
-      <div class="card shadow-lg border border-dashed border-green-300 bg-green-50 p-6 flex items-center justify-center">
-        <button 
-          class="btn btn-outline btn-success flex items-center gap-2"
-          hx-get="{{ url_for('form_management.load_add_form_and_formula') }}?default_scope=2" 
-          hx-target="#modal-content" 
-          hx-swap="innerHTML"
-          onclick="document.getElementById('modal').classList.add('modal-open')">
-          <i data-feather="plus-circle" class="w-5 h-5"></i>
-          <span>{{t.add_form}} Scope 2</span>
-        </button>
       </div>
+    {% endfor %}
+    
+    <!-- Add New Sub Scope -->
+    <div class="card shadow-lg border border-dashed border-green-400 bg-green-100 p-6 flex items-center justify-center">
+      <button 
+        class="btn btn-outline btn-success flex items-center gap-2"
+        hx-get="{{ url_for('form_management.load_add_form_and_formula') }}?default_scope=2" 
+        hx-target="#modal-content" 
+        hx-swap="innerHTML"
+        onclick="document.getElementById('modal').classList.add('modal-open')">
+        <i data-feather="plus-circle" class="w-5 h-5"></i>
+        <span>{{t.add_form}} Scope 2 (New Sub Scope)</span>
+      </button>
     </div>
   </div>
 
@@ -190,81 +238,108 @@
       </span>
     </div>
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {% for form in forms %}
-        {% if form.ghg_scope == 3 %}
-        <div class="card shadow-lg border border-blue-200 bg-base-100 p-6">
-          <div class="flex justify-between items-start mb-4">
-            <div class="flex items-center gap-3 min-w-0 flex-1">
-              <div class="bg-blue-500 text-white p-2 rounded-full flex-shrink-0">
-                <i data-feather="file-text" class="w-5 h-5"></i>
+    {% set scope3_forms = forms|selectattr('ghg_scope', 'equalto', 3)|list %}
+    {% set scope3_sub_scopes = scope3_forms|map(attribute='ghg_sup_scope')|unique|sort %}
+    
+    {% for sub_scope in scope3_sub_scopes %}
+      <div class="mb-6">
+        <!-- Scope 3 Sub Scope Header -->
+        {% set scope_key = "3." + sub_scope|string %}
+        <h3 class="text-lg font-semibold text-blue-700 mb-3">
+          3.{{ sub_scope }}{% if scope_names.get(scope_key) %} - {{ scope_names.get(scope_key) }}{% endif %}
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {% for form in scope3_forms %}
+            {% if form.ghg_sup_scope == sub_scope %}
+            <div class="card shadow-lg border border-blue-200 bg-base-100 p-6">
+              <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                  <div class="bg-blue-100 text-blue-600 p-2 rounded-full flex-shrink-0">
+                    <i data-feather="file-text" class="w-5 h-5"></i>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <h4 class="text-lg font-semibold break-words break-all leading-snug">{{ form.name }}</h4>
+                    <p class="text-sm text-gray-600 break-words">{{ form.material_name }}</p>
+                  </div>
+                </div>
+                <div class="flex gap-2 flex-shrink-0">
+                  <!-- Edit Button -->
+                  <button class="btn btn-ghost btn-sm" title="{{ t.edit }}"
+                    hx-get="{{ url_for('form_management.load_edit_form_and_formula') }}?form_id={{ form.id }}"
+                    hx-target="#modal-content"
+                    hx-swap="innerHTML"
+                    onclick="document.getElementById('modal').classList.add('modal-open')">
+                    <i data-feather="edit" class="w-5 h-5"></i>
+                  </button>
+                </div>
               </div>
-              <div class="min-w-0 flex-1">
-                <h3 class="text-lg font-semibold break-words break-all leading-snug">{{ form.name }}</h3>
-                <p class="text-sm text-gray-600 break-words">{{ form.material_name }}</p>
+              
+              <p class="text-sm text-gray-700 mb-3 break-words">{{ form.desc_form or "-" }}</p>
+              
+              <!-- Sub Scope -->
+              <div class="mb-3">
+                <span class="badge bg-blue-100 text-blue-800 text-xs">
+                  {{ form.ghg_scope }}.{{ form.ghg_sup_scope }}
+                </span>
               </div>
+              
+              <!-- Variables -->
+              <div class="mb-3">
+                <p class="font-medium text-xs mb-1">{{ t.variables }}</p>
+                <div class="flex flex-wrap gap-1">
+                  {% for var in form.variables %}
+                  <span class="badge bg-yellow-100 text-yellow-800 text-xs break-words">{{ var }}</span>
+                  {% endfor %}
+                </div>
+              </div>
+              
+              <!-- Formula -->
+              <div class="mb-2">
+                <p class="font-medium text-xs mb-1">{{ t.formula }}</p>
+                <p class="text-xs bg-gray-100 p-2 rounded break-words">{{ form.formula or t.no_formula_provided }}</p>
+              </div>
+              
+              {% if form.formula2 %}
+              <div>
+                <p class="font-medium text-xs mb-1">{{ t.formula2 }}</p>
+                <p class="text-xs bg-green-50 p-2 rounded border border-green-200 break-words">{{ form.formula2 }}</p>
+              </div>
+              {% endif %}
             </div>
-            <div class="flex gap-2 flex-shrink-0">
-              <!-- Edit Button -->
-              <button class="btn btn-ghost btn-sm" title="{{ t.edit }}"
-                hx-get="{{ url_for('form_management.load_edit_form_and_formula') }}?form_id={{ form.id }}"
-                hx-target="#modal-content"
-                hx-swap="innerHTML"
-                onclick="document.getElementById('modal').classList.add('modal-open')">
-                <i data-feather="edit" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </div>
+            {% endif %}
+          {% endfor %}
           
-          <p class="text-sm text-gray-700 mb-3 break-words">{{ form.desc_form or "-" }}</p>
-          
-          <!-- Sub Scope -->
-          <div class="mb-3">
-            <span class="badge bg-blue-100 text-blue-800 text-xs">
-              Sub Scope: {{ form.ghg_sup_scope }}
-            </span>
+          <!-- Add New Form Card for this Sub Scope -->
+          <div class="card shadow-lg border border-dashed border-blue-300 bg-blue-50 p-6 flex items-center justify-center">
+            <button 
+              class="btn btn-outline btn-info flex items-center gap-2"
+              hx-get="{{ url_for('form_management.load_add_form_and_formula') }}?default_scope=3&default_sub_scope={{ sub_scope }}" 
+              hx-target="#modal-content" 
+              hx-swap="innerHTML"
+              onclick="document.getElementById('modal').classList.add('modal-open')">
+              <i data-feather="plus-circle" class="w-5 h-5"></i>
+              <span>{{t.add_form}} Sub Scope {{ sub_scope }}</span>
+            </button>
           </div>
-          
-          <!-- Variables -->
-          <div class="mb-3">
-            <p class="font-medium text-xs mb-1">{{ t.variables }}</p>
-            <div class="flex flex-wrap gap-1">
-              {% for var in form.variables %}
-              <span class="badge bg-yellow-100 text-yellow-800 text-xs break-words">{{ var }}</span>
-              {% endfor %}
-            </div>
-          </div>
-          
-          <!-- Formula -->
-          <div class="mb-2">
-            <p class="font-medium text-xs mb-1">{{ t.formula }}</p>
-            <p class="text-xs bg-gray-100 p-2 rounded break-words">{{ form.formula or t.no_formula_provided }}</p>
-          </div>
-          
-          {% if form.formula2 %}
-          <div>
-            <p class="font-medium text-xs mb-1">{{ t.formula2 }}</p>
-            <p class="text-xs bg-green-50 p-2 rounded border border-green-200 break-words">{{ form.formula2 }}</p>
-          </div>
-          {% endif %}
         </div>
-        {% endif %}
-      {% endfor %}
-      
-      <!-- Add New Form Card for Scope 3 -->
-      <div class="card shadow-lg border border-dashed border-blue-300 bg-blue-50 p-6 flex items-center justify-center">
-        <button 
-          class="btn btn-outline btn-info flex items-center gap-2"
-          hx-get="{{ url_for('form_management.load_add_form_and_formula') }}?default_scope=3" 
-          hx-target="#modal-content" 
-          hx-swap="innerHTML"
-          onclick="document.getElementById('modal').classList.add('modal-open')">
-          <i data-feather="plus-circle" class="w-5 h-5"></i>
-          <span>{{t.add_form}} Scope 3</span>
-        </button>
       </div>
+    {% endfor %}
+    
+    <!-- Add New Sub Scope -->
+    <div class="card shadow-lg border border-dashed border-blue-400 bg-blue-100 p-6 flex items-center justify-center">
+      <button 
+        class="btn btn-outline btn-info flex items-center gap-2"
+        hx-get="{{ url_for('form_management.load_add_form_and_formula') }}?default_scope=3" 
+        hx-target="#modal-content" 
+        hx-swap="innerHTML"
+        onclick="document.getElementById('modal').classList.add('modal-open')">
+        <i data-feather="plus-circle" class="w-5 h-5"></i>
+        <span>{{t.add_form}} Scope 3 (New Sub Scope)</span>
+      </button>
     </div>
   </div>
 
+</div>
 
 {% endblock content %}

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_required
+from flask_login import login_required, current_user
 from ...models import Scope, FormAndFormula
 
 module = Blueprint("scope_management", __name__, url_prefix="/scope")
@@ -126,14 +126,13 @@ def add_scope():
 def update_scope(scope_id):
     """
     อัปเดตข้อมูล Scope ที่มีอยู่
-    การอัปเดตจะแก้ไข name, description และ material (head_table)
+    การอัปเดตจะแก้ไข name และ description เท่านั้น
     ของทุก Scope ที่มี ghg_scope และ ghg_sup_scope เดียวกัน
     """
     try:
         # ดึงข้อมูลใหม่จากฟอร์ม
         new_ghg_name = request.form.get("ghg_name")
         new_ghg_desc = request.form.get("ghg_desc")
-        selected_materials = request.form.getlist("head_table")
 
         if not all([new_ghg_name, new_ghg_desc]):
             flash("กรุณากรอกข้อมูล Name และ Description ให้ครบถ้วน", "error")
@@ -144,21 +143,17 @@ def update_scope(scope_id):
         if not base_scope:
             flash("ไม่พบ Scope ที่ต้องการแก้ไข", "error")
             return redirect(url_for("scope_management.scope_page"))
-        
-        new_head_table =  [x for x in selected_materials if x not in base_scope.head_table]
 
-        # ลูปอัปเดตแต่ละ scope แยกกัน
+        # อัปเดตทุก scope ที่มี ghg_scope และ ghg_sup_scope เดียวกัน
         all_scopes = Scope.objects(
-            ghg_scope=base_scope.ghg_scope, ghg_sup_scope=base_scope.ghg_sup_scope
+            ghg_scope=base_scope.ghg_scope, 
+            ghg_sup_scope=base_scope.ghg_sup_scope
         )
-        
 
         for scope in all_scopes:
-            # รวมข้อมูลเก่ากับใหม่สำหรับแต่ละ scope
             scope.ghg_name = new_ghg_name
             scope.ghg_desc = new_ghg_desc
-            scope.head_table.extend(new_head_table)  # อัปเดต material
-            print(scope.head_table,5555555555555555)
+            # ไม่อัปเดต head_table แล้ว
             scope.save()
 
         flash(
@@ -200,20 +195,22 @@ def load_add_scope_form():
 def load_edit_scope_form(scope_id):
     """
     โหลดฟอร์ม HTML สำหรับการ 'แก้ไข' scope ที่มีอยู่ (สำหรับ HTMX)
-    พร้อมดึงรายการ material ที่กรองแล้วมาแสดงผลตอนเริ่มต้น
     """
     try:
         scope_to_edit = Scope.objects.get(id=scope_id)
 
-        # ดึงรายการ material ที่กรองตาม scope และ sup_scope ของเอกสารที่กำลังแก้ไข
-        materials_for_this_scope = FormAndFormula.objects(
-            ghg_scope=scope_to_edit.ghg_scope, ghg_sup_scope=scope_to_edit.ghg_sup_scope
+        # ดึง material_names จาก FormAndFormula ที่ตรงกับ scope และ sub_scope แบบเรียงลำดับ
+        materials = FormAndFormula.objects(
+            ghg_scope=scope_to_edit.ghg_scope,
+            ghg_sup_scope=scope_to_edit.ghg_sup_scope
         ).distinct("material_name")
+        
+        material_names = sorted([name for name in materials if name])
 
         return render_template(
             "/scope/partials/edit_scope_form.html",
             scope=scope_to_edit,
-            materials=materials_for_this_scope,
+            material_names=material_names,
         )
     except Scope.DoesNotExist:
         return (
@@ -224,45 +221,34 @@ def load_edit_scope_form(scope_id):
         return (f'<p class="text-error">Error: {e}</p>', 500)
 
 
-@module.route("/load-materials", methods=["POST"])
+@module.route("/scope-description/<int:ghg_scope>/<int:ghg_sup_scope>", methods=["GET"])
 @login_required
-def load_materials_for_scope():
-    """
-    (สำหรับ HTMX) โหลดรายการ material checkboxes โดยกรองจาก ghg_scope
-    และ ghg_sup_scope ที่ส่งมาจากฟอร์ม
-    """
+def scope_description(ghg_scope, ghg_sup_scope):
+    """แสดง popup description ของ Scope"""
     try:
-        print(777777777777)
-        scope = int(request.form.get("ghg_scope"))
-        sup_scope = int(request.form.get("ghg_sup_scope"))
-        scope_id = request.form.get("scope_id")  # รับ ID ของ scope ที่กำลังแก้ไข (ถ้ามี)
+        # ค้นหา Scope ที่ต้องการ
+        scope = Scope.objects(
+            ghg_scope=ghg_scope,
+            ghg_sup_scope=ghg_sup_scope,
+            campus="base",
+            department="base",
+        ).first()
 
-        # ค้นหา material ที่ตรงกับ scope และ sup-scope ที่ระบุ
-        filtered_materials = FormAndFormula.objects(
-            ghg_scope=scope, ghg_sup_scope=sup_scope
-        )
+        print(scope.campus, scope.department)
 
-        # ตรวจสอบ material ที่เคยถูกเลือกไว้ (สำหรับหน้า Edit)
-        selected_materials = []
-        if scope_id:
-            current_scope = Scope.objects.get(id=scope_id)
-            if current_scope.head_table:
-                selected_materials = current_scope.head_table
-        print(filtered_materials)
-        print(selected_materials)
+        if not scope:
+            return render_template(
+                "/emissions-scope/partials/scope-description-modal.html",
+                error="ไม่พบข้อมูล Scope ที่ต้องการ",
+            )
 
-        # Render HTML Partial เฉพาะส่วนของ Checkbox
         return render_template(
-            "/scope/partials/_material_checkboxes.html",
-            materials=filtered_materials,
-            selected_materials=selected_materials,
+            "/emissions-scope/partials/scope-description-modal.html", scope=scope
         )
 
-    except (ValueError, TypeError):
-        print(555555555555555555555555555555)
-        # ถ้าผู้ใช้ยังกรอกข้อมูลไม่ครบ ก็ส่งค่าว่างกลับไป
-        return ""
     except Exception as e:
-        print(555555555555555555555555555555)
-        # ส่งข้อความ Error กลับไปแสดงผล
-        return f'<p class="text-error">Error loading materials: {e}</p>'
+        print(555555555555555)
+        return render_template(
+            "/emissions-scope/partials/scope-description-modal.html",
+            error=f"เกิดข้อผิดพลาด: {str(e)}",
+        )
