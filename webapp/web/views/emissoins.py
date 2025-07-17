@@ -82,8 +82,8 @@ def view_emissions():
     scope = Scope.objects(
         ghg_scope=int(scope_id),
         ghg_sup_scope=int(sub_scope_id),
-        department=current_user.department,
-        campus=current_user.campus,
+        department=current_user.department_key,
+        campus=current_user.campus_id,
     ).first()
     if scope:
         ghg_name = scope.ghg_name
@@ -113,8 +113,8 @@ def load_emissions_table():
     scope = Scope.objects(
         ghg_scope=int(scope_id),
         ghg_sup_scope=int(sub_scope_id),
-        campus=current_user.campus,
-        department=current_user.department,
+        campus=current_user.campus_id,
+        department=current_user.department_key,
     ).first()
     if not scope:
         return jsonify({"error": "Scope not found"}), 404
@@ -130,8 +130,8 @@ def load_emissions_table():
         scope=int(scope_id),
         sub_scope=int(sub_scope_id),
         year=int(year),
-        department=current_user.department,
-        campus=current_user.campus,
+        department=current_user.department_key,
+        campus=current_user.campus_id,
     )
 
     if request.headers.get("HX-Request"):
@@ -220,8 +220,8 @@ def load_materials_form():
     scope = Scope.objects(
         ghg_scope=int(scope_id),
         ghg_sup_scope=int(sub_scope_id),
-        department=current_user.department,
-        campus=current_user.campus,
+        department=current_user.department_key,
+        campus=current_user.campus_id,
     ).first()
     head_table = scope.head_table if scope else []
     materials_form = []
@@ -334,8 +334,8 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
     # scope = Scope.objects(
     #     ghg_scope=int(scope_id),
     #     ghg_sup_scope=int(sub_scope_id),
-    #     department=current_user.department,
-    #     campus=current_user.campus,
+    #     department=current_user.department_key,
+    #     campus=current_user.campus_id,
     # ).first()
     # sub_scope = Scope.objects(
     #     ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
@@ -353,8 +353,8 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
         scope=int(scope_id),
         sub_scope=int(sub_scope_id),
         year=year,
-        department=current_user.department,
-        campus=current_user.campus,
+        department=current_user.department_key,
+        campus=current_user.campus_id,
     ).first()
 
     form_and_formula = FormAndFormula.objects(material_name=head).first()
@@ -382,8 +382,8 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
                     unit=input_type.unit,
                 )
             )
-        material.department = current_user.department
-        material.campus = current_user.campus
+        material.department = current_user.department_key
+        material.campus = current_user.campus_id
         material.edit_by_id = str(current_user.id)  # อัปเดต edit_by_id
         material.update_date = datetime.datetime.now()  # อัปเดต update_date
         material.save()
@@ -396,8 +396,8 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
             year=year,
             day=1,
             form_and_formula=form_and_formula.name,
-            department=current_user.department,
-            campus=current_user.campus,
+            department=current_user.department_key,
+            campus=current_user.campus_id,
             edit_by_id=str(current_user.id),  # เซฟ edit_by_id
             update_date=datetime.datetime.now(),  # เซฟ update_date
             quantity_type=[
@@ -435,8 +435,8 @@ def save_materials():
     scope = Scope.objects(
         ghg_scope=int(scope_id),
         ghg_sup_scope=int(sub_scope_id),
-        department=current_user.department,
-        campus=current_user.campus,
+        department=current_user.department_key,
+        campus=current_user.campus_id,
     ).first()
 
     if not scope:
@@ -514,8 +514,8 @@ def save_materials():
         scope=int(scope_id),
         sub_scope=int(sub_scope_id),
         year=int(year),
-        department=current_user.department,
-        campus=current_user.campus,
+        department=current_user.department_key,
+        campus=current_user.campus_id,
     )
 
     if request.headers.get("HX-Request"):
@@ -564,8 +564,8 @@ def delete_material():
         scope=int(scope_id),
         sub_scope=int(sub_scope_id),
         year=int(year),
-        department=current_user.department,
-        campus=current_user.campus,
+        department=current_user.department_key,
+        campus=current_user.campus_id,
     ).first()
 
     if material:
@@ -583,8 +583,8 @@ def delete_material():
     scope = Scope.objects(
         ghg_scope=int(scope_id),
         ghg_sup_scope=int(sub_scope_id),
-        department=current_user.department,
-        campus=current_user.campus,
+        department=current_user.department_key,
+        campus=current_user.campus_id,
     ).first()
     head_table = scope.head_table if scope else []
 
@@ -596,8 +596,8 @@ def delete_material():
         scope=int(scope_id),
         sub_scope=int(sub_scope_id),
         year=int(year),
-        department=current_user.department,
-        campus=current_user.campus,
+        department=current_user.department_key,
+        campus=current_user.campus_id,
     )
 
     if request.headers.get("HX-Request"):
@@ -640,8 +640,8 @@ def delete_all_materials():
         scope=int(scope_id),
         sub_scope=int(sub_scope_id),
         year=int(year),
-        department=current_user.department,
-        campus=current_user.campus,
+        department=current_user.department_key,
+        campus=current_user.campus_id,
     )
 
     if materials:
@@ -658,8 +658,8 @@ def delete_all_materials():
     scope = Scope.objects(
         ghg_scope=int(scope_id),
         ghg_sup_scope=int(sub_scope_id),
-        department=current_user.department,
-        campus=current_user.campus,
+        department=current_user.department_key,
+        campus=current_user.campus_id,
     ).first()
     head_table = scope.head_table if scope else []
 
@@ -671,8 +671,8 @@ def delete_all_materials():
         scope=int(scope_id),
         sub_scope=int(sub_scope_id),
         year=int(year),
-        department=current_user.department,
-        campus=current_user.campus,
+        department=current_user.department_key,
+        campus=current_user.campus_id,
     )
 
     if request.headers.get("HX-Request"):
@@ -727,8 +727,8 @@ def load_upload_modal(
         sub_scope_id=int(sub_scope_id),
         year=int(year),
         month=int(month_id),
-        campus=current_user.campus,
-        department=current_user.department,
+        campus=current_user.campus_id,
+        department=current_user.department_key,
     ).first()
 
     if not documents:
@@ -737,8 +737,8 @@ def load_upload_modal(
             sub_scope_id=int(sub_scope_id),
             year=int(year),
             month=int(month_id),
-            campus=current_user.campus,
-            department=current_user.department,
+            campus=current_user.campus_id,
+            department=current_user.department_key,
             files=[],
         )
         documents.save()
@@ -776,8 +776,8 @@ def upload_file():
         sub_scope_id=int(sub_scope_id),
         year=int(year),
         month=int(month_id),
-        campus=current_user.campus,
-        department=current_user.department,
+        campus=current_user.campus_id,
+        department=current_user.department_key,
     ).first()
 
     if not document:
@@ -786,8 +786,8 @@ def upload_file():
             sub_scope_id=int(sub_scope_id),
             year=int(year),
             month=int(month_id),
-            campus=current_user.campus,
-            department=current_user.department,
+            campus=current_user.campus_id,
+            department=current_user.department_key,
             files=[],
         )
 

@@ -1,22 +1,24 @@
 from flask import Blueprint, render_template, redirect, url_for, request, jsonify
 from flask_login import login_required, current_user
-from ...models import FormAndFormula, Scope, Material
+from ...models import FormAndFormula, Scope, Material, CampusAndDepartment
 from datetime import datetime
-from ..utils.acl import permissions_required_all
+# from ..utils.acl import permissions_required_all
 
 module = Blueprint("emissions_scope", __name__, url_prefix="/emissions-scope")
 
 
 @module.route("/", methods=["GET"])
 @login_required
-@permissions_required_all(["view_scope"])
+# @permissions_required_all(["view_scope"])
 def emissions_scope():
     # รับปีที่เลือกจาก query parameter หรือใช้ปีปัจจุบันเป็นค่าเริ่มต้น
     selected_year = request.args.get("year", default=datetime.now().year, type=int)
-    
+    user = current_user
+    user.campus = CampusAndDepartment.get_campus_name(user.campus_id)
+    user.department = CampusAndDepartment.get_department_name(user.campus_id, user.department_key)
     # ดึงข้อมูล Scope ที่ตรงกับ campus และ department ของ current_user
     scopes = Scope.objects(
-        campus=current_user.campus, department=current_user.department
+        campus=user.campus_id, department=user.department_key
     ).order_by("ghg_scope", "ghg_sup_scope")
 
     # ดึงปีทั้งหมดที่มีในฐานข้อมูล Material สำหรับ dropdown
@@ -74,7 +76,7 @@ def emissions_scope():
 
     return render_template(
         "/emissions-scope/emissions-scope.html",
-        user=current_user,
+        user=user,
         mockup_data={
             "overall_progress": overall_progress,
             "total_sources": total_sources,
@@ -110,8 +112,8 @@ def calculate_scope_progress(scope, selected_year):
         scope=scope.ghg_scope,
         sub_scope=scope.ghg_sup_scope,
         year=selected_year,
-        campus=current_user.campus,
-        department=current_user.department,
+        campus=current_user.campus_id,
+        department=current_user.department_key,
     )
 
     # นับจำนวนช่องที่กรอกข้อมูลแล้ว
@@ -128,7 +130,7 @@ def calculate_scope_progress(scope, selected_year):
 
 @module.route("/get-latest-sub-scope", methods=["POST"])
 @login_required
-@permissions_required_all(["edit_scope"])
+# @permissions_required_all(["edit_scope"])
 def get_latest_sub_scope():
     ghg_scope = request.json.get("ghg_scope")  # รับข้อมูลจาก JSON
     if not ghg_scope or not ghg_scope.isdigit():
@@ -158,8 +160,8 @@ def edit_scope(ghg_scope, ghg_sup_scope):
     scope = Scope.objects(
         ghg_scope=ghg_scope,
         ghg_sup_scope=ghg_sup_scope,
-        campus=current_user.campus,
-        department=current_user.department,
+        campus=current_user.campus_id,
+        department=current_user.department_key,
     ).first()
 
     if not scope:
