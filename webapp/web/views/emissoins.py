@@ -331,21 +331,21 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
     field = material_data["field"]
     amount = material_data["amount"]
 
-    scope = Scope.objects(
-        ghg_scope=int(scope_id),
-        ghg_sup_scope=int(sub_scope_id),
-        department=current_user.department,
-        campus=current_user.campus,
-    ).first()
-    sub_scope = Scope.objects(
-        ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
-    ).first()
+    # scope = Scope.objects(
+    #     ghg_scope=int(scope_id),
+    #     ghg_sup_scope=int(sub_scope_id),
+    #     department=current_user.department,
+    #     campus=current_user.campus,
+    # ).first()
+    # sub_scope = Scope.objects(
+    #     ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
+    # ).first()
 
-    if not scope or not sub_scope:
-        print(
-            f"Scope or Sub-Scope not found: scope_id={scope_id}, sub_scope_id={sub_scope_id}"
-        )
-        return False
+    # if not scope or not sub_scope:
+    #     print(
+    #         f"Scope or Sub-Scope not found: scope_id={scope_id}, sub_scope_id={sub_scope_id}"
+    #     )
+    #     return False
 
     material = Material.objects(
         month=int(month_id),
@@ -581,7 +581,10 @@ def delete_material():
 
     # Refresh the table after deletion
     scope = Scope.objects(
-        ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
+        ghg_scope=int(scope_id),
+        ghg_sup_scope=int(sub_scope_id),
+        department=current_user.department,
+        campus=current_user.campus,
     ).first()
     head_table = scope.head_table if scope else []
 
@@ -653,7 +656,10 @@ def delete_all_materials():
 
     # Refresh the table after deletion
     scope = Scope.objects(
-        ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
+        ghg_scope=int(scope_id),
+        ghg_sup_scope=int(sub_scope_id),
+        department=current_user.department,
+        campus=current_user.campus,
     ).first()
     head_table = scope.head_table if scope else []
 
