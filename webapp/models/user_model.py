@@ -22,8 +22,8 @@ class User(me.Document, UserMixin):
     password = me.StringField(required=True)
     roles = me.ListField(me.StringField(), default=["user"]) 
     email = me.EmailField(required=False, unique=True, sparse=False, default=generate_default_email)
-    campus = me.StringField(required=True, default="Not yet allocated")
-    department = me.StringField(
+    campus_id = me.StringField(required=True, default="Not yet allocated")
+    department_key = me.StringField(
         required=False, unique=False, null=True, default=""
     )
     status = me.StringField(
