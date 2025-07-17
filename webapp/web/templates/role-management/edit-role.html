@@ -13,13 +13,20 @@
 
   <div class="mb-4">
     <label class="block text-sm font-medium mb-1">{{ t.permissions }}</label>
-    <div class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+    <div class="grid grid-cols-2 gap-4 max-h-40 overflow-y-auto">
       {% for perm in permissions %}
-        <label class="flex items-center space-x-2">
-          <input type="checkbox" name="permissions" value="{{ perm.id }}"
-          {% if perm.id in selected_permission_ids %}checked{% endif %}>
-          <span>{{ perm.name }}</span>
-        </label>
+        <div class="flex items-center space-x-2 relative">
+          <input type="checkbox"
+                 name="permissions"
+                 value="{{ perm.id }}"
+                 id="perm-{{ perm.id }}"
+                 class="checkbox checkbox-primary rounded-full"
+                 {% if perm.id in selected_permission_ids %}checked{% endif %}
+                 title="{{ perm.description }}">
+          <label for="perm-{{ perm.id }}" class="text-sm">
+            {{ perm.name | capitalize }}
+          </label>
+        </div>
       {% endfor %}
     </div>
   </div>
