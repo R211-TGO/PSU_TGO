@@ -1,40 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-from ...models import Scope, FormAndFormula
+from ...models import Scope, FormAndFormula, CampusAndDepartment
 
 module = Blueprint("scope_management", __name__, url_prefix="/scope")
 
-# Campus และ Department ทั้งหมด
-CAMPUS_DEPARTMENTS = {
-    "hatyai": [
-        "president",
-        "IT Department",
-        "HR Department1",
-        "Finance Department1",
-        "Marketing Department1",
-    ],
-    "phuket": [
-        "president",
-        "IT Department",
-        "HR Department",
-        "Finance Department",
-        "Marketing Department",
-    ],
-    "surat": [
-        "president",
-        "IT Department",
-        "HR Department",
-        "Finance Department",
-        "Marketing Department",
-    ],
-    "trang": [
-        "president",
-        "IT Department",
-        "HR Department",
-        "Finance Department",
-        "Marketing Department",
-    ],
-}
 
 
 @module.route("/", methods=["GET"])
@@ -110,14 +79,14 @@ def add_scope():
         base_scope.save()
 
         # 2. สร้าง scope สำหรับทุก campus/department
-        for campus, departments in CAMPUS_DEPARTMENTS.items():
-            for department in departments:
+        for campus in CampusAndDepartment.objects():
+            for department in list(campus.departments.keys()):
                 scope = Scope(
                     ghg_scope=ghg_scope,
                     ghg_sup_scope=ghg_sup_scope,
                     ghg_name=ghg_name,
                     ghg_desc=ghg_desc,
-                    campus=campus,
+                    campus=str(campus.id),
                     department=department,
                     head_table=selected_materials,  # บันทึก material
                 )
