@@ -2,115 +2,70 @@ from flask import Blueprint, render_template, redirect, url_for, request, jsonif
 from flask_login import login_required, logout_user, current_user
 from ..forms.user_form import LoginForm, RegisterForm, EditUserForm, EditprofileForm
 from ...services.user_service import UserService
-from ...models import User, Role, Permission
-from ..utils.acl import permissions_required_all
+from ...models import User, Role, Permission, CampusAndDepartment
+# from ..utils.acl import permissions_required_all
 
 module = Blueprint("users_management", __name__, url_prefix="/users-management")
 
-
-# Centralized campus and department data
-CAMPUS_DEPARTMENTS = {
-    "hatyai": [
-        "president",
-        "IT Department",
-        "HR Department1",
-        "Finance Department1",
-        "Marketing Department1",
-    ],
-    "phuket": [
-        "president",
-        "IT Department",
-        "HR Department",
-        "Finance Department", 
-        "Marketing Department",
-    ],
-    "surat": [
-        "president",
-        "IT Department",
-        "HR Department",
-        "Finance Department",
-        "Marketing Department",
-    ],
-    "trang": [
-        "president",
-        "IT Department",
-        "HR Department",
-        "Finance Department",
-        "Marketing Department",
-    ],
-}
-
-
 def get_campuses():
-    """Get list of all available campuses"""
-    return list(CAMPUS_DEPARTMENTS.keys())
+    """Return list of campus objects (for dropdown)"""
+    return list(CampusAndDepartment.objects())
 
+def get_departments(campus_obj_id):
+    """Return dict of departments for campus (key: id, value: name)"""
+    campus_obj = CampusAndDepartment.objects.with_id(campus_obj_id)
+    if campus_obj:
+        return campus_obj.departments
+    return {}
 
-def get_departments(campus):
-    """Get departments for a specific campus"""
-    if not campus or campus == "none" or campus == "All Campuses":
-        return get_all_unique_departments()
-    
-    return CAMPUS_DEPARTMENTS.get(campus, [])
+def get_campus_name_by_id(campus_obj_id):
+    campus_obj = CampusAndDepartment.objects.with_id(campus_obj_id)
+    if campus_obj and "0" in campus_obj.name:
+        return campus_obj.name["0"]
+    return ""
 
+def get_department_name_by_key(campus_obj_id, department_key):
+    campus_obj = CampusAndDepartment.objects.with_id(campus_obj_id)
+    if campus_obj and department_key in campus_obj.departments:
+        return campus_obj.departments[department_key]
+    return ""
 
 def get_all_unique_departments():
-    """Get all unique department names across all campuses"""
-    all_departments = []
-    for campus_departments in CAMPUS_DEPARTMENTS.values():
-        all_departments.extend(campus_departments)
-    
-    # Return unique departments sorted alphabetically
-    return sorted(list(set(all_departments))) 
+    """Get all unique department keys and names across all campuses from DB"""
+    all_departments = {}
+    for campus_obj in CampusAndDepartment.objects():
+        for key, name in campus_obj.departments.items():
+            all_departments[key] = name
+    return all_departments
 
-
-def normalize_department_name(department):
-    """Remove trailing numbers from department names"""
-    if not department:
-        return department
-    
-    import re
-    normalized = re.sub(r'\d+$', '', department).strip()
-    return normalized if normalized else department
-
-
-def get_user_department_for_campus(user_department, user_campus):
-    """Get the correct department name for a user"""
-    if not user_department or not user_campus:
-        return user_department
-    
-    normalized_dept = normalize_department_name(user_department)
-    available_departments = get_departments(user_campus)
-    
-    # Try exact match first
-    if normalized_dept in available_departments:
-        return normalized_dept
-    
-    # Try normalized match
-    for dept in available_departments:
-        if normalize_department_name(dept) == normalize_department_name(user_department):
-            return dept
-    
-    return user_department
-
+def get_user_department_for_campus(department_key, campus_obj_id):
+    """Get department name for user by campus id and department key"""
+    return get_department_name_by_key(campus_obj_id, department_key)
 
 @module.route("/", methods=["get", "post"])
 @login_required
-@permissions_required_all(["view_users_management"])
+# @permissions_required_all(["view_users_management"])
 # @permissions_required_all(['edit_management', 'view_management'])
 def users_management():
     users = User.objects()
+    for user in users:
+        user.campus = CampusAndDepartment.get_campus_name(user.campus_id)
+        user.department = CampusAndDepartment.get_department_name(user.campus_id,user.department_key)
+
+    campuses = CampusAndDepartment.objects()
+    for campus in campuses:
+        campus.name = campus.name.get("0", "Unknown Campus")
     return render_template(
         "/users-management/users-management.html",
         users=users,
-        campuses=get_campuses(),
+        campuses=campus,
         departments=get_all_unique_departments(),
     )
 
 
 @module.route("/load-edit-user-role", methods=["GET", "POST"])
 @login_required
-@permissions_required_all(['edit_users_management'])
+# @permissions_required_all(['edit_users_management'])
 def load_edit_user_role():
     user_id = request.args.get("user_id")
     page = int(request.args.get("page", 1))
@@ -119,6 +74,12 @@ def load_edit_user_role():
     search_query = request.args.get("search", "").strip()  # รับค่าของ search
 
     user = User.objects.with_id(user_id)
+    user.campus = CampusAndDepartment.get_campus_name(user.campus_id)
+    user.department = CampusAndDepartment.get_department_name(user.campus_id,user.department_key)
+
+    campuses = CampusAndDepartment.objects()
+    for campus in campuses:
+        campus.name = campus.name.get("0", "Unknown Campus")
     if not user:
         return jsonify({"error": "User not found"}), 404
 
@@ -151,6 +112,11 @@ def load_edit_user_role():
             query["username__icontains"] = search_query
 
         users = User.objects(**query).skip((page - 1) * 10).limit(10)
+        for user in users:
+            user.campus = CampusAndDepartment.get_campus_name(user.campus_id)
+            user.department = CampusAndDepartment.get_department_name(user.campus_id,user.department_key)
+
+
 
         if request.headers.get("HX-Request"):
             return render_template(
@@ -168,12 +134,12 @@ def load_edit_user_role():
             return redirect(url_for("users_management.users_management"))
 
     form.username.data = user.username
-    form.campus.data = user.campus if user.campus else "none"
+    form.campus.data = user.campus_id if user.campus_id else "none"
     
     # Set department with normalization
-    user_department = user.department if user.department else "none"
+    user_department = CampusAndDepartment.get_department_name(user.campus_id, user.department_key) if user.department_key else "none"
     if user_department != "none" and user.campus:
-        form.department.data = get_user_department_for_campus(user_department, user.campus)
+        form.department.data = get_user_department_for_campus(user_department, user.campus_id)
     else:
         form.department.data = user_department
     
@@ -195,7 +161,7 @@ def load_edit_user_role():
 
 @module.route("/load-users-table", methods=["GET", "POST"])
 @login_required
-@permissions_required_all(["view_users_management"])
+# @permissions_required_all(["view_users_management"])
 def load_users_table():
     page = int(request.args.get("page", 1))
     per_page = 10
@@ -215,13 +181,20 @@ def load_users_table():
     total_users = User.objects(**query).count()
     total_pages = (total_users + per_page - 1) // per_page
     users = User.objects(**query).skip((page - 1) * per_page).limit(per_page)
+    for user in users:
+        user.campus = CampusAndDepartment.get_campus_name(user.campus_id)
+        user.department = CampusAndDepartment.get_department_name(user.campus_id,user.department_key)
+
+    campuses = CampusAndDepartment.objects()
+    for campus in campuses:
+        campus.name = campus.name.get("0", "Unknown Campus")
 
     return render_template(
         "/users-management/users-table.html",
         users=users,
         page=page,
         total_pages=total_pages,
-        campuses=get_campuses(),
+        campuses=campuses,
         departments=get_all_unique_departments(),
         selected_campus=selected_campus,
         selected_department=selected_department,
@@ -231,7 +204,7 @@ def load_users_table():
 
 @module.route("/load-departments", methods=["GET", "POST"])
 @login_required
-@permissions_required_all(['view_users_management'])
+# @permissions_required_all(['view_users_management'])
 def load_departments():
     """Load department dropdown based on selected campus"""
     if request.method == "POST":
@@ -255,12 +228,13 @@ def load_departments():
 
 @module.route("/load-departments-edit", methods=["POST"])
 @login_required
-@permissions_required_all(['edit_users_management'])
+# @permissions_required_all(['edit_users_management'])
 def load_departments_edit():
     """Load department dropdown for edit form"""
     selected_campus = request.form.get("campus", "")
     current_selected_department = request.form.get("department", "")
     is_change = request.form.get("is_change", "false") == "true"
+    print(selected_campus, current_selected_department, 555555555555555555555555)
     
     if not selected_campus or selected_campus == "none":
         departments_list = get_all_unique_departments()
@@ -281,14 +255,20 @@ def load_departments_edit():
 
 @module.route("/load-campuses", methods=["GET"])
 @login_required
-@permissions_required_all(['view_users_management'])
+# @permissions_required_all(['view_users_management'])
 def load_campuses():
     """Load campus dropdown"""
     selected_campus = request.args.get("campus", "")
+    print(selected_campus,88888888888888888888888888888888888888888888888888888888888888888888888)
+    campuses_obj = get_campuses()
+    campuses = []
+    for campus in campuses_obj:
+        campuses.append(CampusAndDepartment.get_campus_name(campus.id))
+    print(campuses)
     
     return render_template(
         "/users-management/partials/campus_dropdown.html",
-        campuses=get_campuses(),
+        campuses=campuses,
         selected_campus=selected_campus
     )
 
