@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required, current_user
-from ...models import Scope
+from ...models import Scope, CampusAndDepartment
 from ...models.materail_model import Material, QuantityType
 from datetime import datetime, timedelta
 from bson import ObjectId
@@ -12,6 +12,8 @@ module = Blueprint("summary", __name__, url_prefix="/summary")
 @login_required
 def summary():
     user = current_user
+    user.campus = CampusAndDepartment.get_campus_name(user.campus_id)
+    user.department = CampusAndDepartment.get_department_name(user.campus_id, user.department_key)
     return render_template("/summary/summary.html", user=user)
 
 
@@ -20,8 +22,10 @@ def summary():
 def get_scopes():
     """HTMX endpoint สำหรับ load scope dropdown"""
     user = current_user
+    user.campus = CampusAndDepartment.get_campus_name(user.campus_id)
+    user.department = CampusAndDepartment.get_department_name(user.campus_id, user.department_key)
 
-    all_scopes = Scope.objects(campus=user.campus, department=user.department)
+    all_scopes = Scope.objects(campus=user.campus_id, department=user.department_key)
     seen = set()
     unique_scopes = [
         s for s in all_scopes if not (s.ghg_scope in seen or seen.add(s.ghg_scope))
@@ -37,7 +41,8 @@ def get_scopes():
 def get_sub_scopes():
     """HTMX endpoint สำหรับ load sub scope dropdown ตาม scope ที่เลือก"""
     user = current_user
-
+    user.campus = CampusAndDepartment.get_campus_name(user.campus_id)
+    user.department = CampusAndDepartment.get_department_name(user.campus_id, user.department_key)
     # รับ scope ที่เลือกและ sub scope ที่เคยติ๊กไว้
     selected_scopes = request.form.getlist("selected_scopes")
     current_selected_sub_scopes = request.form.getlist("selected_sub_scopes")
@@ -46,14 +51,14 @@ def get_sub_scopes():
         # ถ้าไม่มี scope ใดถูกเลือก ให้แสดง sub scope ทั้งหมดในระบบ
         # เพื่อให้ยังคงเห็น sub scope ที่เคยติ๊กไว้
         sub_scopes = Scope.objects(
-            campus=user.campus,
-            department=user.department,
+            campus=user.campus_id,
+            department=user.department_key,
         ).order_by("ghg_scope", "ghg_sup_scope")
     else:
         # ถ้ามี scope ที่เลือก ให้แสดงเฉพาะ sub scope ในสโคปนั้น
         sub_scopes = Scope.objects(
-            campus=user.campus,
-            department=user.department,
+            campus=user.campus_id,
+            department=user.department_key,
             ghg_scope__in=[int(scope) for scope in selected_scopes],
         ).order_by("ghg_scope", "ghg_sup_scope")
 
@@ -68,7 +73,8 @@ def get_sub_scopes():
 @login_required
 def get_materials():
     user = current_user
-
+    user.campus = CampusAndDepartment.get_campus_name(user.campus_id)
+    user.department = CampusAndDepartment.get_department_name(user.campus_id, user.department_key)
     # รับ parameters
     sub_scopes = request.args.getlist("sub_scopes[]")
     time_period = request.args.get("time_period", "week")
@@ -92,8 +98,8 @@ def get_materials():
     # Query materials
     sub_scope_ids = [int(s) for s in sub_scopes]
     materials = Material.objects(
-        campus=user.campus,
-        department=user.department,
+        campus=user.campus_id,
+        department=user.department_key,
         sub_scope__in=sub_scope_ids,
         create_date__gte=start_date,
     )
@@ -112,7 +118,7 @@ def get_materials():
     category_data = {}
     for sub_scope_id in sub_scope_ids:
         scope = Scope.objects(
-            campus=user.campus, department=user.department, ghg_sup_scope=sub_scope_id
+            campus=user.campus_id, department=user.department_key, ghg_sup_scope=sub_scope_id
         ).first()
 
         if scope:
@@ -172,6 +178,8 @@ def clear_charts():
 def get_stats():
     """HTMX endpoint สำหรับ stats - คิวรี่ใหม่ทุกครั้ง"""
     user = current_user
+    user.campus = CampusAndDepartment.get_campus_name(user.campus_id)
+    user.department = CampusAndDepartment.get_department_name(user.campus_id, user.department_key)
 
     selected_scopes = request.form.getlist("selected_scopes")
     selected_sub_scopes = request.form.getlist("selected_sub_scopes")
@@ -196,7 +204,7 @@ def get_stats():
 
     # ดึง sub scope objects ทั้งหมดที่เลือก
     all_selected_sub_scopes = Scope.objects(
-        id__in=scope_object_ids, campus=user.campus, department=user.department
+        id__in=scope_object_ids, campus=user.campus_id, department=user.department_key
     )
 
     # กรองเฉพาะ sub scope ที่อยู่ใน scope ที่เลือก (ถ้ามี scope ที่เลือก)
@@ -220,7 +228,7 @@ def get_stats():
     )
 
     # ดึง scope ทั้งหมดสำหรับ dropdown และกรอง scope ที่ซ้ำกัน
-    scopes = Scope.objects(campus=user.campus, department=user.department)
+    scopes = Scope.objects(campus=user.campus_id, department=user.department_key)
     unique_scopes = {
         scope.ghg_scope: scope for scope in scopes
     }.values()  # กรอง scope ที่ซ้ำกัน
@@ -239,6 +247,8 @@ def get_stats():
 def get_charts():
     """HTMX endpoint สำหรับ charts - คิวรี่ใหม่ทุกครั้ง"""
     user = current_user
+    user.campus = CampusAndDepartment.get_campus_name(user.campus_id)
+    user.department = CampusAndDepartment.get_department_name(user.campus_id, user.department_key)
 
     selected_scopes = request.form.getlist("selected_scopes")
     selected_sub_scopes = request.form.getlist("selected_sub_scopes")
@@ -263,7 +273,7 @@ def get_charts():
 
     # ดึง sub scope objects ทั้งหมดที่เลือก
     all_selected_sub_scopes = Scope.objects(
-        id__in=scope_object_ids, campus=user.campus, department=user.department
+        id__in=scope_object_ids, campus=user.campus_id, department=user.department_key
     )
 
     # กรองเฉพาะ sub scope ที่อยู่ใน scope ที่เลือก (ถ้ามี scope ที่เลือก)
@@ -311,15 +321,15 @@ def calculate_emissions_data(user, sub_scopes, time_period, selected_year=None):
 
     # ดึง scope objects จาก IDs
     scopes = Scope.objects(
-        id__in=scope_object_ids, campus=user.campus, department=user.department
+        id__in=scope_object_ids, campus=user.campus_id, department=user.department_key
     )
 
     print(f"Found {scopes.count()} valid scopes")
 
     # คิวรี่ materials สำหรับปีที่เลือก
     materials = Material.objects(
-        campus=user.campus,
-        department=user.department,
+        campus=user.campus_id,
+        department=user.department_key,
         scope__in=[s.ghg_scope for s in scopes],
         sub_scope__in=[s.ghg_sup_scope for s in scopes],
         year=int(selected_year),
@@ -327,8 +337,8 @@ def calculate_emissions_data(user, sub_scopes, time_period, selected_year=None):
 
     # คิวรี่ materials สำหรับปีที่แล้ว (เพื่อเปรียบเทียบ)
     last_year_materials = Material.objects(
-        campus=user.campus,
-        department=user.department,
+        campus=user.campus_id,
+        department=user.department_key,
         scope__in=[s.ghg_scope for s in scopes],
         sub_scope__in=[s.ghg_sup_scope for s in scopes],
         year=int(selected_year) - 1,
@@ -435,6 +445,8 @@ def calculate_emissions_data(user, sub_scopes, time_period, selected_year=None):
 def update_badges():
     """HTMX endpoint สำหรับอัปเดต badges"""
     user = current_user
+    user.campus = CampusAndDepartment.get_campus_name(user.campus_id)
+    user.department = CampusAndDepartment.get_department_name(user.campus_id, user.department_key)
 
     selected_scopes = request.form.getlist("selected_scopes")
     selected_sub_scopes = request.form.getlist("selected_sub_scopes")
@@ -471,7 +483,7 @@ def update_badges():
 
         # หาจำนวน sub scope ทั้งหมดใน main scope นี้
         total_sub_scopes = Scope.objects(
-            campus=user.campus, department=user.department, ghg_scope=main_scope_int
+            campus=user.campus_id, department=user.department_key, ghg_scope=main_scope_int
         ).count()
 
         # หาจำนวน sub scope ที่เลือกใน main scope นี้
@@ -531,9 +543,11 @@ def update_badges():
 def get_years():
     """HTMX endpoint สำหรับ load year dropdown"""
     user = current_user
+    user.campus = CampusAndDepartment.get_campus_name(user.campus_id)
+    user.department = CampusAndDepartment.get_department_name(user.campus_id, user.department_key)
 
     # ดึงปีทั้งหมดที่มีข้อมูล materials
-    materials = Material.objects(campus=user.campus, department=user.department)
+    materials = Material.objects(campus=user.campus_id, department=user.department_key)
     years = sorted(list(set([m.year for m in materials if m.year])), reverse=True)
 
     # ถ้าไม่มีข้อมูล ให้ใช้ปีปัจจุบัน
@@ -548,10 +562,13 @@ def get_years():
 def top_sub_scope_partial():
     """HTMX endpoint สำหรับ top sub scope"""
     user = current_user
+    user.campus = CampusAndDepartment.get_campus_name(user.campus_id)
+    user.department = CampusAndDepartment.get_department_name(user.campus_id, user.department_key)
+
     selected_scope = request.args.get("selected_scope", None)  # รับค่าจาก dropdown
     selectes_year = request.args.get("selected_year", datetime.now().year)
     # ดึง scope ทั้งหมดสำหรับ dropdown และกรอง scope ที่ซ้ำกัน
-    scopes = Scope.objects(campus=user.campus, department=user.department)
+    scopes = Scope.objects(campus=user.campus_id, department=user.department_key)
     unique_scopes = {
         scope.ghg_scope: scope for scope in scopes
     }.values()  # กรอง scope ที่ซ้ำกัน
@@ -560,8 +577,8 @@ def top_sub_scope_partial():
     if selected_scope:
         # คิวรี่ sub-scope ตาม scope ที่เลือก
         sub_scopes = Scope.objects(
-            campus=user.campus,
-            department=user.department,
+            campus=user.campus_id,
+            department=user.department_key,
             ghg_scope=int(selected_scope),
         )
 
@@ -570,8 +587,8 @@ def top_sub_scope_partial():
         total_emissions = 0
         for sub_scope in sub_scopes:
             total_result = Material.objects(
-                campus=user.campus,
-                department=user.department,
+                campus=user.campus_id,
+                department=user.department_key,
                 scope=sub_scope.ghg_scope,
                 sub_scope=sub_scope.ghg_sup_scope,
                 year=int(selectes_year),
