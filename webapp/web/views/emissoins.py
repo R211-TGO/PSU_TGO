@@ -214,6 +214,8 @@ def load_materials_form():
         year=int(year),
         scope=int(scope_id),
         sub_scope=int(sub_scope_id),
+        department=current_user.department_key,
+        campus=current_user.campus_id,
     )
 
     # ดึงข้อมูล head_table และ materials_form
