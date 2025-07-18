@@ -2,20 +2,27 @@ from flask import Blueprint, render_template, redirect, url_for, request, jsonif
 from flask_login import login_required, logout_user, current_user
 from ..forms.user_form import LoginForm, RegisterForm, EditUserForm, EditprofileForm
 from ...services.user_service import UserService
-from ...models import User, Role, Permission
+from ...models import User, Role, Permission, CampusAndDepartment
 
 module = Blueprint("profile", __name__, url_prefix="/profile")
 
 @module.route("/", methods=["get", "post"])
 @login_required
 def profile():
-    return render_template("/profile/profile.html", user=current_user)
+    user = current_user
+    user.campus = CampusAndDepartment.get_campus_name(user.campus_id)
+    user.department = CampusAndDepartment.get_department_name(user.campus_id,user.department_key)
+
+    print(user.campus)
+    return render_template("/profile/profile.html", user=user)
 
 
 @module.route("/load-edit-profile", methods=["GET", "POST"])
 @login_required
 def load_edit_profile():
     user = current_user  # ใช้ current_user เพื่อดึงข้อมูลผู้ใช้ที่ล็อกอินอยู่
+    user.campus = CampusAndDepartment.get_campus_name(user.campus_id)
+    user.department = CampusAndDepartment.get_department_name(user.campus_id,user.department_key)
     if not user:
         return jsonify({"error": "User not found"}), 404
 

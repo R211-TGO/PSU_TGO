@@ -1,40 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-from ...models import Scope, FormAndFormula
+from ...models import Scope, FormAndFormula, CampusAndDepartment
 
 module = Blueprint("scope_management", __name__, url_prefix="/scope")
 
-# Campus และ Department ทั้งหมด
-CAMPUS_DEPARTMENTS = {
-    "hatyai": [
-        "president",
-        "IT Department",
-        "HR Department1",
-        "Finance Department1",
-        "Marketing Department1",
-    ],
-    "phuket": [
-        "president",
-        "IT Department",
-        "HR Department",
-        "Finance Department",
-        "Marketing Department",
-    ],
-    "surat": [
-        "president",
-        "IT Department",
-        "HR Department",
-        "Finance Department",
-        "Marketing Department",
-    ],
-    "trang": [
-        "president",
-        "IT Department",
-        "HR Department",
-        "Finance Department",
-        "Marketing Department",
-    ],
-}
 
 
 @module.route("/", methods=["GET"])
@@ -42,6 +11,7 @@ CAMPUS_DEPARTMENTS = {
 def scope_page():
     """
     แสดงหน้าหลักสำหรับจัดการ Scope โดยดึงข้อมูลเฉพาะ campus='base'
+    และส่งจำนวน FormAndFormula ของแต่ละ scope ไปด้วย
     """
     try:
         base_scopes = Scope.objects(campus="base").order_by(
@@ -51,6 +21,14 @@ def scope_page():
         scopes_by_type = {1: [], 2: [], 3: []}
         for s in base_scopes:
             if s.ghg_scope in scopes_by_type:
+                # นับจำนวน FormAndFormula ที่ตรงกับ scope นี้
+                formula_count = FormAndFormula.objects(
+                    ghg_scope=s.ghg_scope,
+                    ghg_sup_scope=s.ghg_sup_scope
+                ).count()
+                
+                # เพิ่ม attribute formula_count ให้กับ scope object
+                s.formula_count = formula_count
                 scopes_by_type[s.ghg_scope].append(s)
 
         return render_template(
@@ -101,14 +79,14 @@ def add_scope():
         base_scope.save()
 
         # 2. สร้าง scope สำหรับทุก campus/department
-        for campus, departments in CAMPUS_DEPARTMENTS.items():
-            for department in departments:
+        for campus in CampusAndDepartment.objects():
+            for department in list(campus.departments.keys()):
                 scope = Scope(
                     ghg_scope=ghg_scope,
                     ghg_sup_scope=ghg_sup_scope,
                     ghg_name=ghg_name,
                     ghg_desc=ghg_desc,
-                    campus=campus,
+                    campus=str(campus.id),
                     department=department,
                     head_table=selected_materials,  # บันทึก material
                 )
@@ -234,7 +212,6 @@ def scope_description(ghg_scope, ghg_sup_scope):
             department="base",
         ).first()
 
-        print(scope.campus, scope.department)
 
         if not scope:
             return render_template(
@@ -247,7 +224,6 @@ def scope_description(ghg_scope, ghg_sup_scope):
         )
 
     except Exception as e:
-        print(555555555555555)
         return render_template(
             "/emissions-scope/partials/scope-description-modal.html",
             error=f"เกิดข้อผิดพลาด: {str(e)}",
