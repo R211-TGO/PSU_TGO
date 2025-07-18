@@ -166,7 +166,7 @@ translations = {
         "view_more": "ดูเพิ่มเติม",
         "view_less": "ย่อ",
         "update_password": "อัปเดตรหัสผ่าน",
-        "scope_management": "การจัดการ Scope",
+        "scope_management": "การจัดการ Ghg Scope",
         "enter_ghg_sub_scope": "กรอก Sub-Scope",
         "indirect_emission": "การปล่อยมลพิษทางอ้อม",
         "direct_emission": "การปล่อยมลพิษทางตรง",
@@ -174,6 +174,7 @@ translations = {
         "select_materials": "เลือกวัสดุหรือกิจกรรมที่เกี่ยวข้องกับ Scope นี้",
         "no_material_found": "ไม่พบวัสดุหรือกิจกรรมที่เกี่ยวข้องกับ Scope/Sub-Scope นี้",
         "subtitle_scope_management": "สร้างและจัดการกับ scope ของการปล่อยก๊าซเรือนกระจก",
+        "materials_in_scope": "จํานวน ghg scope",
     },
     "en": {
         "system_info": "System Information",
@@ -339,7 +340,7 @@ translations = {
         "view_more": "View more",
         "view_less": "View less",
         "update_password": "Update Password",
-        "scope_management": "Scope Management",
+        "scope_management": "Ghg Scope Management",
         "enter_ghg_sub_scope": "Enter Sub-Scope",
         "indirect_emission": "Indirect Emission",
         "direct_emission": "Direct Emission",
@@ -347,5 +348,6 @@ translations = {
         "select_materials": "Select materials or activities related to this scope",
         "no_material_found": "No materials or activities found for this Scope/Sub-Scope.",
         "subtitle_scope_management": "Create and manage greenhouse gas emission scopes",
+        "materials_in_scope": "Materials in this ghg scope",
     },
 }

@@ -123,16 +123,18 @@
     <input type="hidden" name="ghg_desc" value="{{ scope.ghg_desc }}">
     
     <!-- Modal Actions - Mobile Stack -->
-    <div class="modal-action mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-0">
-      <button type="button" class="btn btn-outline flex items-center justify-center gap-2 w-full sm:w-auto order-2 sm:order-1" 
-        onclick="document.getElementById('modal').classList.remove('modal-open')">
-        <span class="text-sm sm:text-base">{{ t.cancel }}</span>
+    <div class="flex justify-end gap-4 pt-6 mt-6 border-t">
+      <button type="button" onclick="document.getElementById('modal').classList.remove('modal-open')" class="btn btn-outline btn-secondary">
+        <i data-feather="x" class="w-4 h-4 mr-2"></i>
+        {{ t.cancel }}
       </button>
-      
-      <button type="submit" name="action" value="save" class="btn btn-primary flex items-center justify-center gap-2 w-full sm:w-auto order-1 sm:order-2">
-        <i data-feather="save" class="w-4 h-4"></i>
-        <span class="text-sm sm:text-base">{{ t.save }}</span>
+      <button type="submit" class="btn btn-primary">
+        <i data-feather="save" class="w-4 h-4 mr-2"></i>
+        {{ t.save_changes | default('Save Changes') }}
       </button>
     </div>
   </form>
 </div>
+<script>
+  feather.replace();
+</script>

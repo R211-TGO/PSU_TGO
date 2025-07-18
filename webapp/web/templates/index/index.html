@@ -66,6 +66,12 @@
           </a>
         </li>
         <li>
+          <a href="/scope" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path.startswith('/scope') %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
+            <i data-feather="layers"></i>
+            <span class="text-md">{{t.scope_management}}</span>
+          </a>
+        </li>
+        <li>
           <a href="/emissions-scope" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/emissions-scope' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
             <i data-feather="bar-chart-2"></i>
             <span class="text-md">{{ t.sidebar_emissions }}</span>
@@ -81,12 +87,6 @@
           <a href="/setting" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path == '/settings' %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
             <i data-feather="settings"></i>
             <span class="text-md">{{ t.sidebar_settings }}</span>
-          </a>
-        </li>
-        <li>
-          <a href="/scope" class="flex items-center gap-4 rounded-lg p-3 font-bold {% if request.path.startswith('/scope') %}bg-primary text-primary-content{% else %}hover:bg-primary/90 hover:text-primary-content/90{% endif %}">
-            <i data-feather="layers"></i>
-            <span class="text-md">Scope</span>
           </a>
         </li>
       </ul>
@@ -138,7 +138,7 @@
           <h1 class="text-4xl md:text-6xl font-bold animate-fade-up">Understand Your Impact on the Planet</h1>
           <p class="mt-4 text-lg md:text-xl animate-fade-up delay-100 max-w-4xl">ถ้าเปลี่ยนมาใช้ชีวิตอย่างใส่ใจ ยั่งยืนต่อสิ่งแวดล้อม เรื่องที่สอนคือ Basic Python</p>
           <div class="mt-6 space-x-4 animate-fade-up delay-200">
-            <a href="#" class="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors">Calculate My Footprint ➜</a>
+            <a href="/summary" class="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors">Calculate My Footprint ➜</a>
             <a href="#" class="border border-white text-white px-6 py-3 rounded-full hover:bg-white hover:text-green-600 transition-colors">Learn More</a>
           </div>
         </div>
