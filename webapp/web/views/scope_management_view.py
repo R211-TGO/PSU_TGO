@@ -27,9 +27,9 @@ def scope_page():
                     ghg_sup_scope=s.ghg_sup_scope
                 ).count()
                 
+                s.formula_count = formula_count
                 # เพิ่ม attribute formula_count ให้กับ scope object
                 scopes_by_type[s.ghg_scope].append(s)
-            s.formula_count = formula_count
 
         return render_template(
             "/scope/scope_management.html", scopes_by_type=scopes_by_type
