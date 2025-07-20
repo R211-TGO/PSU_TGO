@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField,EmailField
+from wtforms import StringField, PasswordField, EmailField, SelectField
 from wtforms.validators import DataRequired
 
 
@@ -16,15 +16,15 @@ class RegisterForm(FlaskForm):
 
 class EditUserForm(FlaskForm):
     username = StringField("Username", validators=[DataRequired()])
-    campus = StringField("Campus")
+    campus = SelectField("Campus", choices=[])  # ใช้ SelectField สำหรับ dropdown
     department = StringField("Department")
     email = EmailField("Email", validators=[DataRequired()])
     roles = StringField("Roles")
     # Add any other fields you need for editing the user
+
 
 class EditprofileForm(FlaskForm):
     username = StringField("Username", validators=[DataRequired()])
     email = EmailField("Email", validators=[DataRequired()])
     campus = StringField("Campus")
     department = StringField("Department")
-

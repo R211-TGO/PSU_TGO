@@ -43,10 +43,21 @@ class UserService:
         if not user:
             return {"success": False, "error_msg": "ไม่พบผู้ใช้"}
 
-        user.username = form.username.data
-        user.campus = form.campus.data
-        user.department = form.department.data
-        user.email = form.email.data
+        # ตรวจสอบและเซฟ campus_id
+        user.campus_id = (
+            form.campus.data
+            if form.campus.data and form.campus.data != "none"
+            else None
+        )
+
+        # ตรวจสอบและเซฟ department_key
+        user.department_key = (
+            form.department.data
+            if form.department.data and form.department.data != "none"
+            else None
+        )
+        user.email = form.email.data if form.email.data else user.email
+        # เซฟข้อมูลอื่น ๆ
         user.roles = form.roles.data.split(",")
         user.save()
         return {"success": True, "error_msg": ""}

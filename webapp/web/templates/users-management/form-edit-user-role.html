@@ -17,12 +17,11 @@
                 hx-target="#department-select-edit"
                 hx-swap="innerHTML"
                 hx-trigger="change"
-                hx-include="#campus-select-edit"
-                hx-vals='{"is_change": "true"}'>
-            <option value="none" {% if not user.campus or user.campus not in campuses %}selected{% endif %}>None</option>
+                hx-include="#campus-select-edit">
+            <option value="none" {% if not form.campus.data or form.campus.data == "none" %}selected{% endif %}>None</option>
             {% for campus in campuses %}
-            <option value="{{ campus }}" {% if form.campus.data == campus %}selected{% endif %}>
-                {{ campus | capitalize }}
+            <option value="{{ campus.id }}" {% if form.campus.data == campus.id %}selected{% endif %}>
+                {{ campus.name.get("0") }}
             </option>
             {% endfor %}
         </select>
@@ -30,16 +29,13 @@
     <div class="mb-2">
         <label class="block text-sm font-medium">Department</label>
         <select name="department" class="select select-bordered w-full" id="department-select-edit">
-            <!-- Department options will be loaded via HTMX -->
+            <option value="none" {% if not user.department_key or user.department_key == "none" %}selected{% endif %}>None</option>
+            {% for key, name in departments.items() %}
+            <option value="{{ key }}" {% if user.department_key == key %}selected{% endif %}>
+                {{ name }}
+            </option>
+            {% endfor %}
         </select>
-        <!-- Hidden element to trigger initial load of departments for edit form -->
-        <div hx-post="{{ url_for('users_management.load_departments_edit') }}"
-             hx-trigger="load"
-             hx-target="#department-select-edit"
-             hx-swap="innerHTML"
-             hx-vals='{"campus": "{{ form.campus.data or user.campus or 'none' }}", "department": "{{ form.department.data or user.department or '' }}", "is_change": "false"}'
-             style="display: none;">
-        </div>
     </div>
     <div class="mb-2">
         <label class="block text-sm font-medium">Role</label>
