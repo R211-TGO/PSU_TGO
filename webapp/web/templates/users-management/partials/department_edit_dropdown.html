@@ -1,6 +1,6 @@
-<option value="none" {% if not selected_department or selected_department == "none" or selected_department == "" %}selected{% endif %}>None</option>
-{% for department in departments %}
-  <option value="{{ department.key }}" {% if selected_department == department.key %}selected{% endif %}>
-    {{ department.name }}
+<option value="none" {% if not selected_department or selected_department == "none" %}selected{% endif %}>None</option>
+{% for key, name in departments.items() %}
+  <option value="{{ key }}" {% if selected_department == key %}selected{% endif %}>
+    {{ name }}
   </option>
 {% endfor %}
