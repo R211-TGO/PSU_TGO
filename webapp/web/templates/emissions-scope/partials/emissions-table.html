@@ -27,7 +27,7 @@
                         
                         <!-- Loop through main headers (e.g., 'สูตร N-P-K (1)') -->
                         {% for head in head_table %}
-                        <th colspan="{{ materials_form[loop.index0] | length }}" class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-r border-gray-200">
+                        <th colspan="{{ materials_form[loop.index0] | length }}" class="px-6 py-3 text-xs font-medium text-gray-500 tracking-wider border-b border-r border-gray-200">
                             {{ head }}
                         </th>
                         {% endfor %}
@@ -37,7 +37,7 @@
                         <!-- Loop through each main header's sub-fields -->
                         {% for head in head_table %}
                             {% for input in materials_form[loop.index0] %}
-                            <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-r border-gray-200">
+                            <th class="px-6 py-3 text-xs font-medium text-gray-500 tracking-wider border-b-2 border-r border-gray-200">
                                 {{ input.label }} ({{ input.unit }})
                             </th>
                             {% endfor %}

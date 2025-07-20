@@ -28,8 +28,8 @@ def scope_page():
                 ).count()
                 
                 # เพิ่ม attribute formula_count ให้กับ scope object
-                s.formula_count = formula_count
                 scopes_by_type[s.ghg_scope].append(s)
+            s.formula_count = formula_count
 
         return render_template(
             "/scope/scope_management.html", scopes_by_type=scopes_by_type
