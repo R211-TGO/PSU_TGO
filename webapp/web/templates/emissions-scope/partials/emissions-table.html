@@ -25,20 +25,22 @@
                         <th rowspan="2" class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider align-middle border-b-2 border-r border-gray-200">{{t.table_actions}}</th>
                         <th rowspan="2" class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider align-middle border-b-2 border-r border-gray-200">{{t.monthly_data}}</th>
                         
-                        <!-- Loop through main headers (e.g., 'สูตร N-P-K (1)') -->
+                        <!-- Loop through main headers -->
                         {% for head in head_table %}
-                        <th colspan="{{ materials_form[loop.index0] | length }}" class="px-6 py-3 text-xs font-medium text-gray-500 tracking-wider border-b border-r border-gray-200">
-                            {{ head }}
+                        <th colspan="{{ materials_form[loop.index0] | length }}" 
+                            class="px-6 py-3 text-xs font-medium text-gray-500 tracking-wider border-b border-r border-gray-200 truncate"
+                            title="{{ head }}">
+                            {{ head | truncate(5+3, True, '...') }}
                         </th>
                         {% endfor %}
                     </tr>
                     <!-- Second Header Row: Sub-categories -->
                     <tr>
-                        <!-- Loop through each main header's sub-fields -->
                         {% for head in head_table %}
                             {% for input in materials_form[loop.index0] %}
-                            <th class="px-6 py-3 text-xs font-medium text-gray-500 tracking-wider border-b-2 border-r border-gray-200">
-                                {{ input.label }} ({{ input.unit }})
+                            <th class="px-6 py-3 text-xs font-medium text-gray-500 tracking-wider border-b-2 border-r border-gray-200 truncate"
+                                title="{{ input.label }} ({{ input.unit }})">
+                                {{ input.label | truncate(5+3, True, '...') }} ({{ input.unit }})
                             </th>
                             {% endfor %}
                         {% endfor %}
@@ -134,3 +136,11 @@
 <script>
     feather.replace();
 </script>
+
+<style>
+    .truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
