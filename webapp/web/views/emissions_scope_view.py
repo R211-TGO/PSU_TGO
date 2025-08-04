@@ -208,8 +208,8 @@ def scope_description(ghg_scope, ghg_sup_scope):
         scope = Scope.objects(
             ghg_scope=ghg_scope,
             ghg_sup_scope=ghg_sup_scope,
-            campus=current_user.campus,
-            department=current_user.department,
+            campus=current_user.campus_id,
+            department=current_user.department_key,
         ).first()
 
         if not scope:

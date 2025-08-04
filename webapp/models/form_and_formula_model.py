@@ -19,17 +19,22 @@ class InputType(me.EmbeddedDocument):
 
 
 class FormAndFormula(me.Document):
-    name = me.StringField(required=True, unique=True)
     ghg_scope = me.IntField(required=True, choices=[1, 2, 3])
     ghg_sup_scope = me.IntField(required=True)
     desc_form = me.StringField(required=True)
     desc_formula = me.StringField(required=True)
-    desc_formula2 = me.StringField(required=False, default="")  # ตรวจสอบว่ามี field นี้
-    material_name = me.StringField(required=True, material_name=True)
+    desc_formula2 = me.StringField(required=False, default="")
+    material_name = me.StringField(required=True)
+    
+    # ระบบลิงก์
+    is_linked = me.BooleanField(default=False)  # เป็นฟอร์มที่ลิงก์หรือไม่
+    linked_material_name = me.StringField(required=False)  # ชื่อ material ที่ต้องการลิงก์
+    
     input_types = me.EmbeddedDocumentListField(InputType)
     variables = me.ListField(me.StringField(), required=True)
     formula = me.StringField(required=True)
-    formula2 = me.StringField(required=False, default="")  # ตรวจสอบว่ามี field นี้
+    formula2 = me.StringField(required=False, default="")
+    
     create_date = me.DateTimeField(default=datetime.datetime.now)
     update_date = me.DateTimeField(default=datetime.datetime.now)
 
@@ -37,9 +42,80 @@ class FormAndFormula(me.Document):
         self.update_date = datetime.datetime.now()
         self.save()
 
+    def setup_linked_form(self, linked_material_name):
+        """
+        ตั้งค่าฟอร์มให้เป็นแบบลิงก์และสร้าง auto input_types
+        """
+        self.is_linked = True
+        self.linked_material_name = linked_material_name
+        
+        # สร้าง buffer field อัตโนมัติ
+        auto_field = InputType.create_input(
+            field="buffer_data",
+            label="ข้อมูลจากระบบ (อัตโนมัติ)",
+            input_type="number",
+            unit="unit"
+        )
+        self.input_types = [auto_field]
+        self.variables = ["buffer_data"]
+
+    def get_linked_data(self, year, month, campus, department):
+        """
+        ดึงข้อมูลจาก Material ที่ลิงก์
+        """
+        if not self.is_linked or not self.linked_material_name:
+            return None
+            
+        from webapp.models.materail_model import Material
+        
+        # ดึงข้อมูล Material ที่ต้องการ
+        materials = Material.objects(
+            name=self.linked_material_name,
+            year=year,
+            month=month,
+            campus=campus,
+            department=department
+        )
+        
+        total_value = 0
+        for material in materials:
+            if material.result is not None:
+                total_value += float(material.result)
+                
+        return total_value
+
+    def calculate_linked_result(self, year, month, campus, department):
+        """
+        คำนวณผลลัพธ์จากข้อมูลที่ลิงก์
+        """
+        if not self.is_linked:
+            return None
+            
+        linked_data = self.get_linked_data(year, month, campus, department)
+        if linked_data is None:
+            return None
+            
+        # แทนค่าในสูตร
+        try:
+            # สร้าง variables dict สำหรับคำนวณ
+            variables_dict = {"buffer_data": linked_data}
+            
+            # แทนที่ตัวแปรในสูตร
+            formula_to_execute = self.formula
+            for var_name, value in variables_dict.items():
+                formula_to_execute = formula_to_execute.replace(var_name, str(value))
+            
+            # คำนวณผลลัพธ์
+            result = eval(formula_to_execute)
+            return float(result)
+            
+        except Exception as e:
+            print(f"Error calculating linked result: {e}")
+            return None
+
     meta = {
         "collection": "form_and_formula",
-        "indexes": ["name"],
+        "indexes": ["material_name", "is_linked", "linked_material_name"],
     }
 
 
