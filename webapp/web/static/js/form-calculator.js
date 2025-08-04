@@ -9,10 +9,10 @@ let isFormInitialized = false;
 function toggleFormulaCalculator() {
     const calculator = document.getElementById('formula-calculator');
     const formula2Calculator = document.getElementById('formula2-calculator');
-    
-    formula2Calculator.classList.add('hidden');
+    if (formula2Calculator) {
+        formula2Calculator.classList.add('hidden');
+    }
     calculator.classList.toggle('hidden');
-    
     if (!calculator.classList.contains('hidden')) {
         currentFormula = document.getElementById('formula').value;
         updateFormulaButtons();
@@ -100,7 +100,7 @@ function addInputField(fieldData = {}) {
                 class="input input-bordered w-full" 
                 placeholder="Field" 
                 value="${fieldData.field || ''}" 
-                onchange="updatePreview(); updateFormulaButtons(); updateFormula2Buttons();" 
+                onchange="updatePreview(); updateFormulaButtons();" 
                 required
             >
             <input 
@@ -108,12 +108,12 @@ function addInputField(fieldData = {}) {
                 class="input input-bordered w-full" 
                 placeholder="Label" 
                 value="${fieldData.label || ''}" 
-                onchange="updatePreview(); updateFormulaButtons(); updateFormula2Buttons();"
+                onchange="updatePreview(); updateFormulaButtons();"
             >
             <select 
                 name="input_type" 
                 class="select select-bordered w-full" 
-                onchange="updatePreview(); updateFormulaButtons(); updateFormula2Buttons();"
+                onchange="updatePreview(); updateFormulaButtons();"
             >
                 <option value="number" ${fieldData.input_type === 'number' ? 'selected' : ''}>Number</option>
                 <option value="text" ${fieldData.input_type === 'text' ? 'selected' : ''}>Text</option>
@@ -124,7 +124,7 @@ function addInputField(fieldData = {}) {
                 class="input input-bordered w-full" 
                 placeholder="Unit" 
                 value="${fieldData.unit || ''}" 
-                onchange="updatePreview(); updateFormulaButtons(); updateFormula2Buttons();"
+                onchange="updatePreview(); updateFormulaButtons();"
             >
         </div>
     </div>`;
@@ -136,7 +136,6 @@ function removeField(button) {
     button.closest("[data-index]").remove();
     updatePreview();
     updateFormulaButtons();
-    updateFormula2Buttons();
 }
 
 function updateFormulaButtons() {

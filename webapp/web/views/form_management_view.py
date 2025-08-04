@@ -119,79 +119,95 @@ def load_add_form_and_formula():
 @login_required
 def edit_form_and_formula():
     form_id = request.form.get("form_id")
-    
     if not form_id:
-        return render_template(
-            "/form-management/edit-form-and-formula.html",
-            error_msg="No form ID provided"
-        )
-    
+        return jsonify({
+            "success": False,
+            "message": "No form ID provided"
+        }), 400
     try:
         from bson import ObjectId
         form = FormAndFormula.objects(id=ObjectId(form_id)).first()
-        
         if not form:
-            return render_template(
-                "/form-management/edit-form-and-formula.html",
-                error_msg="Form not found"
-            )
-        
-        name = request.form.get("name")
-        
-        # อัปเดตข้อมูล form ตาม Model
-        form.name = name  # ใช้ string ตรงๆ
+            return jsonify({
+                "success": False,
+                "message": "Form not found"
+            }), 404
+
+        # อัปเดตข้อมูลพื้นฐาน
         form.material_name = request.form.get("material_name")
         form.desc_form = request.form.get("desc_form")
         form.desc_formula = request.form.get("desc_formula")
-        form.desc_formula2 = request.form.get("desc_formula2", "")
+        form.desc_formula2 = ''
         form.formula = request.form.get("formula")
-        form.formula2 = request.form.get("formula2", "")
+        form.formula2 = ''
         
-        # เพิ่มการอัปเดต scope ตาม Model
         ghg_scope = request.form.get("scope")
         ghg_sup_scope = request.form.get("sup_scope")
         if ghg_scope and ghg_sup_scope:
-            form.ghg_scope = int(ghg_scope)  # ใช้ ghg_scope
+            form.ghg_scope = int(ghg_scope)
             try:
-                form.ghg_sup_scope = int(ghg_sup_scope)  # ใช้ ghg_sup_scope
+                form.ghg_sup_scope = int(ghg_sup_scope)
             except ValueError:
-                return render_template(
-                    "/form-management/edit-form-and-formula.html",
-                    form=form,
-                    error_msg="Sub Scope ต้องเป็นตัวเลขเท่านั้น"
-                )
+                return jsonify({
+                    "success": False,
+                    "message": "Sub Scope ต้องเป็นตัวเลขเท่านั้น"
+                }), 400
+
+        # ตรวจสอบว่าเป็นฟอร์มลิงก์หรือไม่
+        is_linked = getattr(form, 'is_linked', False)
         
-        # อัปเดต input fields
-        input_fields = []
-        variables = []
+        print(f"Debug - Current form is_linked: {is_linked}")
+        print(f"Debug - Form variables before: {form.variables}")
         
-        fields = request.form.getlist("field")
-        labels = request.form.getlist("label")
-        input_types = request.form.getlist("input_type")
-        units = request.form.getlist("unit")
-        
-        for i in range(len(fields)):
-            field = fields[i]
-            label = labels[i] if i < len(labels) else ""
-            input_type = input_types[i] if i < len(input_types) else "text"
-            unit = units[i] if i < len(units) else ""
+        if is_linked:
+            # ฟอร์มลิงก์ - อัปเดตเฉพาะสูตรและคำอธิบาย
+            print("Debug - Updating linked form (formula only)")
+            # ไม่แก้ไข input_types และ variables สำหรับฟอร์มลิงก์
+            # ตรวจสอบว่ามี variables หรือไม่ ถ้าไม่มีให้ใส่ default
+            if not form.variables or len(form.variables) == 0:
+                form.variables = ["buffer_data"]
+                print("Debug - Set default variables for linked form")
+        else:
+            # ฟอร์มปกติ - อัปเดต input fields
+            print("Debug - Updating normal form")
+            input_fields = []
+            variables = []
+            fields = request.form.getlist("field")
+            labels = request.form.getlist("label")
+            input_types = request.form.getlist("input_type")
+            units = request.form.getlist("unit")
             
-            if field and input_type:
-                input_fields.append(InputType.create_input(field, label, input_type, unit))
-                variables.append(field)
-        
-        form.input_types = input_fields
-        form.variables = variables
+            print(f"Debug - Received fields: {fields}")
+            
+            for i in range(len(fields)):
+                field = fields[i]
+                label = labels[i] if i < len(labels) else ""
+                input_type = input_types[i] if i < len(input_types) else "text"
+                unit = units[i] if i < len(units) else ""
+                
+                if field and input_type:
+                    input_fields.append(InputType.create_input(field, label, input_type, unit))
+                    variables.append(field)
+
+            form.input_types = input_fields
+            form.variables = variables
+            
+            print(f"Debug - Updated variables: {variables}")
+
         form.save()
         
-        return redirect(url_for("form_management.form_management"))
-        
+        return jsonify({
+            "success": True,
+            "message": "บันทึกการแก้ไขสำเร็จ!",
+            "redirect_url": url_for("form_management.form_management")
+        })
     except Exception as e:
-        return render_template(
-            "/form-management/edit-form-and-formula.html",
-            form=form if 'form' in locals() else None,
-            error_msg=f"Failed to update form: {str(e)}"
-        )
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "success": False,
+            "message": f"Failed to update form: {str(e)}"
+        }), 400
 
 @module.route("/load-edit-form", methods=["GET"])
 @login_required
@@ -201,7 +217,7 @@ def load_edit_form_and_formula():
     if not form_id:
         return render_template(
             "/form-management/edit-form-and-formula.html",
-            form=None,  # ส่ง None แทน
+            form=None,
             error_msg="No form ID provided"
         )
     
@@ -214,7 +230,7 @@ def load_edit_form_and_formula():
         except InvalidId:
             return render_template(
                 "/form-management/edit-form-and-formula.html",
-                form=None,  # ส่ง None แทน
+                form=None,
                 error_msg="Invalid form ID format"
             )
         
@@ -222,18 +238,45 @@ def load_edit_form_and_formula():
         if not form:
             return render_template(
                 "/form-management/edit-form-and-formula.html",
-                form=None,  # ส่ง None แทน
+                form=None,
                 error_msg="Form not found"
             )
         
-        return render_template("/form-management/edit-form-and-formula.html", form=form)
+        # แปลง FormAndFormula object เป็น dict เพื่อส่งไปยัง template
+        form_data = {
+            "id": str(form.id),
+            "material_name": form.material_name,
+            "desc_form": form.desc_form,
+            "desc_formula": form.desc_formula,
+            "formula": form.formula,
+            "formula2": form.formula2 or "",
+            "ghg_scope": form.ghg_scope,
+            "ghg_sup_scope": form.ghg_sup_scope,
+            "is_linked": getattr(form, 'is_linked', False),  # ใช้ getattr เพื่อป้องกัน AttributeError
+            "linked_material_name": getattr(form, 'linked_material_name', ''),
+            "input_types": []
+        }
+        
+        if form.input_types:
+            for input_field in form.input_types:
+                form_data["input_types"].append({
+                    "field": input_field.field,
+                    "label": input_field.label,
+                    "input_type": input_field.input_type,
+                    "unit": input_field.unit
+                })
+        
+        return render_template(
+            "/form-management/edit-form-and-formula.html", 
+            form=form_data
+        )
         
     except Exception as e:
         import traceback
         traceback.print_exc()
         return render_template(
             "/form-management/edit-form-and-formula.html",
-            form=None,  # ส่ง None แทน
+            form=None,
             error_msg=f"Error loading form: {str(e)}"
         )
 
@@ -242,58 +285,44 @@ def load_edit_form_and_formula():
 @login_required
 def add_form_and_formula():
     try:
-        name = request.form.get("name")
         desc_form = request.form.get("desc_form")
         desc_formula = request.form.get("desc_formula")
         desc_formula2 = request.form.get("desc_formula2", "")
         material_name = request.form.get("material_name")
         formula = request.form.get("formula")
-        formula2 = request.form.get("formula2", "")
-        
-        # เพิ่มการรับค่า scope ตาม Model
+        formula2 = ''
         ghg_scope = request.form.get("scope")
         ghg_sup_scope = request.form.get("sup_scope")
+        
+        # เพิ่มการจัดการลิงก์
+        is_linked = request.form.get("is_linked") == "true"
+        linked_material_name = request.form.get("linked_material_name", "")
 
-        # Debug: แสดงข้อมูลที่ได้รับ (ลบออกหลังจากแก้ไขเสร็จ)
-        print(f"Debug - Received data:")
-        print(f"name: '{name}'")
-        print(f"material_name: '{material_name}'")
-        print(f"ghg_scope: '{ghg_scope}'")
-        print(f"ghg_sup_scope: '{ghg_sup_scope}'")
+        print(f"Debug - is_linked: {is_linked}")
+        print(f"Debug - linked_material_name: {linked_material_name}")
+        print(f"Debug - form_type from request: {request.form.get('form_type')}")
+        print(f"Debug - is_linked from request: {request.form.get('is_linked')}")
 
         # ตรวจสอบข้อมูลที่จำเป็น
-        if not name or not material_name or not formula or not ghg_scope or not ghg_sup_scope:
+        if not material_name or not formula or not ghg_scope or not ghg_sup_scope:
             missing_fields = []
-            if not name: missing_fields.append("ชื่อฟอร์ม")
             if not material_name: missing_fields.append("ชื่อวัสดุ")
             if not formula: missing_fields.append("สูตรคำนวณ")
             if not ghg_scope: missing_fields.append("Scope หลัก")
             if not ghg_sup_scope: missing_fields.append("Sub Scope")
-            
             return jsonify({
                 "success": False,
                 "message": f"กรุณากรอกข้อมูลให้ครบถ้วน: {', '.join(missing_fields)}"
             }), 400
 
-        # ตรวจสอบว่าชื่อฟอร์มซ้ำหรือไม่ (ใช้ string แทน int)
-        existing_form_name = FormAndFormula.objects(name=name).first()
-        if existing_form_name:
-            print(f"Debug - Found existing form with name: {existing_form_name.name}")
-            return jsonify({
-                "success": False,
-                "message": f'ชื่อฟอร์ม "{name}" มีอยู่แล้ว กรุณาใช้ชื่ออื่น'
-            }), 409
-
-        # ตรวจสอบว่าชื่อวัสดุซ้ำหรือไม่
+        # ตรวจสอบชื่อวัสดุซ้ำ
         existing_material = FormAndFormula.objects(material_name=material_name).first()
         if existing_material:
-            print(f"Debug - Found existing material with name: {existing_material.material_name}")
             return jsonify({
                 "success": False,
                 "message": f'ชื่อวัสดุ "{material_name}" มีอยู่แล้ว กรุณาใช้ชื่ออื่น'
             }, 409)
 
-        # ตรวจสอบว่า ghg_sup_scope สามารถแปลงเป็น int ได้หรือไม่
         try:
             ghg_sup_scope_int = int(ghg_sup_scope)
         except ValueError:
@@ -302,76 +331,68 @@ def add_form_and_formula():
                 "message": "Sub Scope ต้องเป็นตัวเลขเท่านั้น"
             }), 400
 
-        # ดึงข้อมูล input fields จากฟอร์ม
-        input_fields = []
-        variables = []
-
-        fields = request.form.getlist("field")
-        labels = request.form.getlist("label")
-        input_types = request.form.getlist("input_type")
-        units = request.form.getlist("unit")
-
-        # ลูปผ่านข้อมูลที่ดึงมา
-        for i in range(len(fields)):
-            field = fields[i] if i < len(fields) else ""
-            label = labels[i] if i < len(labels) else ""
-            input_type = input_types[i] if i < len(input_types) else "text"
-            unit = units[i] if i < len(units) else ""
-
-            if field and input_type:
-                input_fields.append(InputType.create_input(field, label, input_type, unit))
-                variables.append(field)
-
-        # สร้าง FormAndFormula object ใหม่ตาม Model
+        # สร้าง FormAndFormula object ใหม่
         new_form = FormAndFormula(
-            name=name,  # ใช้ string ตรงๆ
             desc_form=desc_form,
             desc_formula=desc_formula,
             desc_formula2=desc_formula2,
             material_name=material_name,
             formula=formula,
             formula2=formula2,
-            ghg_scope=int(ghg_scope),  # ใช้ ghg_scope
-            ghg_sup_scope=ghg_sup_scope_int,  # ใช้ int ที่แปลงแล้ว
-            input_types=input_fields,
-            variables=variables
+            ghg_scope=int(ghg_scope),
+            ghg_sup_scope=ghg_sup_scope_int,
+            is_linked=is_linked,  # เพิ่มบรรทัดนี้
+            linked_material_name=linked_material_name if is_linked else ""  # เพิ่มบรรทัดนี้
         )
 
-        # บันทึกลง MongoDB
-        new_form.save()
+        print(f"Debug - new_form.is_linked: {new_form.is_linked}")
+        print(f"Debug - new_form.linked_material_name: {new_form.linked_material_name}")
 
-        # สำเร็จ → ส่ง JSON response แทน redirect
+        if is_linked and linked_material_name:
+            # ตั้งค่าเป็นฟอร์มลิงก์
+            new_form.setup_linked_form(linked_material_name)
+            print("Debug - Called setup_linked_form")
+        else:
+            # ฟอร์มปกติ - ดึงข้อมูล input fields จากฟอร์ม
+            input_fields = []
+            variables = []
+            fields = request.form.getlist("field")
+            labels = request.form.getlist("label")
+            input_types = request.form.getlist("input_type")
+            units = request.form.getlist("unit")
+            
+            print(f"Debug - Normal form fields: {fields}")
+            
+            for i in range(len(fields)):
+                field = fields[i] if i < len(fields) else ""
+                label = labels[i] if i < len(labels) else ""
+                input_type = input_types[i] if i < len(input_types) else "text"
+                unit = units[i] if i < len(units) else ""
+                
+                if field and input_type:
+                    input_fields.append(InputType.create_input(field, label, input_type, unit))
+                    variables.append(field)
+
+            new_form.input_types = input_fields
+            new_form.variables = variables
+
+        new_form.save()
+        
+        print(f"Debug - Saved form with is_linked: {new_form.is_linked}")
+        
         return jsonify({
             "success": True,
-            "message": f'สร้างฟอร์ม "{name}" สำเร็จแล้ว',
+            "message": "สร้างฟอร์มสำเร็จ!",
             "redirect_url": url_for("form_management.form_management")
         })
-
+        
     except Exception as e:
         import traceback
         traceback.print_exc()
-        
-        # จัดการ error ตามประเภท
-        error_message = str(e)
-        print(f"Debug - Exception occurred: {error_message}")
-        
-        if "duplicate key error" in error_message:
-            if "name_1" in error_message:
-                error_message = f'ชื่อฟอร์ม "{name}" มีอยู่แล้ว กรุณาใช้ชื่ออื่น'
-            elif "material_name_1" in error_message:
-                error_message = f'ชื่อวัสดุ "{material_name}" มีอยู่แล้ว กรุณาใช้ชื่ออื่น'
-        elif "NotUniqueError" in str(type(e)):
-            if "name" in str(e):
-                error_message = f'ชื่อฟอร์ม "{name}" มีอยู่แล้ว กรุณาใช้ชื่ออื่น'
-            elif "material_name" in str(e):
-                error_message = f'ชื่อวัสดุ "{material_name}" มีอยู่แล้ว กรุณาใช้ชื่ออื่น'
-        else:
-            error_message = f'เกิดข้อผิดพลาดในการบันทึกฟอร์ม: {str(e)}'
-        
         return jsonify({
             "success": False,
-            "message": error_message
-        }), 500
+            "message": f"เกิดข้อผิดพลาด: {str(e)}"
+        }), 400
 
 @module.route("/get-form-data/<form_id>", methods=["GET"])
 @login_required
@@ -379,32 +400,28 @@ def get_form_data(form_id):
     try:
         from bson import ObjectId
         from bson.errors import InvalidId
-        
         try:
             object_id = ObjectId(form_id)
         except InvalidId:
             return jsonify({"success": False, "message": "Invalid form ID format"})
-        
         form = FormAndFormula.objects(id=object_id).first()
         if not form:
             return jsonify({"success": False, "message": "Form not found"})
         
-        # แปลงข้อมูลเป็น dict ตาม Model
         form_data = {
             "id": str(form.id),
-            "name": form.name,
             "material_name": form.material_name,
             "desc_form": form.desc_form,
             "desc_formula": form.desc_formula,
-            "desc_formula2": form.desc_formula2 or "",
             "formula": form.formula,
             "formula2": form.formula2 or "",
-            "ghg_scope": form.ghg_scope,  # เพิ่ม ghg_scope
-            "ghg_sup_scope": form.ghg_sup_scope,  # เพิ่ม ghg_sup_scope
+            "ghg_scope": form.ghg_scope,
+            "ghg_sup_scope": form.ghg_sup_scope,
+            "is_linked": getattr(form, 'is_linked', False),
+            "linked_material_name": getattr(form, 'linked_material_name', ""),
             "input_types": []
         }
         
-        # แปลง input_types
         if form.input_types:
             for input_field in form.input_types:
                 form_data["input_types"].append({
@@ -415,7 +432,6 @@ def get_form_data(form_id):
                 })
         
         return jsonify({"success": True, "form": form_data})
-        
     except Exception as e:
         return jsonify({"success": False, "message": f"Error loading form: {str(e)}"})
 
@@ -426,24 +442,19 @@ def delete_form(form_id):
     try:
         from bson import ObjectId
         from bson.errors import InvalidId
-        
         try:
             object_id = ObjectId(form_id)
         except InvalidId:
             return jsonify({"success": False, "message": "Invalid form ID format"}), 400
-        
         form = FormAndFormula.objects(id=object_id).first()
         if not form:
             return jsonify({"success": False, "message": "Form not found"}), 404
-        
-        form_name = form.name
+        form_name = form.material_name  # ใช้ชื่อวัสดุแทน
         form.delete()
-        
         return jsonify({
             "success": True,
             "message": f"Form '{form_name}' deleted successfully"
         })
-        
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -451,3 +462,23 @@ def delete_form(form_id):
             "success": False,
             "message": f"Error deleting form: {str(e)}"
         }), 500
+
+@module.route("/get-available-materials/<int:scope>/<int:sub_scope>", methods=["GET"])
+@login_required
+def get_available_materials(scope, sub_scope):
+    """
+    ดึงรายชื่อ material ที่สามารถลิงก์ได้
+    """
+    try:
+        # ดึง material ที่ไม่ใช่ฟอร์มลิงก์ในกลุ่มเดียวกัน
+        available_form = FormAndFormula.objects(
+        )
+        
+        
+        return render_template(
+            "form-management/partials/material-select.html",
+            available_form=available_form
+        )
+        
+    except Exception as e:
+        return f'<option value="">Error: {str(e)}</option>'
