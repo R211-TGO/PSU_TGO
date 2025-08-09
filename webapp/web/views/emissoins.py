@@ -323,6 +323,7 @@ def calculate_result(material):
         print(f"Sanitized formula: {sanitized_formula}")
         print(f"Sanitized variables: {sanitized_variables}")
         print("-----------------------")
+    return result
 
 
 def save_material(scope_id, sub_scope_id, month_id, year, material_data):
@@ -333,22 +334,7 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
     field = material_data["field"]
     amount = material_data["amount"]
 
-    # scope = Scope.objects(
-    #     ghg_scope=int(scope_id),
-    #     ghg_sup_scope=int(sub_scope_id),
-    #     department=current_user.department_key,
-    #     campus=current_user.campus_id,
-    # ).first()
-    # sub_scope = Scope.objects(
-    #     ghg_scope=int(scope_id), ghg_sup_scope=int(sub_scope_id)
-    # ).first()
-
-    # if not scope or not sub_scope:
-    #     print(
-    #         f"Scope or Sub-Scope not found: scope_id={scope_id}, sub_scope_id={sub_scope_id}"
-    #     )
-    #     return False
-
+    # ค้นหา Material ที่ตรงกับข้อมูล
     material = Material.objects(
         month=int(month_id),
         name=head,
@@ -359,16 +345,19 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
         campus=current_user.campus_id,
     ).first()
 
+    # ค้นหา FormAndFormula ที่ตรงกับ head
     form_and_formula = FormAndFormula.objects(material_name=head).first()
     if not form_and_formula:
         print(f"Form and Formula not found for material: {head}")
         return False
 
+    # ค้นหา InputType ที่ตรงกับ field
     input_type = form_and_formula.input_types.filter(field=field).first()
     if not input_type:
         print(f"Input type not found for field: {field} in material: {head}")
         return False
 
+    # อัปเดตหรือสร้าง Material
     if material:
         updated = False
         for qt in material.quantity_type:
@@ -397,7 +386,7 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
             sub_scope=int(sub_scope_id),
             year=year,
             day=1,
-            form_and_formula=form_and_formula.name,
+            form_and_formula=str(form_and_formula.id),
             department=current_user.department_key,
             campus=current_user.campus_id,
             edit_by_id=str(current_user.id),  # เซฟ edit_by_id
@@ -414,8 +403,71 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
         new_material.save()
         material = new_material
 
-    # Calculate and update the result
-    calculate_result(material)
+    # คำนวณและอัปเดตผลลัพธ์
+    result = calculate_result(material)
+
+    # ตรวจสอบ FormAndFormula ที่ลิงก์กับ head
+    linked_formulas = FormAndFormula.objects(linked_material_name=head, is_linked=True)
+
+    for linked_formula in linked_formulas:
+        # สร้างหรืออัปเดต Material ที่ลิงก์
+        linked_material = Material.objects(
+            month=int(month_id),
+            name=linked_formula.material_name,
+            scope=int(linked_formula.ghg_scope),
+            sub_scope=int(linked_formula.ghg_sup_scope),
+            year=year,
+            department=current_user.department_key,
+            campus=current_user.campus_id,
+        ).first()
+
+        if linked_material:
+            # อัปเดตค่าใน Material ที่ลิงก์
+            updated = False
+            for qt in linked_material.quantity_type:
+                if qt.field == linked_formula.input_types[0].field:
+                    qt.amount = float(result)
+                    updated = True
+            if not updated:
+                linked_material.quantity_type.append(
+                    QuantityType(
+                        field=linked_formula.input_types[0].field,
+                        label=linked_formula.input_types[0].label,
+                        amount=float(result),
+                        unit=linked_formula.input_types[0].unit,
+                    )
+                )
+            linked_material.edit_by_id = str(current_user.id)
+            linked_material.update_date = datetime.datetime.now()
+            linked_material.save()
+        else:
+            # สร้าง Material ใหม่สำหรับ linked_formula
+            linked_material = Material(
+                month=int(month_id),
+                name=linked_formula.material_name,
+                scope=int(linked_formula.ghg_scope),
+                sub_scope=int(linked_formula.ghg_sup_scope),
+                year=year,
+                day=1,
+                form_and_formula=str(linked_formula.id),
+                department=current_user.department_key,
+                campus=current_user.campus_id,
+                edit_by_id=str(current_user.id),
+                update_date=datetime.datetime.now(),
+                quantity_type=[
+                    QuantityType(
+                        field=linked_formula.input_types[0].field,
+                        label=linked_formula.input_types[0].label,
+                        amount=float(result),
+                        unit=linked_formula.input_types[0].unit,
+                    )
+                ],
+            )
+            linked_material.save()
+
+        # คำนวณผลลัพธ์สำหรับ Material ที่ลิงก์
+        calculate_result(linked_material)
+
     return True
 
 
