@@ -160,24 +160,46 @@ def edit_form_and_formula():
         print(f"Debug - Form variables before: {form.variables}")
 
         if is_linked:
-            # ฟอร์มลิงก์ - อัปเดตเฉพาะสูตรและคำอธิบาย
-            print("Debug - Updating linked form (formula only)")
-            # ไม่แก้ไข input_types และ variables สำหรับฟอร์มลิงก์
-            # ตรวจสอบว่ามี variables หรือไม่ ถ้าไม่มีให้ใส่ default
-            if not form.variables or len(form.variables) == 0:
-                form.variables = ["buffer_data"]
-                print("Debug - Set default variables for linked form")
+            # ดึงข้อมูล material ต้นฉบับ
+            linked_material_name = request.form.get("linked_material_name", "")
+            linked_material = FormAndFormula.objects(
+                material_name=linked_material_name
+            ).first()
+            if not linked_material:
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": f"Material '{linked_material_name}' ไม่พบในระบบ",
+                        }
+                    ),
+                    404,
+                )
+
+            # ใช้ quantity_type ของ material ต้นฉบับ
+            input_fields = []
+            variables = []
+            for quantity in linked_material.input_types:
+                input_fields.append(
+                    InputType.create_input(
+                        field=quantity.field,
+                        label=quantity.label,
+                        input_type=quantity.input_type,
+                        unit=quantity.unit,
+                    )
+                )
+                variables.append(quantity.field)
+
+            form.input_types = input_fields
+            form.variables = variables
         else:
             # ฟอร์มปกติ - อัปเดต input fields
-            print("Debug - Updating normal form")
             input_fields = []
             variables = []
             fields = request.form.getlist("field")
             labels = request.form.getlist("label")
             input_types = request.form.getlist("input_type")
             units = request.form.getlist("unit")
-
-            print(f"Debug - Received fields: {fields}")
 
             for i in range(len(fields)):
                 field = fields[i]
@@ -193,12 +215,6 @@ def edit_form_and_formula():
 
             form.input_types = input_fields
             form.variables = variables
-
-            print(f"Debug - Updated variables: {variables}")
-
-        # อัปเดต Scope ที่ลิงก์
-        linked_scopes = request.form.getlist("linked_scopes")
-        form.linked_scopes = [int(scope) for scope in linked_scopes if scope.isdigit()]
 
         form.save()
 
@@ -358,12 +374,6 @@ def add_form_and_formula():
                 400,
             )
 
-        # ดึงข้อมูล Scope ที่ต้องการลิงก์
-        linked_scopes = request.form.getlist("linked_scopes")  # รับ Scope ที่ลิงก์จากฟอร์ม
-        linked_scopes = [
-            int(scope) for scope in linked_scopes if scope.isdigit()
-        ]  # แปลงเป็น int
-
         # สร้าง FormAndFormula object ใหม่
         new_form = FormAndFormula(
             desc_form=desc_form,
@@ -376,16 +386,43 @@ def add_form_and_formula():
             ghg_sup_scope=ghg_sup_scope_int,
             is_linked=is_linked,  # เพิ่มบรรทัดนี้
             linked_material_name=linked_material_name if is_linked else "",  # เพิ่มบรรทัดนี้
-            linked_scopes=linked_scopes,  # เพิ่ม Scope ที่ลิงก์
         )
 
         print(f"Debug - new_form.is_linked: {new_form.is_linked}")
         print(f"Debug - new_form.linked_material_name: {new_form.linked_material_name}")
 
         if is_linked and linked_material_name:
-            # ตั้งค่าเป็นฟอร์มลิงก์
-            new_form.setup_linked_form(linked_material_name)
-            print("Debug - Called setup_linked_form")
+            # ดึงข้อมูล material ต้นฉบับ
+            linked_material = FormAndFormula.objects(
+                material_name=linked_material_name
+            ).first()
+            if not linked_material:
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": f"Material '{linked_material_name}' ไม่พบในระบบ",
+                        }
+                    ),
+                    404,
+                )
+
+            # ใช้ quantity_type ของ material ต้นฉบับ
+            input_fields = []
+            variables = []
+            for quantity in linked_material.input_types:
+                input_fields.append(
+                    InputType.create_input(
+                        field=quantity.field,
+                        label=quantity.label,
+                        input_type=quantity.input_type,
+                        unit=quantity.unit,
+                    )
+                )
+                variables.append(quantity.field)
+
+            new_form.input_types = input_fields
+            new_form.variables = variables
         else:
             # ฟอร์มปกติ - ดึงข้อมูล input fields จากฟอร์ม
             input_fields = []

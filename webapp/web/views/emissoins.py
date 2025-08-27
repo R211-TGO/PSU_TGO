@@ -256,11 +256,7 @@ def load_materials_form():
 
 def calculate_result(material):
     """
-    คำนวณผลลัพธ์จากสูตรและอัปเดต field result ของ material
-    ฟังก์ชันนี้ถูกแก้ไขให้รองรับชื่อตัวแปรภาษาไทยในสูตร
-
-    Args:
-        material (Material): a object material ที่ต้องการอัปเดต
+    คำนวณผลลัพธ์จากสูตรและบันทึก result ลงใน material
     """
     # ดึงข้อมูลสูตรจากฐานข้อมูล
     form_and_formula = FormAndFormula.objects(material_name=material.name).first()
@@ -268,52 +264,42 @@ def calculate_result(material):
         print(f"ไม่พบสูตรสำหรับ material: {material.name}")
         return
 
-    # --- ส่วนที่แก้ไข ---
-
-    # 1. สร้าง mapping ระหว่างชื่อตัวแปรภาษาไทย กับชื่อที่ปลอดภัย (Safe ASCII names)
-    # เช่น {'ความหนา': 'var_0', 'ความยาว': 'var_1'}
+    # สร้าง mapping ระหว่างชื่อตัวแปรภาษาไทย กับชื่อที่ปลอดภัย
     variable_mapping = {
         original_var: f"var_{i}"
         for i, original_var in enumerate(form_and_formula.variables)
     }
 
-    # 2. เตรียม dictionary ของตัวแปรที่แปลงชื่อแล้วสำหรับใช้ใน eval()
     sanitized_variables = {}
-    # กำหนดค่าเริ่มต้นสำหรับทุกตัวแปรเป็น 0
     for safe_name in variable_mapping.values():
         sanitized_variables[safe_name] = 0
 
-    # อัปเดตค่าจาก material ที่มีอยู่
     for qt in material.quantity_type:
-        # ตรวจสอบว่า field จาก material เป็นหนึ่งในตัวแปรที่กำหนดไว้ในสูตรหรือไม่
         if qt.field in variable_mapping:
-            # ดึงชื่อที่ปลอดภัย (เช่น 'var_0') มาใช้เป็น key
             safe_name = variable_mapping[qt.field]
             sanitized_variables[safe_name] = qt.amount
 
-    # 3. แปลงสตริงสูตร โดยแทนที่ชื่อตัวแปรภาษาไทยด้วยชื่อที่ปลอดภัย
     sanitized_formula = form_and_formula.formula
-    # เรียงลำดับ key ตามความยาวจากมากไปน้อย เพื่อป้องกันการแทนที่ผิดพลาด
-    # เช่น ป้องกันการแทนที่ "ความหนา" ซึ่งเป็นส่วนหนึ่งของ "ความหนาแน่น" ก่อน
     sorted_vars = sorted(variable_mapping.keys(), key=len, reverse=True)
 
     for original_var in sorted_vars:
         safe_name = variable_mapping[original_var]
-        # ใช้ regular expression (\b) เพื่อให้มั่นใจว่าแทนที่ทั้งคำเท่านั้น
         sanitized_formula = re.sub(
             r"\b" + re.escape(original_var) + r"\b", safe_name, sanitized_formula
         )
 
-    # --- สิ้นสุดส่วนที่แก้ไข ---
-
     try:
-        # 4. ประมวลผลสูตรที่แปลงแล้วด้วยตัวแปรที่แปลงแล้ว
         print(f"Executing sanitized formula: {sanitized_formula}")
         print(f"With variables: {sanitized_variables}")
 
-        result = eval(sanitized_formula, {}, sanitized_variables)
-        material.result = float(result)  # บันทึกผลลัพธ์เป็น float
+        # คำนวณผลลัพธ์
+        eval_result = eval(sanitized_formula, {}, sanitized_variables)
+
+        # บันทึกผลลัพธ์ลงใน material.result
+        material.result = eval_result
+        material.update_date = datetime.datetime.now()
         material.save()
+
         print(f"คำนวณผลลัพธ์สำหรับ {material.name} สำเร็จ: {material.result}")
 
     except Exception as e:
@@ -323,12 +309,11 @@ def calculate_result(material):
         print(f"Sanitized formula: {sanitized_formula}")
         print(f"Sanitized variables: {sanitized_variables}")
         print("-----------------------")
-    return result
 
 
 def save_material(scope_id, sub_scope_id, month_id, year, material_data):
     """
-    Save a single material to the database and calculate its result.
+    Save a single material to the database และคำนวณ result
     """
     head = material_data["head"]
     field = material_data["field"]
@@ -375,8 +360,8 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
             )
         material.department = current_user.department_key
         material.campus = current_user.campus_id
-        material.edit_by_id = str(current_user.id)  # อัปเดต edit_by_id
-        material.update_date = datetime.datetime.now()  # อัปเดต update_date
+        material.edit_by_id = str(current_user.id)
+        material.update_date = datetime.datetime.now()
         material.save()
     else:
         new_material = Material(
@@ -389,8 +374,8 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
             form_and_formula=str(form_and_formula.id),
             department=current_user.department_key,
             campus=current_user.campus_id,
-            edit_by_id=str(current_user.id),  # เซฟ edit_by_id
-            update_date=datetime.datetime.now(),  # เซฟ update_date
+            edit_by_id=str(current_user.id),
+            update_date=datetime.datetime.now(),
             quantity_type=[
                 QuantityType(
                     field=field,
@@ -403,14 +388,12 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
         new_material.save()
         material = new_material
 
-    # คำนวณและอัปเดตผลลัพธ์
-    result = calculate_result(material)
+    # คำนวณและบันทึก result
+    calculate_result(material)
 
-    # ตรวจสอบ FormAndFormula ที่ลิงก์กับ head
+    # จัดการ Material ที่ลิงก์
     linked_formulas = FormAndFormula.objects(linked_material_name=head, is_linked=True)
-
     for linked_formula in linked_formulas:
-        # สร้างหรืออัปเดต Material ที่ลิงก์
         linked_material = Material.objects(
             month=int(month_id),
             name=linked_formula.material_name,
@@ -422,26 +405,13 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
         ).first()
 
         if linked_material:
-            # อัปเดตค่าใน Material ที่ลิงก์
-            updated = False
-            for qt in linked_material.quantity_type:
-                if qt.field == linked_formula.input_types[0].field:
-                    qt.amount = float(result)
-                    updated = True
-            if not updated:
-                linked_material.quantity_type.append(
-                    QuantityType(
-                        field=linked_formula.input_types[0].field,
-                        label=linked_formula.input_types[0].label,
-                        amount=float(result),
-                        unit=linked_formula.input_types[0].unit,
-                    )
-                )
+            linked_material.quantity_type = material.quantity_type
+            linked_material.result = material.result
+            linked_material.is_linked = True  # ตั้งค่า is_linked เป็น True
             linked_material.edit_by_id = str(current_user.id)
             linked_material.update_date = datetime.datetime.now()
             linked_material.save()
         else:
-            # สร้าง Material ใหม่สำหรับ linked_formula
             linked_material = Material(
                 month=int(month_id),
                 name=linked_formula.material_name,
@@ -454,19 +424,11 @@ def save_material(scope_id, sub_scope_id, month_id, year, material_data):
                 campus=current_user.campus_id,
                 edit_by_id=str(current_user.id),
                 update_date=datetime.datetime.now(),
-                quantity_type=[
-                    QuantityType(
-                        field=linked_formula.input_types[0].field,
-                        label=linked_formula.input_types[0].label,
-                        amount=float(result),
-                        unit=linked_formula.input_types[0].unit,
-                    )
-                ],
+                quantity_type=material.quantity_type,
+                result=material.result,
+                is_linked=True,  # ตั้งค่า is_linked เป็น True
             )
             linked_material.save()
-
-        # คำนวณผลลัพธ์สำหรับ Material ที่ลิงก์
-        calculate_result(linked_material)
 
     return True
 
@@ -546,6 +508,18 @@ def save_materials():
 
     # Save each material
     for material_data in materials:
+        # ตรวจสอบว่า material นี้ไม่ถูกลิงก์
+        matched_material = Material.objects(
+            name=material_data["head"],
+            scope=int(scope_id),
+            sub_scope=int(sub_scope_id),
+            year=int(year),
+            department=current_user.department_key,
+            campus=current_user.campus_id,
+        ).first()
+        if matched_material and matched_material.is_linked:
+            continue  # ข้าม material ที่ถูกลิงก์
+
         save_material(scope_id, sub_scope_id, month_id, year, material_data)
 
     # Update emissions table
@@ -699,7 +673,10 @@ def delete_all_materials():
     )
 
     if materials:
+        # ลบเฉพาะ material ที่ไม่ถูกลิงก์
         for material in materials:
+            if material.is_linked:
+                continue  # ข้าม material ที่ถูกลิงก์
             material.quantity_type = []  # Clear quantity_type
             material.edit_by_id = str(current_user.id)  # Update edit_by_id
             material.update_date = datetime.datetime.now()  # Update update_date

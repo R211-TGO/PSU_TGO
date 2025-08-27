@@ -82,17 +82,19 @@
                         {% for head in head_table %}
                             {% for input in materials_form[loop.index0] %}
                                 <td class="px-6 py-4 whitespace-nowrap text-center border-b border-r border-gray-200">
-                                    {% set matched_quantity = materials | selectattr('month', 'equalto', month.id)
-                                                                          | selectattr('name', 'equalto', head)
-                                                                          | map(attribute='quantity_type')
-                                                                          | sum(start=[])
-                                                                          | selectattr('field', 'equalto', input.field)
-                                                                          | list %}
-                                    <div class="text-sm text-gray-900 cursor-pointer hover:text-blue-500"
-                                         hx-get="{{ url_for('emissions.load_material_form', month_id=month.id, head=head, scope_id=scope_id, sub_scope_id=sub_scope_id, page=page, year=year, month=month.name, amount=(matched_quantity[0].amount if matched_quantity else None),input_label=input.label,input_field=input.field,input_unit=input.unit) }}"
+                                    {% set matched_material = materials | selectattr('month', 'equalto', month.id)
+                                                                        | selectattr('name', 'equalto', head)
+                                                                        | list %}
+                                    {% set is_linked = matched_material[0].is_linked if matched_material else False %}
+                                    {% set matched_quantity = matched_material[0].quantity_type | selectattr('field', 'equalto', input.field) | list if matched_material else [] %}
+
+                                    <div class="text-sm text-gray-900 {% if not is_linked %}cursor-pointer hover:text-blue-500{% endif %}"
+                                         {% if not is_linked %}
+                                         hx-get="{{ url_for('emissions.load_material_form', month_id=month.id, head=head, scope_id=scope_id, sub_scope_id=sub_scope_id, page=page, year=year, month=month.name, amount=(matched_quantity[0].amount if matched_quantity else None), input_label=input.label, input_field=input.field, input_unit=input.unit) }}"
                                          hx-target="#modal-content"
                                          hx-swap="innerHTML"
-                                         hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')">
+                                         hx-on="htmx:afterRequest: document.getElementById('modal').classList.add('modal-open')"
+                                         {% endif %}>
                                         {% if matched_quantity %}
                                             {{ matched_quantity[0].amount }}
                                         {% else %}

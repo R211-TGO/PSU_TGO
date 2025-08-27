@@ -26,6 +26,7 @@ class Material(me.Document):
     department = me.StringField(required=True)
     campus = me.StringField(required=True)
     quantity_type = me.EmbeddedDocumentListField(QuantityType)
+    is_linked = me.BooleanField(default=False)  # เพิ่มฟิลด์นี้
 
     meta = {
         "collection": "materials",
