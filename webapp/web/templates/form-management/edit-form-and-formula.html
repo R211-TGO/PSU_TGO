@@ -224,8 +224,6 @@
           >{{ form.desc_formula if form else '' }}</textarea>
         </div>
 
-       
-
         <div class="mt-6 flex justify-between">
           <!-- ปุ่มลบ -->
           <button type="button" class="btn btn-outline btn-error" onclick="confirmDelete('{{ form.id }}', '{{ form.material_name }}')">
@@ -642,7 +640,7 @@ function updatePreview() {
                        value="[ข้อมูลจาก {{ form.linked_material_name }}]" readonly>
                 <div class="flex gap-2 mt-2">
                     <div class="text-xs text-teal-800 bg-teal-100 border border-teal-300 rounded-full px-3 py-1 inline-block">Field: buffer_data</div>
-                    <div class="text-xs text-emerald-800 bg-emerald-100 border-emerald-300 rounded-full px-3 py-1 inline-block">Type: auto-generated</div>
+                    <div class="text-xs text-emerald-800 bg-emerald-100 border border-emerald-300 rounded-full px-3 py-1 inline-block">Type: auto-generated</div>
                 </div>
             </div>
         </div>`;
