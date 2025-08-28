@@ -17,7 +17,7 @@
     <!-- Left: Edit Form Field -->
     <div class="bg-white rounded-[7px] border border-gray-300 shadow-md p-6">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-black-600 font-bold text-lg border-b border-b-gray-200 pb-3">{{ t.edit_form_field }}</h3>
+        <h3 class="text-gray-800 font-bold text-lg border-b border-b-gray-200 pb-3">{{ t.edit_form_field }}</h3>
         <!-- ปุ่ม toggle พรีวิว -->
         <label for="preview-toggle" class="btn btn-sm btn-ghost text-gray-600 hover:text-gray-800 hover:bg-gray-100 cursor-pointer" title="เปิด/ปิดพรีวิว">
           <i data-feather="eye" class="h-5 w-5 mr-1"></i>
@@ -104,32 +104,25 @@
         </div>
         {% else %}
         <div class="mt-6">
-          <div class="alert bg-emerald-50 border border-emerald-300 text-emerald-800">
-            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24">
+          <div class="alert bg-blue-50 border border-blue-300 text-blue-800">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <div>
-              <h3 class="font-bold text-emerald-800">ข้อมูลการเชื่อมโยง</h3>
-              <div class="text-sm mt-2">
-                <p><strong>🔗 เชื่อมโยงกับ Material:</strong> <span class="font-mono bg-cyan-100 border border-cyan-300 px-2 py-1 rounded text-cyan-800">{{ form.linked_material_name }}</span></p>
-                <p class="mt-1"><strong>📊 Scope:</strong> <span class="text-teal-700">{{ form.ghg_scope }}</span> | <strong>Sub-Scope:</strong> <span class="text-teal-700">{{ form.ghg_sup_scope }}</span></p>
-                <p class="text-xs text-emerald-700 mt-2">ระบบจะดึงข้อมูลจาก Material ดังกล่าวโดยอัตโนมัติ</p>
+              <h3 class="font-bold text-blue-800">ข้อมูลการเชื่อมโยง</h3>
+              <div class="text-sm mt-2" id="linked-info">
+                <p><strong>เชื่อมโยงกับ Material:</strong> <span class="font-mono bg-gray-100 border border-gray-300 px-2 py-1 rounded text-gray-800">{{ form.linked_material_name }}</span></p>
+                <p class="mt-1"><strong>Scope:</strong> <span class="text-blue-700" id="linked-scope">{{ form.ghg_scope }}</span> | <strong>Sub-Scope:</strong> <span class="text-blue-700" id="linked-sub-scope">{{ form.ghg_sup_scope }}</span></p>
+                <p class="text-xs text-blue-700 mt-2">ระบบจะดึงข้อมูลจาก Material ดังกล่าวโดยอัตโนมัติ</p>
               </div>
             </div>
           </div>
           
-          <!-- แสดงตัวอย่างฟิลด์ที่จะถูกสร้างอัตโนมัติ -->
-          <div class="mt-4 p-4 bg-gradient-to-br from-blue-50 to-emerald-50 border-2 border-sky-200 rounded-lg">
-            <h4 class="text-sm font-medium text-teal-800 mb-3">ฟิลด์ที่สร้างอัตโนมัติ</h4>
-            <div class="mb-3">
-              <label class="block text-sm text-blue-800 mb-1">
-                <strong>ข้อมูลจากระบบ (อัตโนมัติ) (unit)</strong>
-              </label>
-              <input type="number" class="input input-bordered w-full text-sm bg-cyan-50 border-cyan-200" value="[ข้อมูลจาก {{ form.linked_material_name }}]" readonly>
-              <div class="flex gap-2 mt-1">
-                <div class="text-xs text-teal-800 bg-teal-100 border border-teal-300 rounded-full px-2 py-1 inline-block">Field: buffer_data</div>
-                <div class="text-xs text-emerald-800 bg-emerald-100 border border-emerald-300 rounded-full px-2 py-1 inline-block">Type: auto-generated</div>
-              </div>
+          <!-- แสดงฟิลด์ที่จะถูกสร้างอัตโนมัติ -->
+          <div class="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <h4 class="text-sm font-medium text-gray-800 mb-3">ฟิลด์ที่สร้างอัตโนมัติ</h4>
+            <div id="linked-fields-preview">
+              <!-- ฟิลด์จะถูกโหลดจาก JavaScript -->
             </div>
           </div>
         </div>
@@ -173,18 +166,14 @@
 
               <!-- Variables Section -->
               <div class="mb-4">
-                <h5 class="text-sm font-medium text-cyan-700 mb-2">{{ t.variables }}</h5>
-                {% if form and form.is_linked %}
-                <div class="grid grid-cols-4 gap-2">
-                  <button type="button" class="btn btn-xs border border-teal-300 text-teal-700 bg-teal-50 hover:bg-teal-100" onclick="addToFormula('buffer_data')">buffer_data</button>
-                </div>
-                <p class="text-xs text-blue-600 mt-2">
-                  ใช้ตัวแปร 'buffer_data' ที่รับค่าจาก Material: <strong class="text-cyan-700">{{ form.linked_material_name }}</strong>
-                </p>
-                {% else %}
+                <h5 class="text-sm font-medium text-gray-700 mb-2">{{ t.variables }}</h5>
                 <div class="grid grid-cols-4 gap-2" id="variables-buttons">
                   <!-- ปุ่มตัวแปรจะถูกเพิ่มที่นี่ -->
                 </div>
+                {% if form and form.is_linked %}
+                <p class="text-xs text-blue-600 mt-2">
+                  ใช้ตัวแปรจาก Material: <strong class="text-blue-700">{{ form.linked_material_name }}</strong>
+                </p>
                 {% endif %}
               </div>
 
@@ -242,7 +231,7 @@
     <!-- Right: Form Preview -->
     <div class="bg-white rounded-[7px] border border-gray-300 shadow-md p-6 transition-all duration-300 preview-panel">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-black-600 font-bold text-lg">{{ t.form_preview }}</h3>
+        <h3 class="text-gray-800 font-bold text-lg">{{ t.form_preview }}</h3>
         <label for="preview-toggle" class="btn btn-sm btn-ghost text-gray-500 hover:text-gray-700 hover:bg-gray-100 cursor-pointer" title="ปิดพรีวิว">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -327,7 +316,9 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-// เก็บ JavaScript เดิมทั้งหมดไม่เปลี่ยนแปลง
+// Global variables for linked material data
+let linkedMaterialData = null;
+
 // เพิ่ม functions สำหรับ formula calculator
 function addToFormula(value) {
     const formulaInput = document.getElementById("formula");
@@ -357,7 +348,7 @@ function toggleFormulaCalculator() {
         
         // อัปเดตปุ่มเครื่องคิดเลข
         updateCalculatorButtons();
-    } else {ห
+    } else {
         calculator.classList.add("hidden");
         const chevron = dropdownBtn.querySelector("i[data-feather='chevron-down']");
         if (chevron) chevron.style.transform = "rotate(0deg)";
@@ -378,15 +369,68 @@ function applyFormula() {
     updatePreview();
 }
 
+// ฟังก์ชันใหม่สำหรับโหลดข้อมูล linked material
+async function loadLinkedMaterialData(materialName) {
+    try {
+        const response = await fetch(`/form-management/get-linked-material-data/${encodeURIComponent(materialName)}`);
+        if (response.ok) {
+            linkedMaterialData = await response.json();
+            updateLinkedDisplay();
+            return linkedMaterialData;
+        }
+    } catch (error) {
+        console.error('Error loading linked material data:', error);
+    }
+    return null;
+}
+
+function updateLinkedDisplay() {
+    if (!linkedMaterialData) return;
+    
+    // อัปเดตข้อมูล scope และ sub-scope
+    const scopeElement = document.getElementById('linked-scope');
+    const subScopeElement = document.getElementById('linked-sub-scope');
+    
+    if (scopeElement) scopeElement.textContent = linkedMaterialData.ghg_scope;
+    if (subScopeElement) subScopeElement.textContent = linkedMaterialData.ghg_sup_scope;
+    
+    // อัปเดตฟิลด์ในส่วน preview
+    updateLinkedFieldsPreview();
+}
+
+function updateLinkedFieldsPreview() {
+    const container = document.getElementById('linked-fields-preview');
+    if (!container || !linkedMaterialData) return;
+    
+    let html = '';
+    linkedMaterialData.input_types.forEach((inputType, index) => {
+        html += `
+            <div class="mb-3">
+                <label class="block text-sm text-gray-700 mb-1">
+                    <strong>${inputType.label || inputType.field} (${inputType.unit || 'unit'})</strong>
+                </label>
+                <input type="${inputType.input_type}" 
+                       class="input input-bordered w-full text-sm bg-gray-50 border-gray-200" 
+                       value="[ข้อมูลจาก ${linkedMaterialData.material_name}]" 
+                       readonly>
+                <div class="flex gap-2 mt-1">
+                    <div class="text-xs text-gray-600 bg-gray-100 border border-gray-200 rounded-full px-2 py-1 inline-block">Field: ${inputType.field}</div>
+                    <div class="text-xs text-blue-600 bg-blue-100 border border-blue-200 rounded-full px-2 py-1 inline-block">Type: ${inputType.input_type}</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
 function updateCalculatorButtons() {
     const isLinked = {{ 'true' if form and form.is_linked else 'false' }};
     
     console.log("Updating calculator buttons, isLinked:", isLinked);
     
-    // สร้างปุ่มตัวแปร (เฉพาะฟอร์มปกติ - ฟอร์มลิงก์จะใช้ปุ่มใน HTML)
-    if (!isLinked) {
-        updateFormulaButtons();
-    }
+    // สร้างปุ่มตัวแปร
+    updateVariableButtons();
     
     // สร้างปุ่มตัวเลข (ทั้งฟอร์มปกติและลิงก์)
     populateNumbersButtons();
@@ -395,26 +439,41 @@ function updateCalculatorButtons() {
     populateOperatorsButtons();
 }
 
-function updateFormulaButtons() {
-    // เฉพาะฟอร์มปกติ
-    const container = document.getElementById("input-fields-container");
+function updateVariableButtons() {
     const variablesButtons = document.getElementById("variables-buttons");
-    
-    if (!container || !variablesButtons) return;
+    if (!variablesButtons) return;
     
     variablesButtons.innerHTML = "";
     
-    const fieldInputs = container.querySelectorAll("input[name='field']");
-    fieldInputs.forEach(input => {
-        if (input.value.trim()) {
+    const isLinked = {{ 'true' if form and form.is_linked else 'false' }};
+    
+    if (isLinked && linkedMaterialData) {
+        // ใช้ตัวแปรจาก linked material
+        linkedMaterialData.input_types.forEach(inputType => {
             const button = document.createElement("button");
             button.type = "button";
-            button.className = "btn btn-xs btn-outline";
-            button.textContent = input.value.trim();
-            button.onclick = () => addToFormula(input.value.trim());
+            button.className = "btn btn-xs border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100";
+            button.textContent = inputType.field;
+            button.onclick = () => addToFormula(inputType.field);
             variablesButtons.appendChild(button);
-        }
-    });
+        });
+    } else {
+        // ฟอร์มปกติ - ใช้ตัวแปรจาก input fields
+        const container = document.getElementById("input-fields-container");
+        if (!container) return;
+        
+        const fieldInputs = container.querySelectorAll("input[name='field']");
+        fieldInputs.forEach(input => {
+            if (input.value.trim()) {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "btn btn-xs btn-outline";
+                button.textContent = input.value.trim();
+                button.onclick = () => addToFormula(input.value.trim());
+                variablesButtons.appendChild(button);
+            }
+        });
+    }
 }
 
 function populateNumbersButtons() {
@@ -552,10 +611,15 @@ function initializeForm() {
     }
 }
 
-function loadFormData(formData) {
+async function loadFormData(formData) {
     const container = document.getElementById("input-fields-container");
     if (container) container.innerHTML = "";
     inputFieldCount = 0;
+    
+    // ถ้าเป็นฟอร์มลิงก์ ให้โหลดข้อมูล linked material
+    if (formData.is_linked && formData.linked_material_name) {
+        await loadLinkedMaterialData(formData.linked_material_name);
+    }
     
     // เฉพาะฟอร์มปกติจึงจะโหลด input fields
     if (!formData.is_linked && formData.input_types && formData.input_types.length > 0) {
@@ -571,7 +635,6 @@ function loadFormData(formData) {
         // ถ้าเป็นฟอร์มปกติแต่ไม่มี input types
         addInputField();
     }
-    // ฟอร์มลิงก์ไม่ต้องโหลด input fields
     
     setTimeout(() => {
         // กรอกข้อมูลที่มีอยู่แล้ว
@@ -597,13 +660,10 @@ function loadFormData(formData) {
         }
         
         setTimeout(() => {
-            htmx.trigger(document.body, 'refreshSubScope');
-            setTimeout(() => {
-                updatePreview();
-                updateCalculatorButtons(); // สำคัญ: เรียกนี้เพื่อให้เครื่องคิดเลขพร้อมใช้งาน
-                feather.replace();
-            }, 200);
-        }, 100);
+            updatePreview();
+            updateCalculatorButtons();
+            feather.replace();
+        }, 200);
     }, 50);
 }
 
@@ -618,33 +678,47 @@ function updatePreview() {
     let html = "";
     html += `<div class="mb-6"><p class="text-sm text-gray-400"><strong>{{ t.material_name|upper }}:</strong> ${materialName}</p></div>`;
 
-    if (isLinked) {
-        // เปลี่ยนสีของ alert ในพรีวิวเป็นโทนสีเขียวอ่อน
-        html += `<div class="alert bg-emerald-50 border border-emerald-300 text-emerald-800 mb-4">
+    if (isLinked && linkedMaterialData) {
+        // แสดงข้อมูลฟอร์มลิงก์
+        html += `<div class="alert bg-blue-50 border border-blue-300 text-blue-800 mb-4">
             <div class="text-sm">
-                <p><strong>🔗 เชื่อมโยงกับ Material:</strong> 
-                   <span class="font-mono bg-cyan-100 border border-cyan-300 px-2 py-1 rounded text-cyan-800">{{ form.linked_material_name if form and form.linked_material_name else 'N/A' }}</span>
+                <p><strong>เชื่อมโยงกับ Material:</strong> 
+                   <span class="font-mono bg-gray-100 border border-gray-300 px-2 py-1 rounded text-gray-800">${linkedMaterialData.material_name}</span>
                 </p>
-                <p><strong>📊 Scope:</strong> <span class="text-teal-700">{{ form.ghg_scope if form else 'N/A' }}</span> | <strong>Sub-Scope:</strong> <span class="text-teal-700">{{ form.ghg_sup_scope if form else 'N/A' }}</span></p>
-                <p class="text-xs text-emerald-700 mt-1">ข้อมูลจะถูกดึงจากฟอร์มต้นทางโดยอัตโนมัติ</p>
+                <p><strong>Scope:</strong> <span class="text-blue-700">${linkedMaterialData.ghg_scope}</span> | <strong>Sub-Scope:</strong> <span class="text-blue-700">${linkedMaterialData.ghg_sup_scope}</span></p>
+                <p class="text-xs text-blue-700 mt-1">ข้อมูลจะถูกดึงจากฟอร์มต้นทางโดยอัตโนมัติ</p>
             </div>
         </div>`;
         
-        // แสดงฟิลด์ที่จะถูกสร้างอัตโนมัติ - เปลี่ยนสีเป็นโทนสีฟ้า/เขียวอ่อน
-        html += `<div class="mb-6">
-            <label class="block text-sm text-blue-800 mb-1">
-                <strong>ข้อมูลจากระบบ (อัตโนมัติ) (unit)</strong>
-            </label>
-            <div class="relative">
-                <input type="number" class="input input-bordered w-full mb-2 bg-cyan-50 border-cyan-200" 
-                       value="[ข้อมูลจาก {{ form.linked_material_name }}]" readonly>
-                <div class="flex gap-2 mt-2">
-                    <div class="text-xs text-teal-800 bg-teal-100 border border-teal-300 rounded-full px-3 py-1 inline-block">Field: buffer_data</div>
-                    <div class="text-xs text-emerald-800 bg-emerald-100 border border-emerald-300 rounded-full px-3 py-1 inline-block">Type: auto-generated</div>
+        // แสดงฟิลด์จาก linked material
+        linkedMaterialData.input_types.forEach(inputType => {
+            html += `<div class="mb-6">
+                <label class="block text-sm text-gray-700 mb-1">
+                    <strong>${inputType.label || inputType.field} (${inputType.unit || 'unit'})</strong>
+                </label>
+                <div class="relative">
+                    <input type="${inputType.input_type}" 
+                           class="input input-bordered w-full mb-2 bg-gray-50 border-gray-200" 
+                           placeholder="กรอก ${inputType.label || inputType.field}">
+                    <div class="flex gap-2 mt-2">
+                        <div class="text-xs text-gray-600 bg-gray-100 border border-gray-200 rounded-full px-3 py-1 inline-block">Field: ${inputType.field}</div>
+                        <div class="text-xs text-blue-600 bg-blue-100 border border-blue-200 rounded-full px-3 py-1 inline-block">Type: ${inputType.input_type}</div>
+                    </div>
                 </div>
+            </div>`;
+        });
+    } else if (isLinked) {
+        // ฟอร์มลิงก์แต่ยังไม่มีข้อมูล
+        html += `<div class="alert bg-blue-50 border border-blue-300 text-blue-800 mb-4">
+            <div class="text-sm">
+                <p><strong>เชื่อมโยงกับ Material:</strong> 
+                   <span class="font-mono bg-gray-100 border border-gray-300 px-2 py-1 rounded text-gray-800">{{ form.linked_material_name if form and form.linked_material_name else 'N/A' }}</span>
+                </p>
+                <p class="text-xs text-blue-700 mt-1">กำลังโหลดข้อมูล...</p>
             </div>
         </div>`;
     } else {
+        // ฟอร์มปกติ
         const descForm = document.querySelector("textarea[name='desc_form']").value || "No Description";
         const mainScope = document.querySelector("select[name='scope']").value || "-";
         const subScope = document.querySelector("select[name='sup_scope']").value || "-";
@@ -653,8 +727,8 @@ function updatePreview() {
             <p class="text-sm text-gray-600">{{ t.material_name }}: ${materialName}</p>
             <p class="text-sm text-gray-600">{{ t.form_description }}: ${descForm}</p>
             <div class="flex gap-4 mt-2">
-                <div class="text-xs text-gray-700 bg-purple-100 rounded-full px-3 py-1 inline-block">Main Scope: ${mainScope}</div>
-                <div class="text-xs text-gray-700 bg-indigo-100 rounded-full px-3 py-1 inline-block">Sub Scope: ${subScope}</div>
+                <div class="text-xs text-gray-700 bg-gray-100 rounded-full px-3 py-1 inline-block">Main Scope: ${mainScope}</div>
+                <div class="text-xs text-gray-700 bg-gray-100 rounded-full px-3 py-1 inline-block">Sub Scope: ${subScope}</div>
                 <div class="text-xs text-gray-700 bg-blue-100 rounded-full px-3 py-1 inline-block">ฟอร์มปกติ</div>
             </div>
         </div>`;
@@ -724,72 +798,8 @@ function confirmDelete(formId, materialName) {
     }
 }
 
-// Functions ที่เหลือเหมือนเดิม...
-function toggleFormType() {
-    const formType = document.querySelector('input[name="form_type"]:checked').value;
-    const linkedSection = document.getElementById('linked-material-section');
-    const inputFieldsSection = document.getElementById('input-fields-section');
-    
-    if (formType === 'linked') {
-        linkedSection.classList.remove('hidden');
-        inputFieldsSection.classList.add('hidden');
-        
-        // โหลด available materials ถ้ามี scope และ sub scope
-        triggerLinkedMaterialsLoad();
-        
-        // ตั้งค่า formula เป็น buffer_data * 1 ถ้ายังไม่มี
-        const formulaInput = document.getElementById('formula');
-        if (!formulaInput.value || formulaInput.value === '') {
-            formulaInput.value = 'buffer_data * 1';
-        }
-        updatePreview();
-    } else {
-        linkedSection.classList.add('hidden');
-        inputFieldsSection.classList.remove('hidden');
-        updatePreview();
-    }
-}
-
-function triggerLinkedMaterialsLoad() {
-    const formType = document.querySelector('input[name="form_type"]:checked')?.value;
-    if (formType !== 'linked') return;
-    
-    const scope = document.querySelector('select[name="scope"]').value;
-    const subScope = document.querySelector('select[name="sup_scope"]').value;
-    
-    if (scope && subScope) {
-        // ใช้ HTMX โหลด available materials
-        htmx.ajax('GET', `/form-management/get-available-materials/${scope}/${subScope}`, {
-            target: '#available-materials-container',
-            swap: 'innerHTML'
-        });
-    }
-}
-
 // Event listeners สำหรับ HTMX
 document.addEventListener('htmx:afterSettle', function(event) {
-    if (event.detail.target.id === 'available-materials-container') {
-        feather.replace();
-        updatePreview();
-        
-        // ตั้งค่า selected value ถ้ามี
-        const form = {{ form|tojson if form else 'null' }};
-        if (form && form.is_linked && form.linked_material_name) {
-            const select = document.querySelector('select[name="linked_material_name"]');
-            if (select) {
-                select.value = form.linked_material_name;
-            }
-        }
-    }
-    if (event.detail.target.id === 'sub-scope-container') {
-        triggerLinkedMaterialsLoad();
-        updatePreview();
-    }
-});
-
-document.addEventListener("htmx:afterSettle", function(event) {
-    console.log("HTMX afterSettle triggered for:", event.detail.target);
-    
     if (event.detail.target.querySelector('input[name="form_id"]')) {
         console.log("Edit form modal loaded, initializing...");
         feather.replace();
@@ -820,7 +830,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // เรียกใช้ updateCalculatorButtons เพิ่มเติมเพื่อให้แน่ใจว่าเครื่องคิดเลขพร้อมใช้งาน
         setTimeout(() => {
             updateCalculatorButtons();
-            console.log("Calculator buttons initialized for linked form");
+            console.log("Calculator buttons initialized");
         }, 1000);
     }
 });
