@@ -560,3 +560,38 @@ def get_available_materials(scope, sub_scope):
 
     except Exception as e:
         return f'<option value="">Error: {str(e)}</option>'
+
+
+@module.route("/get-linked-material-data/<material_name>", methods=["GET"])
+@login_required
+def get_linked_material_data(material_name):
+    """
+    ดึงข้อมูล input types ของ material ต้นฉบับสำหรับฟอร์มลิงก์
+    """
+    try:
+        form = FormAndFormula.objects(material_name=material_name).first()
+        if not form:
+            return jsonify({"error": "Material not found"}), 404
+
+        input_types = []
+        for input_type in form.input_types:
+            input_types.append(
+                {
+                    "field": input_type.field,
+                    "label": input_type.label,
+                    "input_type": input_type.input_type,
+                    "unit": input_type.unit,
+                }
+            )
+
+        return jsonify(
+            {
+                "material_name": form.material_name,
+                "ghg_scope": form.ghg_scope,
+                "ghg_sup_scope": form.ghg_sup_scope,
+                "input_types": input_types,
+            }
+        )
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
